@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+/* Eventure Design Tokens */
+@theme {
+  /* Brand Colours */
+  --color-coral: #FF6B4A;
+  --color-coral-dark: #E85A3A;
+  --color-coral-light: #FFF0ED;
+  --color-ocean: #0A7B7F;
+  --color-ocean-dark: #065D60;
+  --color-ocean-light: #E6F7F7;
+  --color-sunshine: #FFB930;
+  --color-sunshine-light: #FFF8E6;
+
+  /* Neutrals */
+  --color-slate-900: #1A1D23;
+  --color-slate-700: #3D4250;
+  --color-slate-500: #6B7080;
+  --color-slate-300: #C5C9D6;
+  --color-slate-100: #F0F1F5;
+
+  /* Semantic */
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-error: #DC2626;
+
+  /* Typography */
+  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(26, 29, 35, 0.06);
+  --shadow-md: 0 4px 12px rgba(26, 29, 35, 0.08);
+  --shadow-lg: 0 8px 24px rgba(26, 29, 35, 0.12);
+  --shadow-xl: 0 16px 48px rgba(26, 29, 35, 0.16);
+}

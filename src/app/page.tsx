@@ -16,17 +16,17 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <section className="mb-16 text-center">
-        <h1 className="mb-4 text-5xl font-bold tracking-tight">
+        <h1 className="mb-4 font-heading text-4xl font-extrabold tracking-tight md:text-5xl">
           Discover events near you
         </h1>
-        <p className="mx-auto max-w-2xl text-lg text-gray-600">
+        <p className="mx-auto max-w-2xl text-lg text-slate-500">
           Live music, festivals, markets, sports, nightlife, and more — all in
           one place. Starting on the Gold Coast.
         </p>
         <div className="mt-8">
           <Link
             href="/events"
-            className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+            className="inline-block rounded-lg bg-coral px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-dark"
           >
             Browse all events
           </Link>
@@ -36,7 +36,7 @@ export default async function HomePage() {
       <section>
         <h2 className="mb-6 text-2xl font-bold">Upcoming events</h2>
         {upcomingEvents.length === 0 ? (
-          <p className="text-gray-500">
+          <p className="text-slate-500">
             No upcoming events yet. Check back soon!
           </p>
         ) : (
@@ -45,19 +45,19 @@ export default async function HomePage() {
               <Link
                 key={event.id}
                 href={`/events/${event.slug}`}
-                className="group rounded-lg border border-gray-200 p-4 transition hover:shadow-md"
+                className="group rounded-lg border border-slate-300 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
                 {event.imageUrl && (
                   <img
                     src={event.imageUrl}
                     alt={event.name}
-                    className="mb-3 h-48 w-full rounded object-cover"
+                    className="mb-3 h-48 w-full rounded-md object-cover"
                   />
                 )}
-                <h3 className="font-semibold group-hover:text-blue-600">
+                <h3 className="font-heading font-semibold group-hover:text-coral">
                   {event.name}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-slate-500">
                   {new Date(event.startDate).toLocaleDateString("en-AU", {
                     weekday: "short",
                     day: "numeric",
@@ -65,7 +65,7 @@ export default async function HomePage() {
                     year: "numeric",
                   })}
                 </p>
-                <p className="text-sm text-gray-500">{event.venueName}</p>
+                <p className="text-sm text-slate-500">{event.venueName}</p>
               </Link>
             ))}
           </div>
