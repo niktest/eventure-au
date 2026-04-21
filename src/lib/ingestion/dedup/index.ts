@@ -46,6 +46,10 @@ export async function upsertEvents(
             priceMin: event.priceMin,
             priceMax: event.priceMax,
             ticketUrl: event.ticketUrl,
+            ticketProvider: event.ticketProvider,
+            ticketAvailability: event.ticketAvailability,
+            priceTiers: event.priceTiers ?? undefined,
+            affiliateEligible: event.affiliateEligible,
             sourceUrl: event.sourceUrl,
             rawData: event.rawData ?? undefined,
             lastScrapedAt: new Date(),
@@ -57,6 +61,7 @@ export async function upsertEvents(
           data: {
             ...event,
             rawData: event.rawData ?? Prisma.JsonNull,
+            priceTiers: event.priceTiers ?? Prisma.JsonNull,
           },
         });
         created++;

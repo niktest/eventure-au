@@ -1,6 +1,6 @@
-import type { Event as PrismaEvent, EventCategory, EventStatus, Prisma } from "@prisma/client";
+import type { Event as PrismaEvent, EventCategory, EventStatus, TicketAvailability, Prisma } from "@prisma/client";
 
-export type { EventCategory, EventStatus };
+export type { EventCategory, EventStatus, TicketAvailability };
 export type Event = PrismaEvent;
 
 /**
@@ -27,6 +27,10 @@ export interface RawEvent {
   priceMin?: number;
   priceMax?: number;
   ticketUrl?: string;
+  ticketProvider?: string;
+  ticketAvailability?: TicketAvailability;
+  priceTiers?: Array<{ name: string; price: number; currency: string }>;
+  affiliateEligible?: boolean;
   rawData?: unknown;
 }
 
@@ -55,6 +59,11 @@ export interface NormalisedEvent {
   priceMax: number | null;
   currency: string;
   ticketUrl: string | null;
+  ticketProvider: string | null;
+  ticketAvailability: TicketAvailability | null;
+  priceTiers: Prisma.InputJsonValue | null;
+  affiliateEligible: boolean;
+  affiliateUrl: string | null;
   source: string;
   sourceId: string;
   sourceUrl: string | null;

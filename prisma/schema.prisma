@@ -37,6 +37,13 @@ model Event {
   currency    String   @default("AUD")
   ticketUrl   String?
 
+  // Ticketing & monetisation (Stage 2 — captured from day one)
+  ticketProvider     String?              // e.g. "eventbrite", "ticketmaster"
+  ticketAvailability TicketAvailability?
+  priceTiers         Json?                // Array of { name, price, currency }
+  affiliateEligible  Boolean  @default(false)
+  affiliateUrl       String?              // Affiliate-tagged URL (populated later)
+
   // Ingestion metadata
   source      String   // e.g. "eventbrite", "destinationgc", "hota"
   sourceId    String   // ID from the source system
@@ -78,4 +85,10 @@ enum EventStatus {
   published
   cancelled
   past
+}
+
+enum TicketAvailability {
+  available
+  limited
+  sold_out
 }
