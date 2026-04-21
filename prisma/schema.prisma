@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?  @db.Text
+  startDate   DateTime
+  endDate     DateTime?
+  imageUrl    String?
+  url         String?  // Original event URL
+
+  // Location
+  venueName   String?
+  venueAddress String?
+  city        String   @default("Gold Coast")
+  state       String   @default("QLD")
+  country     String   @default("AU")
+  latitude    Float?
+  longitude   Float?
+
+  // Categorisation
+  category    EventCategory @default(OTHER)
+  tags        String[]      @default([])
+
+  // Pricing
+  isFree      Boolean  @default(false)
+  priceMin    Float?
+  priceMax    Float?
+  currency    String   @default("AUD")
+  ticketUrl   String?
+
+  // Ingestion metadata
+  source      String   // e.g. "eventbrite", "destinationgc", "hota"
+  sourceId    String   // ID from the source system
+  sourceUrl   String?  // URL on the source site
+  lastScrapedAt DateTime @default(now())
+  rawData     Json?    // Original data from source for debugging
+
+  // Publishing
+  status      EventStatus @default(draft)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([source, sourceId]) // Prevent duplicate imports from same source
+  @@index([startDate, status])
+  @@index([city, startDate])
+  @@index([category, startDate])
+  @@index([slug])
+}
+
+enum EventCategory {
+  MUSIC
+  FESTIVAL
+  MARKETS
+  SPORTS
+  FAMILY
+  NIGHTLIFE
+  FOOD_DRINK
+  ARTS
+  COMMUNITY
+  COMEDY
+  THEATRE
+  OUTDOOR
+  OTHER
+}
+
+enum EventStatus {
+  draft
+  published
+  cancelled
+  past
+}
