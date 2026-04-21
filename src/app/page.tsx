@@ -4,14 +4,19 @@ import { prisma } from "@/lib/prisma";
 export const revalidate = 3600; // ISR: revalidate homepage every hour
 
 export default async function HomePage() {
-  const upcomingEvents = await prisma.event.findMany({
-    where: {
-      startDate: { gte: new Date() },
-      status: "published",
-    },
-    orderBy: { startDate: "asc" },
-    take: 12,
-  });
+  let upcomingEvents: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  try {
+    upcomingEvents = await prisma.event.findMany({
+      where: {
+        startDate: { gte: new Date() },
+        status: "published",
+      },
+      orderBy: { startDate: "asc" },
+      take: 12,
+    });
+  } catch {
+    // DB unavailable — render empty state, ISR will retry
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">

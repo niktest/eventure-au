@@ -6,12 +6,17 @@ import { eventJsonLd } from "@/lib/seo/schema";
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const events = await prisma.event.findMany({
-    where: { status: "published" },
-    select: { slug: true },
-    take: 500,
-  });
-  return events.map((e) => ({ slug: e.slug }));
+  try {
+    const events = await prisma.event.findMany({
+      where: { status: "published" },
+      select: { slug: true },
+      take: 500,
+    });
+    return events.map((e) => ({ slug: e.slug }));
+  } catch {
+    // DB unavailable at build time — pages will be generated on-demand via ISR
+    return [];
+  }
 }
 
 export async function generateMetadata({

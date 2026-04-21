@@ -27,11 +27,16 @@ export default async function EventsPage({
     where.city = params.city;
   }
 
-  const events = await prisma.event.findMany({
-    where,
-    orderBy: { startDate: "asc" },
-    take: 50,
-  });
+  let events: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  try {
+    events = await prisma.event.findMany({
+      where,
+      orderBy: { startDate: "asc" },
+      take: 50,
+    });
+  } catch {
+    // DB unavailable — render empty state, ISR will retry
+  }
 
   const categories = [
     "MUSIC",

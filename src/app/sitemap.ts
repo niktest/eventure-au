@@ -5,12 +5,17 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://eventure.com.au";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const events = await prisma.event.findMany({
-    where: { status: "published" },
-    select: { slug: true, updatedAt: true },
-    orderBy: { updatedAt: "desc" },
-    take: 5000,
-  });
+  let events: Array<{ slug: string; updatedAt: Date }> = [];
+  try {
+    events = await prisma.event.findMany({
+      where: { status: "published" },
+      select: { slug: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+      take: 5000,
+    });
+  } catch {
+    // DB unavailable at build time
+  }
 
   const eventUrls: MetadataRoute.Sitemap = events.map((event) => ({
     url: `${SITE_URL}/events/${event.slug}`,
@@ -38,6 +43,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     ...cityUrls,
+    {
+      url: `${SITE_URL}/about`,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${SITE_URL}/contact`,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
     ...eventUrls,
   ];
 }

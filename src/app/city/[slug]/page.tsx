@@ -39,15 +39,20 @@ export default async function CityPage({
   const city = CITIES[slug];
   if (!city) return notFound();
 
-  const events = await prisma.event.findMany({
-    where: {
-      city: city.name,
-      startDate: { gte: new Date() },
-      status: "published",
-    },
-    orderBy: { startDate: "asc" },
-    take: 50,
-  });
+  let events: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  try {
+    events = await prisma.event.findMany({
+      where: {
+        city: city.name,
+        startDate: { gte: new Date() },
+        status: "published",
+      },
+      orderBy: { startDate: "asc" },
+      take: 50,
+    });
+  } catch {
+    // DB unavailable — render empty state, ISR will retry
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
