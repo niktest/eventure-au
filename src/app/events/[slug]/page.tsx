@@ -207,7 +207,11 @@ export default async function EventDetailPage({
                         style={{ border: 0, minHeight: "200px" }}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''}&q=${encodeURIComponent(event.venueName + ', ' + event.city)}&center=${event.latitude},${event.longitude}&zoom=15`}
+                        src={
+                          process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
+                            ? `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&q=${encodeURIComponent(event.venueName + ', ' + event.city)}&center=${event.latitude},${event.longitude}&zoom=15`
+                            : `https://www.openstreetmap.org/export/embed.html?bbox=${event.longitude - 0.005},${event.latitude - 0.005},${event.longitude + 0.005},${event.latitude + 0.005}&layer=mapnik&marker=${event.latitude},${event.longitude}`
+                        }
                       />
                     </div>
                   ) : (
