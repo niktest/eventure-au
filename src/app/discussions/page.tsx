@@ -112,7 +112,7 @@ export default function TrendingDiscussionsPage() {
                   {discussion.image ? (
                     <img
                       src={discussion.image}
-                      alt=""
+                      alt={discussion.title}
                       className="w-full h-full object-cover"
                     />
                   ) : (

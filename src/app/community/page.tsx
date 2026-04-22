@@ -169,7 +169,7 @@ export default function CommunityPage() {
                   <div className="flex gap-4">
                     <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0">
                       {conv.image ? (
-                        <img src={conv.image} alt="" className="w-full h-full object-cover" />
+                        <img src={conv.image} alt={conv.title} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-surface-container-high flex items-center justify-center">
                           <span className="material-symbols-outlined text-tertiary">{conv.icon}</span>
