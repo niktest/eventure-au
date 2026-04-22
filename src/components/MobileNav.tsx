@@ -137,7 +137,16 @@ export function MobileNav() {
             </Link>
             <button
               type="button"
-              onClick={() => { fetch("/api/auth/signout", { method: "POST" }).then(() => { window.location.href = "/"; }); }}
+              onClick={async () => {
+                const csrfRes = await fetch("/api/auth/csrf");
+                const { csrfToken } = await csrfRes.json();
+                await fetch("/api/auth/signout", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                  body: new URLSearchParams({ csrfToken }),
+                });
+                window.location.href = "/";
+              }}
               className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
             >
               Sign Out
@@ -255,7 +264,17 @@ export function MobileNav() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => { setOpen(false); fetch("/api/auth/signout", { method: "POST" }).then(() => { window.location.href = "/"; }); }}
+                  onClick={async () => {
+                    setOpen(false);
+                    const csrfRes = await fetch("/api/auth/csrf");
+                    const { csrfToken } = await csrfRes.json();
+                    await fetch("/api/auth/signout", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                      body: new URLSearchParams({ csrfToken }),
+                    });
+                    window.location.href = "/";
+                  }}
                   className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
                 >
                   Sign Out
