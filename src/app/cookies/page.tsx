@@ -15,14 +15,14 @@ export default function CookiePolicyPage() {
 
       <div className="space-y-8 text-on-surface-variant leading-relaxed">
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
-          <p className="text-on-primary-container">
+          <p className="text-on-surface-variant">
             This Cookie Policy explains how Eventure (&ldquo;we&rdquo;,
             &ldquo;us&rdquo;, &ldquo;our&rdquo;) uses cookies and similar
             tracking technologies on our website at eventure.com.au. This policy
             should be read alongside our{" "}
             <a
               href="/privacy"
-              className="font-semibold text-on-primary-container underline hover:no-underline"
+              className="font-semibold text-primary underline hover:no-underline"
             >
               Privacy Policy
             </a>
@@ -31,7 +31,7 @@ export default function CookiePolicyPage() {
         </div>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             1. What Are Cookies?
           </h2>
           <p>
@@ -44,7 +44,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             2. How We Use Cookies
           </h2>
 
@@ -149,7 +149,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             3. Managing Cookies
           </h2>
 
@@ -190,7 +190,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             4. Australian Law Context
           </h2>
           <p>
@@ -205,7 +205,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             5. Changes to This Policy
           </h2>
           <p>
@@ -216,7 +216,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <section className="rounded-xl border border-surface-container-high p-6">
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             6. Contact Us
           </h2>
           <p>

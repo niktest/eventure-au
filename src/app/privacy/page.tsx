@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
 
       <div className="space-y-8 text-on-surface-variant leading-relaxed">
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
-          <p className="text-on-primary-container">
+          <p className="text-on-surface-variant">
             This Privacy Policy describes how Eventure (&ldquo;we&rdquo;,
             &ldquo;us&rdquo;, &ldquo;our&rdquo;) collects, holds, uses, and
             discloses personal information in accordance with the{" "}
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
         </p>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             1. What Personal Information We Collect
           </h2>
 
@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             2. How We Collect Personal Information
           </h2>
           <ul className="list-disc space-y-1 pl-6">
@@ -110,7 +110,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             3. Why We Collect Your Information
           </h2>
           <ul className="list-disc space-y-1 pl-6">
@@ -131,7 +131,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             4. Disclosure of Personal Information
           </h2>
           <p className="mb-2">We may disclose personal information to:</p>
@@ -165,7 +165,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             5. Data Security
           </h2>
           <p>
@@ -181,7 +181,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             6. Access and Correction
           </h2>
           <p>You have the right to:</p>
@@ -201,7 +201,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             7. Data Retention
           </h2>
           <p>
@@ -213,7 +213,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             8. Direct Marketing
           </h2>
           <p>
@@ -225,7 +225,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             9. Anonymity
           </h2>
           <p>
@@ -238,7 +238,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             10. Complaints
           </h2>
           <p>
@@ -260,7 +260,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             11. Changes to This Policy
           </h2>
           <p>
@@ -272,7 +272,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className="rounded-xl border border-surface-container-high p-6">
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             12. Contact Us
           </h2>
           <p>

@@ -15,7 +15,7 @@ export default function TermsPage() {
 
       <div className="space-y-8 text-on-surface-variant leading-relaxed">
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
-          <p className="text-on-primary-container">
+          <p className="text-on-surface-variant">
             These Terms and Conditions (&ldquo;Terms&rdquo;) govern your access
             to and use of the Eventure website at eventure.com.au (the
             &ldquo;Website&rdquo;), operated by Eventure (&ldquo;we&rdquo;,
@@ -25,7 +25,7 @@ export default function TermsPage() {
         </div>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             1. About Eventure
           </h2>
           <p>
@@ -43,7 +43,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             2. Aggregated Content
           </h2>
 
@@ -89,7 +89,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             3. No Endorsement
           </h2>
           <p>
@@ -100,7 +100,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             4. Third-Party Links &amp; Affiliate Disclosure
           </h2>
           <p>
@@ -120,7 +120,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             5. Intellectual Property
           </h2>
           <p>
@@ -133,7 +133,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             6. Acceptable Use
           </h2>
           <p>You agree not to:</p>
@@ -153,7 +153,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             7. Limitation of Liability
           </h2>
           <p>
@@ -178,7 +178,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             8. Indemnity
           </h2>
           <p>
@@ -190,7 +190,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             9. Privacy
           </h2>
           <p>
@@ -207,7 +207,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             10. Governing Law
           </h2>
           <p>
@@ -218,7 +218,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             11. Changes to These Terms
           </h2>
           <p>
@@ -230,7 +230,7 @@ export default function TermsPage() {
         </section>
 
         <section className="rounded-xl border border-surface-container-high p-6">
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
             12. Contact Us
           </h2>
           <p>
