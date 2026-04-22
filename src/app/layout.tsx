@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
+import { DesktopSearch } from "@/components/DesktopSearch";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
 
@@ -63,20 +64,7 @@ export default function RootLayout({
             </Link>
 
             {/* Desktop Search */}
-            <div className="hidden md:flex flex-1 ml-6 max-w-md">
-              <div className="relative w-full">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[20px]">
-                  search
-                </span>
-                <label htmlFor="desktop-search" className="sr-only">Search events</label>
-                <input
-                  id="desktop-search"
-                  type="search"
-                  placeholder="Search events..."
-                  className="w-full pl-10 pr-4 py-2 bg-surface-bright border border-secondary-container rounded-lg focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container font-body text-sm text-on-surface"
-                />
-              </div>
-            </div>
+            <DesktopSearch />
 
             {/* Desktop Nav + Actions */}
             <MobileNav />

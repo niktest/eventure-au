@@ -199,32 +199,55 @@ export default async function EventDetailPage({
                   Venue Details
                 </h2>
                 <div className="bg-surface-bright rounded-xl border border-surface-container-high overflow-hidden flex flex-col md:flex-row">
-                  {event.latitude && event.longitude ? (
-                    <div className="w-full md:w-1/2 h-48 md:h-auto bg-surface-dim relative">
-                      <iframe
-                        title={`Map of ${event.venueName}`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0, minHeight: "200px" }}
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        src={
-                          process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
-                            ? `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&q=${encodeURIComponent(event.venueName + ', ' + event.city)}&center=${event.latitude},${event.longitude}&zoom=15`
-                            : `https://www.openstreetmap.org/export/embed.html?bbox=${event.longitude - 0.005},${event.latitude - 0.005},${event.longitude + 0.005},${event.latitude + 0.005}&layer=mapnik&marker=${event.latitude},${event.longitude}`
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full md:w-1/2 h-48 md:h-auto bg-surface-dim relative flex items-center justify-center">
-                      <span
-                        className="material-symbols-outlined text-4xl text-primary-container drop-shadow-md"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                      >
-                        location_on
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
+                    const hasCoords = event.latitude && event.longitude;
+                    const addressQuery = encodeURIComponent(
+                      [event.venueName, event.venueAddress, event.city].filter(Boolean).join(", ")
+                    );
+
+                    if (mapsKey) {
+                      // Google Maps — works with coordinates or address
+                      const src = hasCoords
+                        ? `https://www.google.com/maps/embed/v1/place?key=${mapsKey}&q=${addressQuery}&center=${event.latitude},${event.longitude}&zoom=15`
+                        : `https://www.google.com/maps/embed/v1/place?key=${mapsKey}&q=${addressQuery}&zoom=15`;
+                      return (
+                        <div className="w-full md:w-1/2 h-48 md:h-auto bg-surface-dim relative">
+                          <iframe title={`Map of ${event.venueName}`} width="100%" height="100%" style={{ border: 0, minHeight: "200px" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={src} />
+                        </div>
+                      );
+                    }
+
+                    if (hasCoords) {
+                      // OpenStreetMap with coordinates
+                      return (
+                        <div className="w-full md:w-1/2 h-48 md:h-auto bg-surface-dim relative">
+                          <iframe title={`Map of ${event.venueName}`} width="100%" height="100%" style={{ border: 0, minHeight: "200px" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={`https://www.openstreetmap.org/export/embed.html?bbox=${event.longitude! - 0.005},${event.latitude! - 0.005},${event.longitude! + 0.005},${event.latitude! + 0.005}&layer=mapnik&marker=${event.latitude},${event.longitude}`} />
+                        </div>
+                      );
+                    }
+
+                    // No coordinates, no Google key — show a static map link
+                    return (
+                      <div className="w-full md:w-1/2 h-48 md:h-auto bg-surface-dim relative">
+                        <a
+                          href={`https://www.openstreetmap.org/search?query=${addressQuery}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center w-full h-full min-h-[200px] bg-surface-container hover:bg-surface-container-high transition-colors group"
+                        >
+                          <div className="text-center space-y-2">
+                            <span className="material-symbols-outlined text-4xl text-primary drop-shadow-md" style={{ fontVariationSettings: "'FILL' 1" }}>
+                              location_on
+                            </span>
+                            <p className="text-sm font-body text-on-surface-variant group-hover:text-primary transition-colors">
+                              View on map
+                            </p>
+                          </div>
+                        </a>
+                      </div>
+                    );
+                  })()}
                   <div className="p-6 w-full md:w-1/2 flex flex-col justify-center space-y-1">
                     <h3 className="font-heading text-xl font-bold text-on-surface">
                       {event.venueName}
