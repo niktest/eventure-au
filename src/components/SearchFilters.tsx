@@ -66,7 +66,7 @@ export function SearchFilters() {
           className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 pl-10 text-sm shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
         />
         <svg
-          className="absolute left-3 top-3.5 h-4 w-4 text-slate-400"
+          className="absolute left-3 top-3.5 h-4 w-4 text-slate-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -83,7 +83,7 @@ export function SearchFilters() {
       {/* Date range and free toggle */}
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col text-sm">
-          <span className="mb-1 font-medium text-slate-600">From</span>
+          <span className="mb-1 font-medium text-slate-700">From</span>
           <input
             type="date"
             defaultValue={currentDateFrom}
@@ -92,7 +92,7 @@ export function SearchFilters() {
           />
         </label>
         <label className="flex flex-col text-sm">
-          <span className="mb-1 font-medium text-slate-600">To</span>
+          <span className="mb-1 font-medium text-slate-700">To</span>
           <input
             type="date"
             defaultValue={currentDateTo}
@@ -109,7 +109,7 @@ export function SearchFilters() {
             }
             className="rounded accent-coral"
           />
-          <span className="font-medium text-slate-600">Free only</span>
+          <span className="font-medium text-slate-700">Free only</span>
         </label>
       </div>
 
@@ -120,7 +120,7 @@ export function SearchFilters() {
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
             !currentCategory
               ? "bg-coral text-white"
-              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              : "bg-slate-100 text-slate-700 hover:bg-slate-300"
           }`}
         >
           All
@@ -139,7 +139,7 @@ export function SearchFilters() {
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               currentCategory.toUpperCase() === cat
                 ? "bg-coral text-white"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-300"
             }`}
           >
             {formatCategory(cat)}

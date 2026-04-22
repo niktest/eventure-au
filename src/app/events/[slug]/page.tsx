@@ -89,7 +89,7 @@ export default async function EventDetailPage({
             {event.category.replace("_", " & ")}
           </span>
           {event.isFree && (
-            <span className="ml-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-success">
+            <span className="ml-2 inline-block rounded-full bg-success/10 px-3 py-1 text-sm font-semibold text-success">
               FREE
             </span>
           )}

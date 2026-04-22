@@ -56,19 +56,29 @@ export default async function CityPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
-      <h1 className="mb-2 font-heading text-4xl font-bold">
-        Events in {city.name}
-      </h1>
-      <p className="mb-8 text-lg text-slate-500">
-        Discover what&apos;s happening in {city.name}, {city.state}
-      </p>
+      <div className="mb-10 rounded-lg bg-ocean-light px-6 py-8">
+        <h1 className="mb-2 font-heading text-4xl font-bold text-slate-900">
+          Events in {city.name}
+        </h1>
+        <p className="text-lg text-ocean-dark">
+          Discover what&apos;s happening in {city.name}, {city.state}
+        </p>
+      </div>
 
       {events.length === 0 ? (
-        <p className="text-slate-500">
-          No upcoming events in {city.name} yet. Check back soon!
-        </p>
+        <div className="text-center py-12">
+          <p className="mb-4 text-slate-500">
+            No upcoming events in {city.name} yet. Check back soon!
+          </p>
+          <a
+            href="/events"
+            className="inline-block rounded-lg bg-coral px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-dark"
+          >
+            Browse all events
+          </a>
+        </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
           {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}

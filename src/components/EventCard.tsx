@@ -13,7 +13,7 @@ export function EventCard({ event }: { event: Event }) {
   return (
     <Link
       href={`/events/${event.slug}`}
-      className="group rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="group rounded-lg border border-slate-300 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       {event.imageUrl && (
         <div className="relative mb-3 aspect-[4/3] w-full overflow-hidden rounded-md">
@@ -31,7 +31,7 @@ export function EventCard({ event }: { event: Event }) {
           {formatCategory(event.category)}
         </span>
         {event.isFree && (
-          <span className="inline-block rounded-full bg-green-50 px-2 py-0.5 text-xs font-semibold text-success">
+          <span className="inline-block rounded-full bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">
             FREE
           </span>
         )}
