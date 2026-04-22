@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const NAV_LINKS = [
-  { href: "/events", label: "Events" },
-  { href: "/city/gold-coast", label: "Gold Coast" },
+  { href: "/events", label: "Browse" },
+  { href: "/community", label: "Community" },
+  { href: "/discussions", label: "Trending" },
   { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export function MobileNav() {
@@ -28,81 +28,84 @@ export function MobileNav() {
 
   return (
     <>
-      {/* Desktop nav */}
-      <div className="hidden sm:flex items-center gap-6 text-sm font-medium">
+      {/* Desktop nav links */}
+      <nav className="hidden md:flex items-center gap-6 ml-auto font-heading text-sm font-semibold tracking-tight">
         {NAV_LINKS.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="text-slate-700 transition-colors hover:text-coral"
+            className="text-secondary hover:text-primary-container transition-all duration-200"
           >
             {link.label}
           </Link>
         ))}
-        {/* Desktop search toggle */}
-        <button
-          type="button"
-          onClick={() => setSearchOpen(!searchOpen)}
-          className="rounded-full bg-slate-100 p-2 text-slate-500 transition-colors hover:bg-coral-light hover:text-coral"
-          aria-label="Search"
+      </nav>
+
+      {/* Desktop auth actions */}
+      <div className="hidden md:flex items-center gap-3 ml-6">
+        <Link
+          href="/login"
+          className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200"
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </button>
+          Log In
+        </Link>
+        <Link
+          href="/signup"
+          className="bg-primary-container text-on-primary rounded-full px-6 py-2 font-heading text-sm font-semibold hover:scale-105 transition-transform duration-200 active:scale-95"
+        >
+          Sign Up
+        </Link>
       </div>
 
-      {/* Mobile hamburger + search */}
-      <div className="flex items-center gap-2 sm:hidden">
+      {/* Mobile actions */}
+      <div className="flex items-center gap-2 md:hidden">
         <button
           type="button"
-          onClick={() => setSearchOpen(!searchOpen)}
-          className="p-2 text-slate-700"
+          onClick={() => {
+            setSearchOpen(!searchOpen);
+            setOpen(false);
+          }}
+          className="p-2 text-secondary hover:text-primary transition-colors"
           aria-label="Search"
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <span className="material-symbols-outlined text-[22px]">search</span>
         </button>
         <button
           type="button"
-          onClick={() => setOpen(!open)}
-          className="p-2 -mr-2 text-slate-700"
+          onClick={() => {
+            setOpen(!open);
+            setSearchOpen(false);
+          }}
+          className="p-2 -mr-2 text-secondary hover:text-primary transition-colors"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
         >
-          {open ? (
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
+          <span className="material-symbols-outlined text-[24px]">
+            {open ? "close" : "menu"}
+          </span>
         </button>
       </div>
 
       {/* Search bar dropdown */}
       {searchOpen && (
-        <div className="absolute top-full left-0 right-0 border-b border-slate-100 bg-white px-4 py-3 shadow-md">
+        <div className="absolute top-full left-0 right-0 border-b border-surface-container-high bg-white px-4 py-3 shadow-md z-50">
           <form onSubmit={handleSearch} className="mx-auto flex max-w-2xl gap-2">
             <div className="relative flex-1">
-              <svg className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <span className="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-[20px]">
+                search
+              </span>
               <input
                 type="search"
                 placeholder="Search events, venues, categories..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 autoFocus
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2.5 pl-10 pr-4 text-sm font-body text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <button
               type="submit"
-              className="rounded-lg bg-coral px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-coral-dark"
+              className="rounded-full bg-primary-container px-5 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary"
             >
               Search
             </button>
@@ -112,18 +115,33 @@ export function MobileNav() {
 
       {/* Mobile menu panel */}
       {open && (
-        <div className="sm:hidden absolute top-full left-0 right-0 border-b border-slate-100 bg-white shadow-md">
-          <div className="flex flex-col px-4 py-3 space-y-3 text-sm font-medium">
+        <div className="md:hidden absolute top-full left-0 right-0 border-b border-surface-container-high bg-white shadow-md z-50">
+          <div className="flex flex-col px-6 py-4 space-y-1">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="text-slate-700 transition-colors hover:text-coral py-1"
+                className="text-on-surface font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors"
               >
                 {link.label}
               </Link>
             ))}
+            <div className="border-t border-surface-container-high my-2" />
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors"
+            >
+              Log In
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setOpen(false)}
+              className="bg-primary-container text-on-primary rounded-full px-6 py-3 font-heading text-sm font-semibold text-center hover:bg-primary transition-colors mt-1"
+            >
+              Sign Up
+            </Link>
           </div>
         </div>
       )}

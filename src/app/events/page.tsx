@@ -7,7 +7,7 @@ import { SearchFilters } from "@/components/SearchFilters";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
-  title: "All Events",
+  title: "Browse Events",
   description:
     "Browse upcoming events on the Gold Coast — live music, festivals, markets, sports, family activities, and more.",
 };
@@ -79,40 +79,48 @@ export default async function EventsPage({
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12">
-      <div className="mb-8">
-        <h1 className="font-heading text-4xl font-bold text-slate-900">Events</h1>
-        <p className="mt-2 text-slate-500">
-          Discover what&apos;s happening near you
-        </p>
-      </div>
-
-      <Suspense fallback={null}>
-        <SearchFilters />
-      </Suspense>
-
-      {events.length === 0 ? (
-        <div className="rounded-xl bg-slate-50 py-16 text-center">
-          <svg className="mx-auto mb-4 h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <p className="text-slate-500">No events found matching your criteria.</p>
-          <p className="mt-1 text-sm text-slate-400">Try adjusting your filters or check back soon!</p>
-        </div>
-      ) : (
-        <>
-          <p className="mb-6 text-sm font-medium text-slate-500">
-            {events.length} event{events.length !== 1 ? "s" : ""} found
+    <div className="bg-surface-bright min-h-screen">
+      <div className="max-w-[1280px] mx-auto px-6 md:px-6 py-12">
+        <div className="mb-8">
+          <h1 className="font-display text-4xl font-extrabold text-on-surface tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+            Browse Events
+          </h1>
+          <p className="mt-2 font-body text-lg text-secondary">
+            Discover what&apos;s happening near you
           </p>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((event, i) => (
-              <ScrollReveal key={event.id} delay={i * 0.03}>
-                <EventCard event={event} />
-              </ScrollReveal>
-            ))}
+        </div>
+
+        <Suspense fallback={null}>
+          <SearchFilters />
+        </Suspense>
+
+        {events.length === 0 ? (
+          <div className="rounded-xl bg-surface-container-low py-16 text-center mt-6">
+            <span className="material-symbols-outlined text-4xl text-secondary mb-4 block">
+              search
+            </span>
+            <p className="text-secondary font-body">
+              No events found matching your criteria.
+            </p>
+            <p className="mt-1 text-sm text-outline font-body">
+              Try adjusting your filters or check back soon!
+            </p>
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <p className="mb-6 mt-6 text-sm font-semibold text-secondary font-body">
+              {events.length} event{events.length !== 1 ? "s" : ""} found
+            </p>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {events.map((event, i) => (
+                <ScrollReveal key={event.id} delay={i * 0.03}>
+                  <EventCard event={event} />
+                </ScrollReveal>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,139 +1,139 @@
 @import "tailwindcss";
 
-/* Eventure Design Tokens */
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* Eventure Design System — per DESIGN.md */
 @theme {
-  /* Brand Colours */
-  --color-coral: #FF6B4A;
-  --color-coral-dark: #E85A3A;
-  --color-coral-light: #FFF0ED;
-  --color-ocean: #0A7B7F;
-  --color-ocean-dark: #065D60;
-  --color-ocean-light: #E6F7F7;
-  --color-sunshine: #FFB930;
-  --color-sunshine-light: #FFF8E6;
+  /* ─── Brand Colours (Material 3 inspired) ─── */
+  --color-primary: #a43c12;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #ff7f50;
+  --color-on-primary-container: #6c2000;
+  --color-inverse-primary: #ffb59c;
 
-  /* Neutrals */
-  --color-slate-900: #1A1D23;
-  --color-slate-700: #3D4250;
-  --color-slate-500: #6B7080;
-  --color-slate-300: #C5C9D6;
-  --color-slate-100: #F0F1F5;
+  --color-secondary: #565e74;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #dae2fd;
+  --color-on-secondary-container: #5c647a;
 
-  /* Semantic */
+  --color-tertiary: #515f74;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #96a5bc;
+  --color-on-tertiary-container: #2d3b4e;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  /* ─── Surfaces ─── */
+  --color-surface: #f8f9ff;
+  --color-surface-dim: #cbdbf5;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-surface-container: #e5eeff;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-on-surface: #0b1c30;
+  --color-on-surface-variant: #57423b;
+  --color-inverse-surface: #213145;
+  --color-inverse-on-surface: #eaf1ff;
+  --color-surface-tint: #a43c12;
+  --color-surface-variant: #d3e4fe;
+
+  --color-outline: #8b7169;
+  --color-outline-variant: #dec0b6;
+  --color-background: #f8f9ff;
+  --color-on-background: #0b1c30;
+
+  /* ─── Legacy aliases (used in existing pages) ─── */
+  --color-coral: #ff7f50;
+  --color-coral-dark: #a43c12;
+  --color-coral-light: #ffdbcf;
+  --color-ocean: #515f74;
+  --color-ocean-dark: #3a485c;
+  --color-ocean-light: #d5e3fd;
   --color-success: #16A34A;
   --color-warning: #F59E0B;
-  --color-error: #DC2626;
 
-  /* Typography */
-  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  /* ─── Slate scale (for legacy compat) ─── */
+  --color-slate-50: #f8f9ff;
+  --color-slate-100: #eff4ff;
+  --color-slate-200: #dce9ff;
+  --color-slate-300: #d3e4fe;
+  --color-slate-400: #96a5bc;
+  --color-slate-500: #565e74;
+  --color-slate-600: #3f465c;
+  --color-slate-700: #213145;
+  --color-slate-800: #1a2a3e;
+  --color-slate-900: #0b1c30;
+
+  /* ─── Typography ─── */
+  --font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
 
-  /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* ─── Border Radius ─── */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(26, 29, 35, 0.06);
-  --shadow-md: 0 4px 12px rgba(26, 29, 35, 0.08);
-  --shadow-lg: 0 8px 24px rgba(26, 29, 35, 0.12);
-  --shadow-xl: 0 16px 48px rgba(26, 29, 35, 0.16);
+  /* ─── Shadows (Tonal Elevation) ─── */
+  --shadow-sm: 0 4px 20px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 20px 40px rgba(15, 23, 42, 0.16);
 }
 
-/* ---- Animated gradient for hero ---- */
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+/* ─── Material Symbols ─── */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-.hero-gradient {
-  background: linear-gradient(-45deg, #FF6B4A, #0A7B7F, #FFB930, #065D60);
-  background-size: 400% 400%;
-  animation: gradient-shift 12s ease infinite;
+/* ─── Smooth scroll ─── */
+html {
+  scroll-behavior: smooth;
 }
 
-/* ---- Floating particles ---- */
-@keyframes float-up {
-  0% { transform: translateY(0) scale(1); opacity: 0.7; }
-  100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+/* ─── Card hover elevation effect ─── */
+.card-hover {
+  transition: all 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
 }
 
-.particle {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: float-up linear infinite;
-}
-
-/* ---- Pulse glow for CTA buttons ---- */
+/* ─── Pulse glow for CTA buttons ─── */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 74, 0.4); }
-  50% { box-shadow: 0 0 20px 6px rgba(255, 107, 74, 0.15); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(164, 60, 18, 0.3); }
+  50% { box-shadow: 0 0 20px 6px rgba(164, 60, 18, 0.1); }
 }
 
 .btn-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
-/* ---- Shimmer loading skeleton ---- */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #F0F1F5 25%, #E0E1E8 50%, #F0F1F5 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-  border-radius: 8px;
-}
-
-/* ---- Smooth scroll ---- */
-html {
-  scroll-behavior: smooth;
-}
-
-/* ---- Wave divider ---- */
-.wave-divider {
-  position: relative;
-  overflow: hidden;
-}
-
-.wave-divider::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 60px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60'%3E%3Cpath fill='%23ffffff' d='M0,30 C360,60 720,0 1080,30 C1260,45 1350,40 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E") no-repeat bottom center;
-  background-size: cover;
-}
-
-.wave-divider-dark::after {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60'%3E%3Cpath fill='%231A1D23' d='M0,30 C360,60 720,0 1080,30 C1260,45 1350,40 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E") no-repeat bottom center;
-  background-size: cover;
-}
-
-/* ---- Category icon badges ---- */
-.category-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* ---- Image blur-up placeholder ---- */
-.img-blur-up {
-  filter: blur(20px);
-  transition: filter 0.4s ease-out;
-}
-
-.img-blur-up.loaded {
-  filter: blur(0);
-}
-
-/* ---- Card hover shine effect ---- */
+/* ─── Card shine effect ─── */
 @keyframes card-shine {
   0% { left: -100%; }
   100% { left: 150%; }
@@ -161,9 +161,81 @@ html {
   animation: card-shine 0.6s ease-out forwards;
 }
 
-/* ---- Newsletter input focus ring ---- */
+/* ─── Shimmer loading skeleton ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #eff4ff 25%, #dce9ff 50%, #eff4ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ─── Hide scrollbar for horizontal scroll areas ─── */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Glass panel effect ─── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Floating particles ─── */
+@keyframes float-up {
+  0% { transform: translateY(0) scale(1); opacity: 0.7; }
+  100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: float-up linear infinite;
+}
+
+/* ─── Hero gradient ─── */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.hero-gradient {
+  background: linear-gradient(-45deg, #ff7f50, #a43c12, #515f74, #0b1c30);
+  background-size: 400% 400%;
+  animation: gradient-shift 12s ease infinite;
+}
+
+/* ─── Newsletter input focus ring ─── */
 .newsletter-input:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(10, 123, 127, 0.3);
-  border-color: #0A7B7F;
+  box-shadow: 0 0 0 3px rgba(164, 60, 18, 0.2);
+  border-color: #a43c12;
+}
+
+/* ─── Wave divider ─── */
+.wave-divider {
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-divider::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60'%3E%3Cpath fill='%23ffffff' d='M0,30 C360,60 720,0 1080,30 C1260,45 1350,40 1440,30 L1440,60 L0,60 Z'/%3E%3C/svg%3E") no-repeat bottom center;
+  background-size: cover;
 }
