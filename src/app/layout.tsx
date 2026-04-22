@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
@@ -60,12 +61,12 @@ export default function RootLayout({
         <header className="fixed top-0 w-full z-50 border-b border-surface-container-high bg-white/90 backdrop-blur-md shadow-sm">
           <div className="flex justify-between items-center h-16 px-6 md:px-12 max-w-[1280px] mx-auto">
             {/* Brand */}
-            <a
+            <Link
               href="/"
               className="text-2xl font-extrabold tracking-tighter text-on-surface font-heading"
             >
               Eventure Discovery
-            </a>
+            </Link>
 
             {/* Desktop Search */}
             <div className="hidden md:flex flex-1 ml-6 max-w-md">
