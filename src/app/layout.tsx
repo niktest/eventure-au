@@ -46,6 +46,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-AU" className={`${inter.variable} ${plusJakarta.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        />
+      </head>
       <body className="min-h-screen bg-background text-on-surface font-body antialiased flex flex-col">
         <a href="#main-content" className="skip-to-content">
           Skip to main content
