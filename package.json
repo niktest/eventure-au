@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "ingest": "tsx src/lib/ingestion/run.ts",
+    "visual-check": "tsx scripts/screenshot-pages.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.1.0",
@@ -30,6 +32,7 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.3.1",
     "husky": "^9.1.7",
+    "playwright": "^1.59.1",
     "postcss": "^8.5.0",
     "prisma": "^6.6.0",
     "tailwindcss": "^4.0.0",
