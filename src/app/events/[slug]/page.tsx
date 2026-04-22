@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -71,11 +72,16 @@ export default async function EventDetailPage({
       />
       <article className="mx-auto max-w-4xl px-4 py-12">
         {event.imageUrl && (
-          <img
-            src={event.imageUrl}
-            alt={event.name}
-            className="mb-8 h-80 w-full rounded-lg object-cover"
-          />
+          <div className="relative mb-8 aspect-[2/1] w-full overflow-hidden rounded-lg">
+            <Image
+              src={event.imageUrl}
+              alt={event.name}
+              fill
+              sizes="(max-width: 896px) 100vw, 896px"
+              priority
+              className="object-cover"
+            />
+          </div>
         )}
 
         <div className="mb-2">

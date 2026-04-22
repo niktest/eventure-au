@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MobileNav } from "@/components/MobileNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,24 +32,11 @@ export default function RootLayout({
     <html lang="en-AU">
       <body className="min-h-screen bg-white text-slate-900 font-body antialiased">
         <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur-sm">
-          <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+          <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
             <a href="/" className="font-heading text-2xl font-bold tracking-tight text-slate-900">
               Eventure
             </a>
-            <div className="flex items-center gap-6 text-sm font-medium">
-              <a href="/events" className="text-slate-700 transition-colors hover:text-coral">
-                Events
-              </a>
-              <a href="/city/gold-coast" className="text-slate-700 transition-colors hover:text-coral">
-                Gold Coast
-              </a>
-              <a href="/about" className="text-slate-700 transition-colors hover:text-coral">
-                About
-              </a>
-              <a href="/contact" className="text-slate-700 transition-colors hover:text-coral">
-                Contact
-              </a>
-            </div>
+            <MobileNav />
           </nav>
         </header>
         <main>{children}</main>

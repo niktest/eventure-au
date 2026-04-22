@@ -29,15 +29,15 @@ export function SearchFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentCategory = searchParams.get("category") ?? "";
-  const currentQuery = searchParams.get("q") ?? "";
-  const currentDateFrom = searchParams.get("dateFrom") ?? "";
-  const currentDateTo = searchParams.get("dateTo") ?? "";
-  const currentFreeOnly = searchParams.get("free") === "1";
+  const currentCategory = searchParams?.get("category") ?? "";
+  const currentQuery = searchParams?.get("q") ?? "";
+  const currentDateFrom = searchParams?.get("dateFrom") ?? "";
+  const currentDateTo = searchParams?.get("dateTo") ?? "";
+  const currentFreeOnly = searchParams?.get("free") === "1";
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       for (const [key, value] of Object.entries(updates)) {
         if (value === null || value === "") {
           params.delete(key);
