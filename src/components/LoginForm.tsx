@@ -1,12 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const callbackUrl = searchParams?.get("callbackUrl") ?? "/";
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitted(true);
     const form = e.currentTarget;
@@ -20,10 +27,44 @@ export function LoginForm() {
     if (!password) newErrors.password = "Password is required.";
 
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setErrors({ _form: "Invalid email or password." });
+        setLoading(false);
+        return;
+      }
+
+      router.push(callbackUrl);
+      router.refresh();
+    } catch {
+      setErrors({ _form: "Something went wrong. Please try again." });
+      setLoading(false);
+    }
   };
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+      {errors._form && (
+        <div role="alert" className="rounded-lg bg-error/10 border border-error/30 p-3 text-error text-sm font-body">
+          {errors._form}
+        </div>
+      )}
+
+      {searchParams?.get("registered") && !errors._form && (
+        <div role="status" className="rounded-lg bg-primary/10 border border-primary/30 p-3 text-primary text-sm font-body">
+          Account created successfully! Please sign in.
+        </div>
+      )}
+
       {/* Email Input */}
       <div className="space-y-1">
         <label
@@ -107,9 +148,10 @@ export function LoginForm() {
       {/* Submit */}
       <button
         type="submit"
-        className="w-full flex items-center justify-center py-4 px-6 bg-primary text-on-primary rounded-full font-body text-sm font-semibold tracking-wide shadow-md hover:bg-primary-container hover:scale-[1.02] active:scale-[0.98] transition-all mt-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        disabled={loading}
+        className="w-full flex items-center justify-center py-4 px-6 bg-primary text-on-primary rounded-full font-body text-sm font-semibold tracking-wide shadow-md hover:bg-primary-container hover:scale-[1.02] active:scale-[0.98] transition-all mt-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Sign In
+        {loading ? "Signing In…" : "Sign In"}
       </button>
     </form>
   );

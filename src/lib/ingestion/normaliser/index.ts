@@ -73,6 +73,6 @@ export function normalise(source: string, raw: RawEvent): NormalisedEvent {
     sourceId: raw.sourceId,
     sourceUrl: raw.url ?? null,
     rawData: (raw.rawData as import("@prisma/client").Prisma.InputJsonValue) ?? null,
-    status: "draft",
+    status: "published",
   };
 }

@@ -9,7 +9,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 export const metadata: Metadata = {
   title: "Browse Events",
   description:
-    "Browse upcoming events on the Gold Coast — live music, festivals, markets, sports, family activities, and more.",
+    "Browse upcoming events across Australia — live music, festivals, markets, sports, family activities, and more.",
 };
 
 export const revalidate = 3600;
