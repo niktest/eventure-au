@@ -164,12 +164,12 @@ export default function FaqPage() {
 
       <div className="space-y-8">
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
-          <p className="text-on-primary-container">
+          <p className="text-primary">
             Find answers to common questions about Eventure below. Can&apos;t
             find what you&apos;re looking for?{" "}
             <a
               href="/contact"
-              className="font-semibold text-on-primary-container underline hover:no-underline"
+              className="font-semibold text-primary underline hover:no-underline"
             >
               Get in touch
             </a>
@@ -177,7 +177,7 @@ export default function FaqPage() {
           </p>
         </div>
 
-        <Accordion items={faqItems} />
+        <Accordion items={faqItems} headingLevel={2} />
       </div>
     </div></div>
   );

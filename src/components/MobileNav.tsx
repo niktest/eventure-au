@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -16,6 +16,9 @@ export function MobileNav() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const router = useRouter();
+  const menuRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const searchPanelRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,15 +29,88 @@ export function MobileNav() {
     }
   };
 
+  const closeMenu = useCallback(() => {
+    setOpen(false);
+    menuButtonRef.current?.focus();
+  }, []);
+
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false);
+  }, []);
+
+  // Focus trap for mobile menu
+  useEffect(() => {
+    if (!open) return;
+
+    const menuEl = menuRef.current;
+    if (!menuEl) return;
+
+    const getFocusableElements = () =>
+      menuEl.querySelectorAll<HTMLElement>(
+        'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
+      );
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeMenu();
+        return;
+      }
+
+      if (e.key !== "Tab") return;
+
+      const focusable = getFocusableElements();
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Focus first item on open
+    const focusable = getFocusableElements();
+    if (focusable.length > 0) {
+      focusable[0].focus();
+    }
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, closeMenu]);
+
+  // Escape key for search panel
+  useEffect(() => {
+    if (!searchOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeSearch();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [searchOpen, closeSearch]);
+
   return (
     <>
       {/* Desktop nav links */}
-      <nav className="hidden md:flex items-center gap-6 ml-auto font-heading text-sm font-semibold tracking-tight">
+      <nav className="hidden md:flex items-center gap-6 ml-auto font-heading text-sm font-semibold tracking-tight" aria-label="Main navigation">
         {NAV_LINKS.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="text-secondary hover:text-primary-container transition-all duration-200"
+            className="text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
           >
             {link.label}
           </Link>
@@ -45,13 +121,13 @@ export function MobileNav() {
       <div className="hidden md:flex items-center gap-3 ml-6">
         <Link
           href="/login"
-          className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200"
+          className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
         >
           Log In
         </Link>
         <Link
           href="/signup"
-          className="bg-primary-container text-on-primary rounded-full px-6 py-2 font-heading text-sm font-semibold hover:scale-105 transition-transform duration-200 active:scale-95"
+          className="bg-primary-container text-on-primary rounded-full px-6 py-2 font-heading text-sm font-semibold hover:scale-105 transition-transform duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Sign Up
         </Link>
@@ -65,22 +141,24 @@ export function MobileNav() {
             setSearchOpen(!searchOpen);
             setOpen(false);
           }}
-          className="p-2 text-secondary hover:text-primary transition-colors"
+          className="p-2 text-secondary hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
           aria-label="Search"
         >
-          <span className="material-symbols-outlined text-[22px]">search</span>
+          <span className="material-symbols-outlined text-[22px]" aria-hidden="true">search</span>
         </button>
         <button
+          ref={menuButtonRef}
           type="button"
           onClick={() => {
             setOpen(!open);
             setSearchOpen(false);
           }}
-          className="p-2 -mr-2 text-secondary hover:text-primary transition-colors"
+          className="p-2 -mr-2 text-secondary hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
+          aria-controls="mobile-menu"
         >
-          <span className="material-symbols-outlined text-[24px]">
+          <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
             {open ? "close" : "menu"}
           </span>
         </button>
@@ -88,13 +166,18 @@ export function MobileNav() {
 
       {/* Search bar dropdown */}
       {searchOpen && (
-        <div className="absolute top-full left-0 right-0 border-b border-surface-container-high bg-white px-4 py-3 shadow-md z-50">
+        <div
+          ref={searchPanelRef}
+          className="absolute top-full left-0 right-0 border-b border-surface-container-high bg-white px-4 py-3 shadow-md z-50"
+        >
           <form onSubmit={handleSearch} className="mx-auto flex max-w-2xl gap-2">
             <div className="relative flex-1">
-              <span className="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-[20px]">
+              <label htmlFor="mobile-search" className="sr-only">Search events</label>
+              <span className="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-[20px]" aria-hidden="true">
                 search
               </span>
               <input
+                id="mobile-search"
                 type="search"
                 placeholder="Search events, venues, categories..."
                 value={query}
@@ -105,7 +188,7 @@ export function MobileNav() {
             </div>
             <button
               type="submit"
-              className="rounded-full bg-primary-container px-5 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary"
+              className="rounded-full bg-primary-container px-5 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               Search
             </button>
@@ -115,14 +198,19 @@ export function MobileNav() {
 
       {/* Mobile menu panel */}
       {open && (
-        <div className="md:hidden absolute top-full left-0 right-0 border-b border-surface-container-high bg-white shadow-md z-50">
+        <nav
+          ref={menuRef}
+          id="mobile-menu"
+          aria-label="Mobile navigation"
+          className="md:hidden absolute top-full left-0 right-0 border-b border-surface-container-high bg-white shadow-md z-50"
+        >
           <div className="flex flex-col px-6 py-4 space-y-1">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="text-on-surface font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors"
+                className="text-on-surface font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
               >
                 {link.label}
               </Link>
@@ -131,19 +219,19 @@ export function MobileNav() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors"
+              className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
             >
               Log In
             </Link>
             <Link
               href="/signup"
               onClick={() => setOpen(false)}
-              className="bg-primary-container text-on-primary rounded-full px-6 py-3 font-heading text-sm font-semibold text-center hover:bg-primary transition-colors mt-1"
+              className="bg-primary-container text-on-primary rounded-full px-6 py-3 font-heading text-sm font-semibold text-center hover:bg-primary transition-colors mt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-container"
             >
               Sign Up
             </Link>
           </div>
-        </div>
+        </nav>
       )}
     </>
   );

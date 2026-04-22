@@ -1,7 +1,21 @@
 import type { Metadata } from "next";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  weight: ["500", "700", "800"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -30,8 +44,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-AU">
+    <html lang="en-AU" className={`${inter.variable} ${plusJakarta.variable}`}>
       <body className="min-h-screen bg-background text-on-surface font-body antialiased flex flex-col">
+        <a href="#main-content" className="skip-to-content">
+          Skip to main content
+        </a>
+
         {/* Top Navigation Bar */}
         <header className="fixed top-0 w-full z-50 border-b border-surface-container-high bg-white/90 backdrop-blur-md shadow-sm">
           <div className="flex justify-between items-center h-16 px-6 md:px-12 max-w-[1280px] mx-auto">
@@ -49,8 +67,10 @@ export default function RootLayout({
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-[20px]">
                   search
                 </span>
+                <label htmlFor="desktop-search" className="sr-only">Search events</label>
                 <input
-                  type="text"
+                  id="desktop-search"
+                  type="search"
                   placeholder="Search events..."
                   className="w-full pl-10 pr-4 py-2 bg-surface-bright border border-secondary-container rounded-lg focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container font-body text-sm text-on-surface"
                 />
@@ -63,7 +83,7 @@ export default function RootLayout({
         </header>
 
         {/* Main content with top padding for fixed header */}
-        <main className="flex-grow pt-16">{children}</main>
+        <main id="main-content" className="flex-grow pt-16">{children}</main>
 
         <Footer />
       </body>

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+/* Material Symbols (icon font — not migratable to next/font) */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 /* Eventure Design System — per DESIGN.md */
@@ -9,8 +8,8 @@
   /* ─── Brand Colours (Material 3 inspired) ─── */
   --color-primary: #a43c12;
   --color-on-primary: #ffffff;
-  --color-primary-container: #ff7f50;
-  --color-on-primary-container: #6c2000;
+  --color-primary-container: #b8551d;
+  --color-on-primary-container: #ffffff;
   --color-inverse-primary: #ffb59c;
 
   --color-secondary: #565e74;
@@ -50,7 +49,7 @@
   --color-on-background: #0b1c30;
 
   /* ─── Legacy aliases (used in existing pages) ─── */
-  --color-coral: #ff7f50;
+  --color-coral: #b8551d;
   --color-coral-dark: #a43c12;
   --color-coral-light: #ffdbcf;
   --color-ocean: #515f74;
@@ -72,9 +71,9 @@
   --color-slate-900: #0b1c30;
 
   /* ─── Typography ─── */
-  --font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-heading: var(--font-plus-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-display: var(--font-plus-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
 
   /* ─── Border Radius ─── */
   --radius-xs: 0.25rem;
@@ -107,6 +106,32 @@
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ─── Skip to content (a11y) ─── */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+}
+.skip-to-content:focus {
+  position: fixed;
+  top: 4px;
+  left: 4px;
+  width: auto;
+  height: auto;
+  padding: 0.75rem 1.5rem;
+  background: #0b1c30;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  outline: 2px solid #a43c12;
+  outline-offset: 2px;
 }
 
 /* ─── Smooth scroll ─── */

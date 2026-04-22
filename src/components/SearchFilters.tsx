@@ -54,10 +54,12 @@ export function SearchFilters() {
     <div className="mb-8 space-y-4">
       {/* Text search */}
       <div className="relative">
-        <span className="material-symbols-outlined absolute left-3 top-3.5 text-secondary text-[20px]">
+        <label htmlFor="event-search" className="sr-only">Search events</label>
+        <span className="material-symbols-outlined absolute left-3 top-3.5 text-secondary text-[20px]" aria-hidden="true">
           search
         </span>
         <input
+          id="event-search"
           type="search"
           placeholder="Search events, artists, venues..."
           defaultValue={currentQuery}
@@ -107,7 +109,8 @@ export function SearchFilters() {
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => updateParams({ category: null })}
-          className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors ${
+          aria-pressed={!currentCategory}
+          className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
             !currentCategory
               ? "bg-primary text-on-primary"
               : "bg-surface-container-low text-on-surface hover:bg-surface-container"
@@ -115,26 +118,27 @@ export function SearchFilters() {
         >
           All
         </button>
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            onClick={() =>
-              updateParams({
-                category:
-                  currentCategory.toUpperCase() === cat
-                    ? null
-                    : cat.toLowerCase(),
-              })
-            }
-            className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors ${
-              currentCategory.toUpperCase() === cat
-                ? "bg-primary text-on-primary"
-                : "bg-surface-container-low text-on-surface hover:bg-surface-container"
-            }`}
-          >
-            {formatCategory(cat)}
-          </button>
-        ))}
+        {CATEGORIES.map((cat) => {
+          const isSelected = currentCategory.toUpperCase() === cat;
+          return (
+            <button
+              key={cat}
+              onClick={() =>
+                updateParams({
+                  category: isSelected ? null : cat.toLowerCase(),
+                })
+              }
+              aria-pressed={isSelected}
+              className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                isSelected
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface-container-low text-on-surface hover:bg-surface-container"
+              }`}
+            >
+              {formatCategory(cat)}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
