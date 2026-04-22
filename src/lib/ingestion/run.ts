@@ -19,6 +19,15 @@ import { HumanitixAdapter } from "./adapters/humanitix";
 import { MoshtixAdapter } from "./adapters/moshtix";
 import { TryBookingAdapter } from "./adapters/trybooking";
 
+// P2 API adapters (national expansion)
+import { EventfindaAdapter } from "./adapters/eventfinda";
+import { StickyTicketsAdapter } from "./adapters/sticky-tickets";
+
+// P2 Scraper adapters (national expansion)
+import { OztixAdapter } from "./adapters/oztix";
+import { MegatixAdapter } from "./adapters/megatix";
+import { VisitBrisbaneAdapter } from "./adapters/visit-brisbane";
+
 // Example adapter (for dev/testing)
 import { ExampleAdapter } from "./adapters/example";
 
@@ -43,6 +52,15 @@ const adapters: SourceAdapter[] = [
   new HumanitixAdapter(),
   new MoshtixAdapter(),
   new TryBookingAdapter(),
+
+  // P2 API-based (national expansion)
+  new EventfindaAdapter(),
+  new StickyTicketsAdapter(),
+
+  // P2 Scraper-based (national expansion)
+  new OztixAdapter(),
+  new MegatixAdapter(),
+  new VisitBrisbaneAdapter(),
 
   // Dev/test
   new ExampleAdapter(),
