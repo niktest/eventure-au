@@ -8,21 +8,21 @@ export const metadata: Metadata = {
 
 export default function CookiePolicyPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-6 font-heading text-4xl font-bold text-slate-900">
+    <div className="bg-surface-bright min-h-screen"><div className="mx-auto max-w-3xl px-6 py-12">
+      <h1 className="mb-6 font-heading text-4xl font-extrabold text-on-surface">
         Cookie Policy
       </h1>
 
-      <div className="space-y-8 text-slate-700 leading-relaxed">
-        <div className="rounded-lg bg-ocean-light p-6">
-          <p className="text-ocean-dark">
+      <div className="space-y-8 text-on-surface-variant leading-relaxed">
+        <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
+          <p className="text-on-primary-container">
             This Cookie Policy explains how Eventure (&ldquo;we&rdquo;,
             &ldquo;us&rdquo;, &ldquo;our&rdquo;) uses cookies and similar
             tracking technologies on our website at eventure.com.au. This policy
             should be read alongside our{" "}
             <a
               href="/privacy"
-              className="font-semibold text-ocean-dark underline hover:no-underline"
+              className="font-semibold text-on-primary-container underline hover:no-underline"
             >
               Privacy Policy
             </a>
@@ -31,7 +31,7 @@ export default function CookiePolicyPage() {
         </div>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             1. What Are Cookies?
           </h2>
           <p>
@@ -44,11 +44,11 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             2. How We Use Cookies
           </h2>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Strictly Necessary Cookies
           </h3>
           <p>
@@ -58,14 +58,14 @@ export default function CookiePolicyPage() {
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th className="pb-2 pr-4 font-semibold text-slate-800">Cookie</th>
-                  <th className="pb-2 pr-4 font-semibold text-slate-800">Purpose</th>
-                  <th className="pb-2 font-semibold text-slate-800">Duration</th>
+                <tr className="border-b border-surface-container-high text-left">
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Cookie</th>
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Purpose</th>
+                  <th className="pb-2 font-semibold text-on-surface">Duration</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-surface-container-high">
                   <td className="py-2 pr-4">Session cookie</td>
                   <td className="py-2 pr-4">Maintains your browsing session</td>
                   <td className="py-2">Session</td>
@@ -74,7 +74,7 @@ export default function CookiePolicyPage() {
             </table>
           </div>
 
-          <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-on-surface">
             Analytics Cookies
           </h3>
           <p>
@@ -84,21 +84,21 @@ export default function CookiePolicyPage() {
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th className="pb-2 pr-4 font-semibold text-slate-800">Cookie</th>
-                  <th className="pb-2 pr-4 font-semibold text-slate-800">Purpose</th>
-                  <th className="pb-2 pr-4 font-semibold text-slate-800">Duration</th>
-                  <th className="pb-2 font-semibold text-slate-800">Provider</th>
+                <tr className="border-b border-surface-container-high text-left">
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Cookie</th>
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Purpose</th>
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Duration</th>
+                  <th className="pb-2 font-semibold text-on-surface">Provider</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-surface-container-high">
                   <td className="py-2 pr-4">_ga</td>
                   <td className="py-2 pr-4">Distinguishes unique users</td>
                   <td className="py-2 pr-4">2 years</td>
                   <td className="py-2">Google Analytics</td>
                 </tr>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-surface-container-high">
                   <td className="py-2 pr-4">_ga_*</td>
                   <td className="py-2 pr-4">Maintains session state</td>
                   <td className="py-2 pr-4">2 years</td>
@@ -108,7 +108,7 @@ export default function CookiePolicyPage() {
             </table>
           </div>
 
-          <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-on-surface">
             Functional Cookies
           </h3>
           <p>
@@ -119,14 +119,14 @@ export default function CookiePolicyPage() {
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left">
-                  <th className="pb-2 pr-4 font-semibold text-slate-800">Cookie</th>
-                  <th className="pb-2 pr-4 font-semibold text-slate-800">Purpose</th>
-                  <th className="pb-2 font-semibold text-slate-800">Duration</th>
+                <tr className="border-b border-surface-container-high text-left">
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Cookie</th>
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Purpose</th>
+                  <th className="pb-2 font-semibold text-on-surface">Duration</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-surface-container-high">
                   <td className="py-2 pr-4">location_pref</td>
                   <td className="py-2 pr-4">
                     Stores your preferred city/region for event discovery
@@ -137,7 +137,7 @@ export default function CookiePolicyPage() {
             </table>
           </div>
 
-          <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-on-surface">
             Third-Party Cookies
           </h3>
           <p>
@@ -149,11 +149,11 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             3. Managing Cookies
           </h2>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Browser Settings
           </h3>
           <p>
@@ -179,7 +179,7 @@ export default function CookiePolicyPage() {
             </li>
           </ul>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Impact of Disabling Cookies
           </h3>
           <p>
@@ -190,7 +190,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             4. Australian Law Context
           </h2>
           <p>
@@ -205,7 +205,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             5. Changes to This Policy
           </h2>
           <p>
@@ -215,8 +215,8 @@ export default function CookiePolicyPage() {
           </p>
         </section>
 
-        <section className="rounded-lg border border-slate-300 p-6">
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+        <section className="rounded-xl border border-surface-container-high p-6">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             6. Contact Us
           </h2>
           <p>
@@ -225,13 +225,13 @@ export default function CookiePolicyPage() {
           <p className="mt-3">
             <a
               href="mailto:privacy@eventure.com.au"
-              className="text-coral hover:text-coral-dark transition-colors"
+              className="text-primary hover:text-primary-container transition-colors"
             >
               privacy@eventure.com.au
             </a>
           </p>
         </section>
       </div>
-    </div>
+    </div></div>
   );
 }

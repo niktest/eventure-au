@@ -73,7 +73,7 @@ const faqItems = [
         love to hear from you. Contact us at{" "}
         <a
           href="mailto:partners@eventure.com.au"
-          className="text-coral hover:text-coral-dark transition-colors"
+          className="text-primary hover:text-primary-container transition-colors"
         >
           partners@eventure.com.au
         </a>{" "}
@@ -97,7 +97,7 @@ const faqItems = [
         If you spot an error in an event listing, please let us know by emailing{" "}
         <a
           href="mailto:hello@eventure.com.au"
-          className="text-coral hover:text-coral-dark transition-colors"
+          className="text-primary hover:text-primary-container transition-colors"
         >
           hello@eventure.com.au
         </a>
@@ -113,7 +113,7 @@ const faqItems = [
         understand how visitors use it. For full details, see our{" "}
         <a
           href="/cookies"
-          className="text-coral hover:text-coral-dark transition-colors"
+          className="text-primary hover:text-primary-container transition-colors"
         >
           Cookie Policy
         </a>
@@ -131,7 +131,7 @@ const faqItems = [
             General enquiries:{" "}
             <a
               href="mailto:hello@eventure.com.au"
-              className="text-coral hover:text-coral-dark transition-colors"
+              className="text-primary hover:text-primary-container transition-colors"
             >
               hello@eventure.com.au
             </a>
@@ -140,7 +140,7 @@ const faqItems = [
             Event organisers &amp; venues:{" "}
             <a
               href="mailto:partners@eventure.com.au"
-              className="text-coral hover:text-coral-dark transition-colors"
+              className="text-primary hover:text-primary-container transition-colors"
             >
               partners@eventure.com.au
             </a>
@@ -149,7 +149,7 @@ const faqItems = [
             Privacy questions:{" "}
             <a
               href="mailto:privacy@eventure.com.au"
-              className="text-coral hover:text-coral-dark transition-colors"
+              className="text-primary hover:text-primary-container transition-colors"
             >
               privacy@eventure.com.au
             </a>
@@ -162,19 +162,19 @@ const faqItems = [
 
 export default function FaqPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-6 font-heading text-4xl font-bold text-slate-900">
+    <div className="bg-surface-bright min-h-screen"><div className="mx-auto max-w-3xl px-6 py-12">
+      <h1 className="mb-6 font-heading text-4xl font-extrabold text-on-surface">
         Frequently Asked Questions
       </h1>
 
       <div className="space-y-8">
-        <div className="rounded-lg bg-ocean-light p-6">
-          <p className="text-ocean-dark">
+        <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
+          <p className="text-on-primary-container">
             Find answers to common questions about Eventure below. Can&apos;t
             find what you&apos;re looking for?{" "}
             <a
               href="/contact"
-              className="font-semibold text-ocean-dark underline hover:no-underline"
+              className="font-semibold text-on-primary-container underline hover:no-underline"
             >
               Get in touch
             </a>
@@ -184,6 +184,6 @@ export default function FaqPage() {
 
         <Accordion items={faqItems} />
       </div>
-    </div>
+    </div></div>
   );
 }

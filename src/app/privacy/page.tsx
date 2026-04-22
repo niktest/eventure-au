@@ -8,14 +8,14 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-6 font-heading text-4xl font-bold text-slate-900">
+    <div className="bg-surface-bright min-h-screen"><div className="mx-auto max-w-3xl px-6 py-12">
+      <h1 className="mb-6 font-heading text-4xl font-extrabold text-on-surface">
         Privacy Policy
       </h1>
 
-      <div className="space-y-8 text-slate-700 leading-relaxed">
-        <div className="rounded-lg bg-ocean-light p-6">
-          <p className="text-ocean-dark">
+      <div className="space-y-8 text-on-surface-variant leading-relaxed">
+        <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
+          <p className="text-on-primary-container">
             This Privacy Policy describes how Eventure (&ldquo;we&rdquo;,
             &ldquo;us&rdquo;, &ldquo;our&rdquo;) collects, holds, uses, and
             discloses personal information in accordance with the{" "}
@@ -34,11 +34,11 @@ export default function PrivacyPolicyPage() {
         </p>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             1. What Personal Information We Collect
           </h2>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Information You Provide Directly
           </h3>
           <ul className="list-disc space-y-1 pl-6">
@@ -59,7 +59,7 @@ export default function PrivacyPolicyPage() {
             </li>
           </ul>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Information Collected Automatically
           </h3>
           <ul className="list-disc space-y-1 pl-6">
@@ -79,7 +79,7 @@ export default function PrivacyPolicyPage() {
               <strong>Cookies and similar technologies:</strong> See our{" "}
               <a
                 href="/cookies"
-                className="text-coral hover:text-coral-dark transition-colors"
+                className="text-primary hover:text-primary-container transition-colors"
               >
                 Cookie Policy
               </a>{" "}
@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             2. How We Collect Personal Information
           </h2>
           <ul className="list-disc space-y-1 pl-6">
@@ -110,7 +110,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             3. Why We Collect Your Information
           </h2>
           <ul className="list-disc space-y-1 pl-6">
@@ -131,7 +131,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             4. Disclosure of Personal Information
           </h2>
           <p className="mb-2">We may disclose personal information to:</p>
@@ -154,7 +154,7 @@ export default function PrivacyPolicyPage() {
               as necessary
             </li>
           </ul>
-          <p className="mt-3 rounded-lg border border-ocean/20 bg-white p-4 text-sm">
+          <p className="mt-3 rounded-xl border border-ocean/20 bg-surface-container-lowest p-4 text-sm">
             We do <strong>not</strong> sell, rent, or trade your personal
             information to third parties for marketing purposes. Some of our
             service providers may store or process data outside Australia,
@@ -165,7 +165,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             5. Data Security
           </h2>
           <p>
@@ -181,7 +181,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             6. Access and Correction
           </h2>
           <p>You have the right to:</p>
@@ -201,7 +201,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             7. Data Retention
           </h2>
           <p>
@@ -213,7 +213,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             8. Direct Marketing
           </h2>
           <p>
@@ -225,7 +225,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             9. Anonymity
           </h2>
           <p>
@@ -238,7 +238,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             10. Complaints
           </h2>
           <p>
@@ -260,7 +260,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             11. Changes to This Policy
           </h2>
           <p>
@@ -271,8 +271,8 @@ export default function PrivacyPolicyPage() {
           </p>
         </section>
 
-        <section className="rounded-lg border border-slate-300 p-6">
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+        <section className="rounded-xl border border-surface-container-high p-6">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             12. Contact Us
           </h2>
           <p>
@@ -282,13 +282,13 @@ export default function PrivacyPolicyPage() {
           <p className="mt-3">
             <a
               href="mailto:privacy@eventure.com.au"
-              className="text-coral hover:text-coral-dark transition-colors"
+              className="text-primary hover:text-primary-container transition-colors"
             >
               privacy@eventure.com.au
             </a>
           </p>
         </section>
       </div>
-    </div>
+    </div></div>
   );
 }

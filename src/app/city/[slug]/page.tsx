@@ -1,33 +1,34 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
-const CITIES: Record<string, { name: string; state: string; tagline: string; gradient: string }> = {
+const CITIES: Record<string, { name: string; state: string; tagline: string; icon: string }> = {
   "gold-coast": {
     name: "Gold Coast",
     state: "QLD",
     tagline: "Sun, surf, and sensational events",
-    gradient: "from-ocean via-ocean-dark to-coral",
+    icon: "surfing",
   },
   brisbane: {
     name: "Brisbane",
     state: "QLD",
     tagline: "River city vibes and live entertainment",
-    gradient: "from-ocean-dark via-ocean to-sunshine",
+    icon: "location_city",
   },
   sydney: {
     name: "Sydney",
     state: "NSW",
     tagline: "Harbour city happenings",
-    gradient: "from-coral via-sunshine to-ocean",
+    icon: "sailing",
   },
   melbourne: {
     name: "Melbourne",
     state: "VIC",
     tagline: "Culture, coffee, and creativity",
-    gradient: "from-slate-700 via-ocean-dark to-ocean",
+    icon: "coffee",
   },
 };
 
@@ -78,28 +79,31 @@ export default async function CityPage({
   }
 
   return (
-    <div>
+    <div className="bg-surface-bright min-h-screen">
       {/* City hero banner */}
-      <section className={`relative overflow-hidden bg-gradient-to-r ${city.gradient} px-4 pb-16 pt-12 md:pb-20 md:pt-16`}>
+      <section className="relative overflow-hidden bg-inverse-surface px-6 pb-16 pt-12 md:pb-20 md:pt-16">
         {/* Decorative circles */}
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5" />
-        <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-white/5" />
+        <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-primary-container/10" />
 
-        <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="relative z-10 mx-auto max-w-[1280px]">
           <div className="flex items-center gap-3 mb-3">
-            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm">
+            <span className="material-symbols-outlined text-primary-container text-3xl">
+              {city.icon}
+            </span>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white backdrop-blur-sm font-body">
               {city.state}
             </span>
             {eventCount > 0 && (
-              <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm">
+              <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white backdrop-blur-sm font-body">
                 {eventCount} upcoming event{eventCount !== 1 ? "s" : ""}
               </span>
             )}
           </div>
-          <h1 className="mb-3 font-heading text-4xl font-extrabold text-white md:text-5xl">
+          <h1 className="mb-3 font-display text-4xl font-extrabold text-white md:text-5xl tracking-tight" style={{ letterSpacing: "-0.02em" }}>
             Events in {city.name}
           </h1>
-          <p className="max-w-xl text-lg text-white/80">
+          <p className="max-w-xl font-body text-lg text-surface-variant">
             {city.tagline}. Discover what&apos;s happening — from live music and
             festivals to markets and family fun.
           </p>
@@ -107,21 +111,21 @@ export default async function CityPage({
       </section>
 
       {/* Events grid */}
-      <section className="mx-auto max-w-7xl px-4 py-12">
+      <section className="mx-auto max-w-[1280px] px-6 py-12">
         {events.length === 0 ? (
-          <div className="rounded-xl bg-slate-50 py-16 text-center">
-            <svg className="mx-auto mb-4 h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <p className="mb-4 text-slate-500">
+          <div className="rounded-xl bg-surface-container-low py-16 text-center">
+            <span className="material-symbols-outlined text-4xl text-secondary mb-4 block">
+              calendar_month
+            </span>
+            <p className="mb-4 text-secondary font-body">
               No upcoming events in {city.name} yet. Check back soon!
             </p>
-            <a
+            <Link
               href="/events"
-              className="inline-block rounded-lg bg-coral px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-dark"
+              className="inline-block rounded-full bg-primary-container px-6 py-3 font-body font-semibold text-on-primary transition-colors hover:bg-primary"
             >
               Browse all events
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

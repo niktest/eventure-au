@@ -44,12 +44,12 @@ export function AnimatedCounter({
 
   return (
     <div ref={ref} className="text-center">
-      <div className="font-heading text-4xl font-extrabold text-coral md:text-5xl">
+      <div className="font-heading text-4xl font-extrabold text-primary-container md:text-5xl">
         {prefix}
         {count}
         {suffix}
       </div>
-      <p className="mt-1 text-sm text-slate-500">{label}</p>
+      <p className="mt-1 text-sm text-secondary font-body">{label}</p>
     </div>
   );
 }

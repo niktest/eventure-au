@@ -8,14 +8,14 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-6 font-heading text-4xl font-bold text-slate-900">
+    <div className="bg-surface-bright min-h-screen"><div className="mx-auto max-w-3xl px-6 py-12">
+      <h1 className="mb-6 font-heading text-4xl font-extrabold text-on-surface">
         Terms &amp; Conditions
       </h1>
 
-      <div className="space-y-8 text-slate-700 leading-relaxed">
-        <div className="rounded-lg bg-ocean-light p-6">
-          <p className="text-ocean-dark">
+      <div className="space-y-8 text-on-surface-variant leading-relaxed">
+        <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
+          <p className="text-on-primary-container">
             These Terms and Conditions (&ldquo;Terms&rdquo;) govern your access
             to and use of the Eventure website at eventure.com.au (the
             &ldquo;Website&rdquo;), operated by Eventure (&ldquo;we&rdquo;,
@@ -25,7 +25,7 @@ export default function TermsPage() {
         </div>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             1. About Eventure
           </h2>
           <p>
@@ -34,7 +34,7 @@ export default function TermsPage() {
             sources to help users discover events happening near them in
             Australia.
           </p>
-          <p className="mt-3 rounded-lg border border-ocean/20 bg-white p-4 text-sm font-semibold">
+          <p className="mt-3 rounded-xl border border-ocean/20 bg-surface-container-lowest p-4 text-sm font-semibold">
             We are not an event organiser, ticketing provider, or venue
             operator. We do not sell tickets, manage bookings, or have any
             involvement in the organisation or delivery of the events listed on
@@ -43,11 +43,11 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             2. Aggregated Content
           </h2>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Third-Party Event Data
           </h3>
           <p>
@@ -58,7 +58,7 @@ export default function TermsPage() {
             informational purposes only.
           </p>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             No Guarantee of Accuracy
           </h3>
           <p>
@@ -78,7 +78,7 @@ export default function TermsPage() {
             </li>
           </ul>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Your Responsibility
           </h3>
           <p className="font-semibold">
@@ -89,7 +89,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             3. No Endorsement
           </h2>
           <p>
@@ -100,7 +100,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             4. Third-Party Links &amp; Affiliate Disclosure
           </h2>
           <p>
@@ -120,7 +120,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             5. Intellectual Property
           </h2>
           <p>
@@ -133,7 +133,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             6. Acceptable Use
           </h2>
           <p>You agree not to:</p>
@@ -153,7 +153,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             7. Limitation of Liability
           </h2>
           <p>
@@ -165,7 +165,7 @@ export default function TermsPage() {
             Website.
           </p>
 
-          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-slate-800">
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
             Australian Consumer Law
           </h3>
           <p>
@@ -178,7 +178,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             8. Indemnity
           </h2>
           <p>
@@ -190,14 +190,14 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             9. Privacy
           </h2>
           <p>
             We collect and handle personal information in accordance with our{" "}
             <a
               href="/privacy"
-              className="text-coral hover:text-coral-dark transition-colors"
+              className="text-primary hover:text-primary-container transition-colors"
             >
               Privacy Policy
             </a>
@@ -207,7 +207,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             10. Governing Law
           </h2>
           <p>
@@ -218,7 +218,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             11. Changes to These Terms
           </h2>
           <p>
@@ -229,8 +229,8 @@ export default function TermsPage() {
           </p>
         </section>
 
-        <section className="rounded-lg border border-slate-300 p-6">
-          <h2 className="mb-3 font-heading text-2xl font-semibold text-ocean-dark">
+        <section className="rounded-xl border border-surface-container-high p-6">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-primary-container">
             12. Contact Us
           </h2>
           <p>
@@ -239,13 +239,13 @@ export default function TermsPage() {
           <p className="mt-3">
             <a
               href="mailto:legal@eventure.com.au"
-              className="text-coral hover:text-coral-dark transition-colors"
+              className="text-primary hover:text-primary-container transition-colors"
             >
               legal@eventure.com.au
             </a>
           </p>
         </section>
       </div>
-    </div>
+    </div></div>
   );
 }
