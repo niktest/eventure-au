@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function SignupForm() {
+  const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitted(true);
     const form = e.currentTarget;
@@ -24,6 +27,45 @@ export function SignupForm() {
       newErrors.password = "Password must be at least 8 characters.";
 
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors(data.errors ?? { _form: "Something went wrong." });
+        setLoading(false);
+        return;
+      }
+
+      // Auto sign-in after successful registration
+      const csrfRes = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfRes.json();
+
+      const signInRes = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ csrfToken, email, password }),
+        redirect: "manual",
+      });
+
+      if (signInRes.ok || signInRes.type === "opaqueredirect") {
+        window.location.href = "/";
+      } else {
+        // Account created but auto-login failed — redirect to login
+        router.push("/login?registered=true");
+      }
+    } catch {
+      setErrors({ _form: "Something went wrong. Please try again." });
+      setLoading(false);
+    }
   };
 
   const inputClass = (field: string) =>
@@ -35,6 +77,12 @@ export function SignupForm() {
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+      {errors._form && (
+        <div role="alert" className="rounded-lg bg-error/10 border border-error/30 p-3 text-error text-sm font-body">
+          {errors._form}
+        </div>
+      )}
+
       <div>
         <label
           htmlFor="name"
@@ -133,9 +181,10 @@ export function SignupForm() {
 
       <button
         type="submit"
-        className="mt-8 flex w-full justify-center rounded-full bg-primary px-4 py-3.5 font-body text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-container hover:text-on-primary-container hover:scale-[1.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        disabled={loading}
+        className="mt-8 flex w-full justify-center rounded-full bg-primary px-4 py-3.5 font-body text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-container hover:text-on-primary-container hover:scale-[1.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Create Account
+        {loading ? "Creating Account…" : "Create Account"}
       </button>
     </form>
   );

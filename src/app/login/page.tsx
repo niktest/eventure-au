@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { LoginForm } from "@/components/LoginForm";
 import { FallbackImage } from "@/components/FallbackImage";
@@ -49,7 +50,9 @@ export default function LoginPage() {
           </div>
 
           {/* Login Form */}
-          <LoginForm />
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
 
           {/* Divider */}
           <div className="mt-8 mb-8 flex items-center text-center">

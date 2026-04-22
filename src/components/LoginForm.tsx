@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export function LoginForm() {
@@ -31,20 +30,23 @@ export function LoginForm() {
 
     setLoading(true);
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      const csrfRes = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfRes.json();
+
+      const res = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ csrfToken, email, password }),
+        redirect: "manual",
       });
 
-      if (result?.error) {
+      if (!res.ok && res.type !== "opaqueredirect") {
         setErrors({ _form: "Invalid email or password." });
         setLoading(false);
         return;
       }
 
-      router.push(callbackUrl);
-      router.refresh();
+      window.location.href = callbackUrl;
     } catch {
       setErrors({ _form: "Something went wrong. Please try again." });
       setLoading(false);

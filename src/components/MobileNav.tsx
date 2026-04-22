@@ -12,6 +12,7 @@ const NAV_LINKS = [
 ];
 
 export function MobileNav() {
+  const [user, setUser] = useState<{ name?: string | null } | null>(null);
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -19,6 +20,13 @@ export function MobileNav() {
   const menuRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const searchPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((r) => r.json())
+      .then((data) => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,18 +127,38 @@ export function MobileNav() {
 
       {/* Desktop auth actions */}
       <div className="hidden md:flex items-center gap-3 ml-6">
-        <Link
-          href="/login"
-          className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
-        >
-          Log In
-        </Link>
-        <Link
-          href="/signup"
-          className="bg-primary-container text-on-primary rounded-full px-6 py-2 font-heading text-sm font-semibold hover:scale-105 transition-transform duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        >
-          Sign Up
-        </Link>
+        {user ? (
+          <>
+            <Link
+              href="/profile"
+              className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+            >
+              {user.name ?? "Profile"}
+            </Link>
+            <button
+              type="button"
+              onClick={() => { fetch("/api/auth/signout", { method: "POST" }).then(() => { window.location.href = "/"; }); }}
+              className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+            >
+              Sign Out
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/login"
+              className="font-heading text-sm font-semibold text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+            >
+              Log In
+            </Link>
+            <Link
+              href="/signup"
+              className="bg-primary-container text-on-primary rounded-full px-6 py-2 font-heading text-sm font-semibold hover:scale-105 transition-transform duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              Sign Up
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Mobile actions */}
@@ -216,20 +244,41 @@ export function MobileNav() {
               </Link>
             ))}
             <div className="border-t border-surface-container-high my-2" />
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/signup"
-              onClick={() => setOpen(false)}
-              className="bg-primary-container text-on-primary rounded-full px-6 py-3 font-heading text-sm font-semibold text-center hover:bg-primary transition-colors mt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-container"
-            >
-              Sign Up
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+                >
+                  {user.name ?? "Profile"}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => { setOpen(false); fetch("/api/auth/signout", { method: "POST" }).then(() => { window.location.href = "/"; }); }}
+                  className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="text-secondary font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="bg-primary-container text-on-primary rounded-full px-6 py-3 font-heading text-sm font-semibold text-center hover:bg-primary transition-colors mt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-container"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       )}
