@@ -49,8 +49,8 @@ export default function ContactPage() {
           </div>
 
           <div className="rounded-xl bg-primary-container/10 p-6 border border-primary-container/20">
-            <h2 className="mb-3 font-heading font-bold text-on-primary-container">Based on the Gold Coast</h2>
-            <p className="text-on-primary-container/70">
+            <h2 className="mb-3 font-heading font-bold text-on-surface">Based on the Gold Coast</h2>
+            <p className="text-on-surface-variant">
               Eventure is proudly based on the Gold Coast, Queensland, Australia.
               We&apos;re building the best way to discover events across
               Australia.
