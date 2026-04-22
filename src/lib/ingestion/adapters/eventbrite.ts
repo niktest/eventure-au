@@ -68,7 +68,7 @@ export class EventbriteAdapter implements SourceAdapter {
       let page = 1;
       let hasMore = true;
 
-      while (hasMore && page <= 5) {
+      while (hasMore && page <= 2) {
         const url = new URL(`${API_BASE}/events/search/`);
         url.searchParams.set("location.latitude", String(loc.lat));
         url.searchParams.set("location.longitude", String(loc.lon));

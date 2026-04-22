@@ -59,6 +59,24 @@ const adapters: SourceAdapter[] = [
 
 export const maxDuration = 300; // 5 min max for Vercel Pro
 
+/** Run a single adapter: fetch → normalise → upsert */
+async function runAdapter(adapter: SourceAdapter) {
+  const rawEvents = await adapter.fetch();
+  if (rawEvents.length === 0) {
+    return { adapter: adapter.name, created: 0, updated: 0, errors: 0 };
+  }
+
+  const normalised = rawEvents.map((raw) => normalise(adapter.name, raw));
+  const result = await upsertEvents(normalised);
+
+  return {
+    adapter: adapter.name,
+    created: result.created,
+    updated: result.updated,
+    errors: result.errors,
+  };
+}
+
 export async function GET(request: NextRequest) {
   // Verify Vercel Cron secret to prevent unauthorised triggers
   const authHeader = request.headers.get("authorization");
@@ -67,9 +85,6 @@ export async function GET(request: NextRequest) {
   }
 
   const startedAt = new Date().toISOString();
-  let totalCreated = 0;
-  let totalUpdated = 0;
-  let totalErrors = 0;
   const adapterResults: Array<{
     adapter: string;
     created: number;
@@ -77,37 +92,26 @@ export async function GET(request: NextRequest) {
     errors: number;
   }> = [];
 
-  for (const adapter of adapters) {
-    try {
-      const rawEvents = await adapter.fetch();
-      if (rawEvents.length === 0) {
-        adapterResults.push({ adapter: adapter.name, created: 0, updated: 0, errors: 0 });
-        continue;
-      }
+  // Run all adapters concurrently to fit within the 5-min Vercel limit
+  const results = await Promise.allSettled(
+    adapters.map((adapter) =>
+      runAdapter(adapter).catch((err) => {
+        console.error(`[cron/ingest] Adapter "${adapter.name}" failed:`, err);
+        return { adapter: adapter.name, created: 0, updated: 0, errors: 1 };
+      })
+    )
+  );
 
-      const normalised = rawEvents.map((raw) => normalise(adapter.name, raw));
-      const result = await upsertEvents(normalised);
+  let totalCreated = 0;
+  let totalUpdated = 0;
+  let totalErrors = 0;
 
-      totalCreated += result.created;
-      totalUpdated += result.updated;
-      totalErrors += result.errors;
-
-      adapterResults.push({
-        adapter: adapter.name,
-        created: result.created,
-        updated: result.updated,
-        errors: result.errors,
-      });
-    } catch (err) {
-      totalErrors++;
-      adapterResults.push({
-        adapter: adapter.name,
-        created: 0,
-        updated: 0,
-        errors: 1,
-      });
-      console.error(`[cron/ingest] Adapter "${adapter.name}" failed:`, err);
-    }
+  for (const result of results) {
+    const r = result.status === "fulfilled" ? result.value : { adapter: "unknown", created: 0, updated: 0, errors: 1 };
+    totalCreated += r.created;
+    totalUpdated += r.updated;
+    totalErrors += r.errors;
+    adapterResults.push(r);
   }
 
   return NextResponse.json({

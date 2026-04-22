@@ -88,7 +88,7 @@ export class EventfindaAdapter implements SourceAdapter {
       let page = 1;
       let hasMore = true;
 
-      while (hasMore && page <= 5) {
+      while (hasMore && page <= 2) {
         const url = new URL(`${API_BASE}/events.json`);
         url.searchParams.set("point", `${loc.lat},${loc.lon}`);
         url.searchParams.set("radius", String(AU_SEARCH_RADIUS_KM));

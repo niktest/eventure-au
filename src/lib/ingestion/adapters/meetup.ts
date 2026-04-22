@@ -111,7 +111,7 @@ export class MeetupAdapter implements SourceAdapter {
       let after: string | null = null;
       let pages = 0;
 
-      while (pages < 3) {
+      while (pages < 2) {
         try {
           const res = await fetch(GRAPHQL_URL, {
             method: "POST",

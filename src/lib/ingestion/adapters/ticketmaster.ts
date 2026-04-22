@@ -69,7 +69,7 @@ export class TicketmasterAdapter implements SourceAdapter {
       let page = 0;
       let totalPages = 1;
 
-      while (page < totalPages && page < 5) {
+      while (page < totalPages && page < 2) {
         const url = new URL(`${API_BASE}/events.json`);
         url.searchParams.set("apikey", apiKey);
         url.searchParams.set("latlong", `${loc.lat},${loc.lon}`);
