@@ -87,7 +87,15 @@
   --shadow-xl: 0 20px 40px rgba(15, 23, 42, 0.16);
 }
 
-/* ─── Material Symbols ─── */
+/* ─── Material Symbols (self-hosted — Google Fonts link stripped by Vercel) ─── */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+}
+
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
