@@ -79,27 +79,27 @@ export default async function EventDetailPage({
         )}
 
         <div className="mb-2">
-          <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+          <span className="inline-block rounded-full bg-ocean-light px-3 py-1 text-sm font-medium text-ocean">
             {event.category.replace("_", " & ")}
           </span>
           {event.isFree && (
-            <span className="ml-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700">
+            <span className="ml-2 inline-block rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-success">
               FREE
             </span>
           )}
         </div>
 
-        <h1 className="mb-4 text-4xl font-bold">{event.name}</h1>
+        <h1 className="mb-4 font-heading text-4xl font-bold">{event.name}</h1>
 
-        <div className="mb-8 flex flex-wrap gap-6 text-gray-600">
+        <div className="mb-8 flex flex-wrap gap-6 text-slate-700">
           <div>
-            <strong className="block text-xs uppercase text-gray-400">
+            <strong className="block text-xs uppercase text-slate-500">
               Date
             </strong>
             {formatDate(event.startDate)}
           </div>
           <div>
-            <strong className="block text-xs uppercase text-gray-400">
+            <strong className="block text-xs uppercase text-slate-500">
               Time
             </strong>
             {formatTime(event.startDate)}
@@ -107,14 +107,14 @@ export default async function EventDetailPage({
           </div>
           {event.venueName && (
             <div>
-              <strong className="block text-xs uppercase text-gray-400">
+              <strong className="block text-xs uppercase text-slate-500">
                 Venue
               </strong>
               {event.venueName}
             </div>
           )}
           <div>
-            <strong className="block text-xs uppercase text-gray-400">
+            <strong className="block text-xs uppercase text-slate-500">
               Location
             </strong>
             {event.city}, {event.state}
@@ -122,8 +122,8 @@ export default async function EventDetailPage({
         </div>
 
         {!event.isFree && (event.priceMin || event.priceMax) && (
-          <div className="mb-8 rounded-lg bg-gray-50 p-4">
-            <strong className="text-sm text-gray-500">Price: </strong>
+          <div className="mb-8 rounded-lg bg-slate-100 p-4">
+            <strong className="text-sm text-slate-500">Price: </strong>
             {event.priceMin && event.priceMax
               ? `$${event.priceMin} – $${event.priceMax} ${event.currency}`
               : event.priceMin
@@ -144,7 +144,7 @@ export default async function EventDetailPage({
               href={event.ticketUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+              className="rounded-lg bg-coral px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-dark"
             >
               Get tickets
             </a>
@@ -154,7 +154,7 @@ export default async function EventDetailPage({
               href={event.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-100"
             >
               Event website
             </a>

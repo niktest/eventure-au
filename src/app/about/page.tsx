@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-6 text-4xl font-bold">About Eventure</h1>
+      <h1 className="mb-6 font-heading text-4xl font-bold">About Eventure</h1>
 
-      <div className="space-y-6 text-gray-700 leading-relaxed">
+      <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
           Eventure is Australia&apos;s events and entertainment aggregator. We
           scan and curate events happening near you — live music, festivals,
@@ -20,7 +20,7 @@ export default function AboutPage() {
           place.
         </p>
 
-        <h2 className="text-2xl font-semibold text-gray-900">Our Mission</h2>
+        <h2 className="font-heading text-2xl font-semibold text-slate-900">Our Mission</h2>
         <p>
           We believe discovering what&apos;s happening near you shouldn&apos;t
           require checking a dozen different websites. Eventure brings together
@@ -28,7 +28,7 @@ export default function AboutPage() {
           community calendars so you never miss out.
         </p>
 
-        <h2 className="text-2xl font-semibold text-gray-900">
+        <h2 className="font-heading text-2xl font-semibold text-slate-900">
           Starting on the Gold Coast
         </h2>
         <p>
@@ -39,14 +39,14 @@ export default function AboutPage() {
           cover it all.
         </p>
 
-        <h2 className="text-2xl font-semibold text-gray-900">Growing Nationwide</h2>
+        <h2 className="font-heading text-2xl font-semibold text-slate-900">Growing Nationwide</h2>
         <p>
           After the Gold Coast, we&apos;re expanding to Brisbane, then Sydney,
           Melbourne, and every corner of Australia. Our goal is to be the go-to
           destination for discovering events across the country.
         </p>
 
-        <h2 className="text-2xl font-semibold text-gray-900">For Organisers</h2>
+        <h2 className="font-heading text-2xl font-semibold text-slate-900">For Organisers</h2>
         <p>
           If you organise events on the Gold Coast and want to make sure your
           events appear on Eventure, get in touch. We&apos;re always looking to

@@ -9,39 +9,39 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-6 text-4xl font-bold">Contact Us</h1>
+      <h1 className="mb-6 font-heading text-4xl font-bold">Contact Us</h1>
 
-      <div className="space-y-6 text-gray-700 leading-relaxed">
+      <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
           Have a question, feedback, or want to partner with us? We&apos;d love
           to hear from you.
         </p>
 
-        <div className="rounded-lg border border-gray-200 p-6 space-y-4">
+        <div className="rounded-lg border border-slate-300 p-6 space-y-4">
           <div>
-            <h2 className="font-semibold text-gray-900">General Enquiries</h2>
-            <p className="text-gray-600">hello@eventure.com.au</p>
+            <h2 className="font-heading font-semibold text-slate-900">General Enquiries</h2>
+            <p className="text-slate-500">hello@eventure.com.au</p>
           </div>
 
           <div>
-            <h2 className="font-semibold text-gray-900">
+            <h2 className="font-heading font-semibold text-slate-900">
               Event Organisers &amp; Venues
             </h2>
-            <p className="text-gray-600">
+            <p className="text-slate-500">
               Want your events featured on Eventure? Reach out at{" "}
               partners@eventure.com.au
             </p>
           </div>
 
           <div>
-            <h2 className="font-semibold text-gray-900">Press &amp; Media</h2>
-            <p className="text-gray-600">press@eventure.com.au</p>
+            <h2 className="font-heading font-semibold text-slate-900">Press &amp; Media</h2>
+            <p className="text-slate-500">press@eventure.com.au</p>
           </div>
         </div>
 
-        <div className="rounded-lg bg-gray-50 p-6">
-          <h2 className="mb-3 font-semibold text-gray-900">Based on the Gold Coast</h2>
-          <p className="text-gray-600">
+        <div className="rounded-lg bg-slate-100 p-6">
+          <h2 className="mb-3 font-heading font-semibold text-slate-900">Based on the Gold Coast</h2>
+          <p className="text-slate-500">
             Eventure is proudly based on the Gold Coast, Queensland, Australia.
             We&apos;re building the best way to discover events across
             Australia.

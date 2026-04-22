@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { EventCard } from "@/components/EventCard";
 
 export const revalidate = 3600; // ISR: revalidate homepage every hour
 
@@ -39,7 +40,7 @@ export default async function HomePage() {
       </section>
 
       <section>
-        <h2 className="mb-6 text-2xl font-bold">Upcoming events</h2>
+        <h2 className="mb-6 font-heading text-2xl font-bold">Upcoming events</h2>
         {upcomingEvents.length === 0 ? (
           <p className="text-slate-500">
             No upcoming events yet. Check back soon!
@@ -47,31 +48,7 @@ export default async function HomePage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {upcomingEvents.map((event) => (
-              <Link
-                key={event.id}
-                href={`/events/${event.slug}`}
-                className="group rounded-lg border border-slate-300 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-              >
-                {event.imageUrl && (
-                  <img
-                    src={event.imageUrl}
-                    alt={event.name}
-                    className="mb-3 h-48 w-full rounded-md object-cover"
-                  />
-                )}
-                <h3 className="font-heading font-semibold group-hover:text-coral">
-                  {event.name}
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {new Date(event.startDate).toLocaleDateString("en-AU", {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-                <p className="text-sm text-slate-500">{event.venueName}</p>
-              </Link>
+              <EventCard key={event.id} event={event} />
             ))}
           </div>
         )}

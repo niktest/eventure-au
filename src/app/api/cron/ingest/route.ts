@@ -6,6 +6,8 @@ import { upsertEvents } from "@/lib/ingestion/dedup";
 // API adapters
 import { EventbriteAdapter } from "@/lib/ingestion/adapters/eventbrite";
 import { TicketmasterAdapter } from "@/lib/ingestion/adapters/ticketmaster";
+import { MeetupAdapter } from "@/lib/ingestion/adapters/meetup";
+import { BandsintownAdapter } from "@/lib/ingestion/adapters/bandsintown";
 
 // Scraper adapters (P1 Gold Coast)
 import { DestinationGCAdapter } from "@/lib/ingestion/adapters/destination-gc";
@@ -21,6 +23,8 @@ import { TryBookingAdapter } from "@/lib/ingestion/adapters/trybooking";
 const adapters: SourceAdapter[] = [
   new EventbriteAdapter(),
   new TicketmasterAdapter(),
+  new MeetupAdapter(),
+  new BandsintownAdapter(),
   new DestinationGCAdapter(),
   new CityOfGCAdapter(),
   new HOTAAdapter(),
