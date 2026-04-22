@@ -10,8 +10,15 @@
 import { chromium, type Browser, type Page } from "playwright";
 import * as path from "path";
 import * as fs from "fs";
+import * as sharpModule from "sharp";
+const sharp = (sharpModule as any).default ?? sharpModule;
 
 const DEFAULT_BASE_URL = "https://eventure-au.vercel.app";
+
+// Max dimension (width or height) for output images.
+// Claude's API limits images to 2000px per dimension in many-image requests.
+// We cap at 1800px to stay safely under the limit.
+const MAX_IMAGE_DIMENSION = 1800;
 
 const VIEWPORTS = [
   { label: "desktop", width: 1440, height: 900 },
@@ -64,7 +71,19 @@ async function screenshotPage(
     await page.goto(url, { waitUntil: "networkidle", timeout: 30_000 });
     // Allow fonts / lazy images to settle
     await page.waitForTimeout(1500);
-    await page.screenshot({ path: filepath, fullPage: true });
+    const rawBuffer = await page.screenshot({ fullPage: true });
+    // Crop height if it exceeds the limit (keeps full width for readability)
+    const metadata = await sharp(rawBuffer).metadata();
+    const w = metadata.width ?? 0;
+    const h = metadata.height ?? 0;
+    if (h > MAX_IMAGE_DIMENSION) {
+      await sharp(rawBuffer)
+        .extract({ left: 0, top: 0, width: w, height: MAX_IMAGE_DIMENSION })
+        .png()
+        .toFile(filepath);
+    } else {
+      fs.writeFileSync(filepath, rawBuffer);
+    }
     return { file: filename, ok: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
