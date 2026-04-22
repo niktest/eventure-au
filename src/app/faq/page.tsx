@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
-import { Accordion } from "@/components/Accordion";
+"use client";
 
-export const metadata: Metadata = {
-  title: "FAQ",
-  description:
-    "Frequently asked questions about Eventure — Australia's events and entertainment aggregator.",
-};
+import { Accordion } from "@/components/Accordion";
 
 const faqItems = [
   {
