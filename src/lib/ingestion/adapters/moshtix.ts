@@ -1,39 +1,65 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 
+/** Moshtix location slugs mapped from city names */
+const MOSHTIX_LOCATIONS = [
+  { slug: "gold-coast", city: "Gold Coast", state: "QLD" },
+  { slug: "brisbane", city: "Brisbane", state: "QLD" },
+  { slug: "sydney", city: "Sydney", state: "NSW" },
+  { slug: "melbourne", city: "Melbourne", state: "VIC" },
+  { slug: "perth", city: "Perth", state: "WA" },
+  { slug: "adelaide", city: "Adelaide", state: "SA" },
+  { slug: "hobart", city: "Hobart", state: "TAS" },
+  { slug: "darwin", city: "Darwin", state: "NT" },
+  { slug: "canberra", city: "Canberra", state: "ACT" },
+  { slug: "newcastle", city: "Newcastle", state: "NSW" },
+  { slug: "sunshine-coast", city: "Sunshine Coast", state: "QLD" },
+  { slug: "cairns", city: "Cairns", state: "QLD" },
+  { slug: "wollongong", city: "Wollongong", state: "NSW" },
+  { slug: "geelong", city: "Geelong", state: "VIC" },
+  { slug: "townsville", city: "Townsville", state: "QLD" },
+];
+
 /**
  * Moshtix scraper adapter.
- * Scrapes moshtix.com.au for Gold Coast live music/event listings.
+ * Scrapes moshtix.com.au for Australian live music/event listings.
+ * Searches all major AU cities.
  */
 export class MoshtixAdapter implements SourceAdapter {
   readonly name = "moshtix";
 
   async fetch(): Promise<RawEvent[]> {
     const baseUrl = process.env.MOSHTIX_URL ?? "https://www.moshtix.com.au";
-    const searchUrl = `${baseUrl}/v2/search?location=gold-coast`;
-    console.log(`[moshtix] Scraping ${searchUrl}`);
+    const allEvents: RawEvent[] = [];
 
-    try {
-      const res = await fetch(searchUrl, {
-        headers: {
-          "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
-        },
-      });
+    for (const loc of MOSHTIX_LOCATIONS) {
+      const searchUrl = `${baseUrl}/v2/search?location=${loc.slug}`;
+      console.log(`[moshtix] Scraping ${loc.city} (${loc.state})`);
 
-      if (!res.ok) {
-        console.error(`[moshtix] HTTP ${res.status}`);
-        return [];
+      try {
+        const res = await fetch(searchUrl, {
+          headers: {
+            "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+          },
+        });
+
+        if (!res.ok) {
+          console.error(`[moshtix] HTTP ${res.status} for ${loc.city}`);
+          continue;
+        }
+
+        const html = await res.text();
+        const events = parseMoshtixEvents(html, baseUrl, loc.city, loc.state);
+        allEvents.push(...events);
+      } catch (err) {
+        console.error(`[moshtix] Fetch failed for ${loc.city}:`, err);
       }
-
-      const html = await res.text();
-      return parseMoshtixEvents(html, baseUrl);
-    } catch (err) {
-      console.error("[moshtix] Fetch failed:", err);
-      return [];
     }
+
+    return allEvents;
   }
 }
 
-function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
+function parseMoshtixEvents(html: string, baseUrl: string, fallbackCity: string, fallbackState: string): RawEvent[] {
   const events: RawEvent[] = [];
   const jsonLdMatches = html.matchAll(
     /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
@@ -57,8 +83,8 @@ function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
           url: eventUrl,
           venueName: item.location?.name ?? undefined,
           venueAddress: item.location?.address?.streetAddress ?? undefined,
-          city: "Gold Coast",
-          state: "QLD",
+          city: item.location?.address?.addressLocality ?? fallbackCity,
+          state: item.location?.address?.addressRegion ?? fallbackState,
           category: "MUSIC",
           rawData: item,
         });
@@ -69,7 +95,7 @@ function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
   }
 
   if (events.length === 0) {
-    console.log("[moshtix] No JSON-LD events found; full HTML parser needed (add cheerio)");
+    console.log(`[moshtix] No JSON-LD events found for ${fallbackCity}; full HTML parser needed (add cheerio)`);
   }
 
   return events;

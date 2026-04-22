@@ -1,9 +1,11 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 
+/** AU state codes to search on Megatix */
+const MEGATIX_STATES = ["QLD", "NSW", "VIC", "WA", "SA", "TAS", "NT", "ACT"];
+
 /**
  * Megatix scraper adapter.
- * Scrapes megatix.com.au for event listings across Australia.
- * Megatix is a major Australian ticketing platform, especially strong in WA.
+ * Scrapes megatix.com.au for event listings across all Australian states.
  * Uses JSON-LD extraction with fallback to embedded page data.
  */
 export class MegatixAdapter implements SourceAdapter {
@@ -13,14 +15,17 @@ export class MegatixAdapter implements SourceAdapter {
     const baseUrl = process.env.MEGATIX_URL ?? "https://megatix.com.au";
     const events: RawEvent[] = [];
 
-    // Megatix events page lists all upcoming events
+    // Fetch all events + each state individually
     const searchUrls = [
-      `${baseUrl}/events`,
-      `${baseUrl}/events?state=QLD`,
+      { url: `${baseUrl}/events`, label: "all" },
+      ...MEGATIX_STATES.map((state) => ({
+        url: `${baseUrl}/events?state=${state}`,
+        label: state,
+      })),
     ];
 
-    for (const searchUrl of searchUrls) {
-      console.log(`[megatix] Scraping ${searchUrl}`);
+    for (const { url: searchUrl, label } of searchUrls) {
+      console.log(`[megatix] Scraping ${label}: ${searchUrl}`);
 
       try {
         const res = await fetch(searchUrl, {
@@ -31,7 +36,7 @@ export class MegatixAdapter implements SourceAdapter {
         });
 
         if (!res.ok) {
-          console.error(`[megatix] HTTP ${res.status}`);
+          console.error(`[megatix] HTTP ${res.status} for ${label}`);
           continue;
         }
 
@@ -39,7 +44,7 @@ export class MegatixAdapter implements SourceAdapter {
         const parsed = parseMegatixEvents(html, baseUrl);
         events.push(...parsed);
       } catch (err) {
-        console.error("[megatix] Fetch failed:", err);
+        console.error(`[megatix] Fetch failed for ${label}:`, err);
       }
     }
 

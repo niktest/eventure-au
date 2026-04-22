@@ -1,9 +1,27 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 
+/** AU cities to search on Oztix */
+const OZTIX_SEARCHES = [
+  { query: "gold+coast", city: "Gold Coast", state: "QLD" },
+  { query: "brisbane", city: "Brisbane", state: "QLD" },
+  { query: "sydney", city: "Sydney", state: "NSW" },
+  { query: "melbourne", city: "Melbourne", state: "VIC" },
+  { query: "perth", city: "Perth", state: "WA" },
+  { query: "adelaide", city: "Adelaide", state: "SA" },
+  { query: "hobart", city: "Hobart", state: "TAS" },
+  { query: "darwin", city: "Darwin", state: "NT" },
+  { query: "canberra", city: "Canberra", state: "ACT" },
+  { query: "newcastle", city: "Newcastle", state: "NSW" },
+  { query: "sunshine+coast", city: "Sunshine Coast", state: "QLD" },
+  { query: "cairns", city: "Cairns", state: "QLD" },
+  { query: "townsville", city: "Townsville", state: "QLD" },
+  { query: "geelong", city: "Geelong", state: "VIC" },
+  { query: "wollongong", city: "Wollongong", state: "NSW" },
+];
+
 /**
  * Oztix scraper adapter.
- * Scrapes oztix.com.au event listings for Gold Coast and Brisbane events.
- * Oztix is Australia's largest independent ticketing company.
+ * Scrapes oztix.com.au event listings for all major Australian cities.
  * Falls back to JSON-LD parsing from search results pages.
  */
 export class OztixAdapter implements SourceAdapter {
@@ -11,16 +29,12 @@ export class OztixAdapter implements SourceAdapter {
 
   async fetch(): Promise<RawEvent[]> {
     const baseUrl = process.env.OZTIX_URL ?? "https://www.oztix.com.au";
-    const events: RawEvent[] = [];
+    const allEvents: RawEvent[] = [];
+    const seen = new Set<string>();
 
-    const searches = [
-      { path: "/search?q=gold+coast", city: "Gold Coast" },
-      { path: "/search?q=brisbane", city: "Brisbane" },
-    ];
-
-    for (const search of searches) {
-      const searchUrl = `${baseUrl}${search.path}`;
-      console.log(`[oztix] Scraping ${searchUrl}`);
+    for (const search of OZTIX_SEARCHES) {
+      const searchUrl = `${baseUrl}/search?q=${search.query}`;
+      console.log(`[oztix] Scraping ${search.city} (${search.state})`);
 
       try {
         const res = await fetch(searchUrl, {
@@ -36,18 +50,23 @@ export class OztixAdapter implements SourceAdapter {
         }
 
         const html = await res.text();
-        const parsed = parseOztixEvents(html, baseUrl, search.city);
-        events.push(...parsed);
+        const parsed = parseOztixEvents(html, baseUrl, search.city, search.state);
+        for (const evt of parsed) {
+          if (!seen.has(evt.sourceId)) {
+            seen.add(evt.sourceId);
+            allEvents.push(evt);
+          }
+        }
       } catch (err) {
         console.error(`[oztix] Fetch failed for ${search.city}:`, err);
       }
     }
 
-    return events;
+    return allEvents;
   }
 }
 
-function parseOztixEvents(html: string, baseUrl: string, fallbackCity: string): RawEvent[] {
+function parseOztixEvents(html: string, baseUrl: string, fallbackCity: string, fallbackState: string): RawEvent[] {
   const events: RawEvent[] = [];
 
   // Strategy 1: Extract JSON-LD structured data
@@ -75,7 +94,7 @@ function parseOztixEvents(html: string, baseUrl: string, fallbackCity: string): 
           venueAddress: item.location?.address?.streetAddress
             ?? (typeof item.location?.address === "string" ? item.location.address : undefined),
           city: item.location?.address?.addressLocality ?? fallbackCity,
-          state: item.location?.address?.addressRegion ?? "QLD",
+          state: item.location?.address?.addressRegion ?? fallbackState,
           latitude: item.location?.geo?.latitude ? parseFloat(item.location.geo.latitude) : undefined,
           longitude: item.location?.geo?.longitude ? parseFloat(item.location.geo.longitude) : undefined,
           category: "MUSIC",
@@ -113,7 +132,7 @@ function parseOztixEvents(html: string, baseUrl: string, fallbackCity: string): 
             venueName: item.venue?.name ?? item.venueName ?? undefined,
             venueAddress: item.venue?.address ?? item.venueAddress ?? undefined,
             city: item.venue?.city ?? fallbackCity,
-            state: item.venue?.state ?? "QLD",
+            state: item.venue?.state ?? fallbackState,
             category: "MUSIC",
             ticketUrl: item.ticketUrl ?? item.url ?? undefined,
             ticketProvider: "oztix",

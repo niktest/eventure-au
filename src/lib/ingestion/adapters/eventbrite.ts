@@ -1,8 +1,7 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { AU_LOCATIONS, AU_SEARCH_RADIUS_KM } from "../au-locations";
 
 const API_BASE = "https://www.eventbriteapi.com/v3";
-const GOLD_COAST_LOCATION = "-28.0167,153.4000"; // lat,lon
-const SEARCH_RADIUS = "50km";
 
 interface EventbriteEvent {
   id: string;
@@ -48,8 +47,8 @@ const CATEGORY_MAP: Record<string, RawEvent["category"]> = {
 };
 
 /**
- * Eventbrite API adapter for Gold Coast events.
- * Requires EVENTBRITE_API_KEY env var (OAuth private token).
+ * Eventbrite API adapter for Australian events.
+ * Searches all major AU cities. Requires EVENTBRITE_API_KEY env var (OAuth private token).
  */
 export class EventbriteAdapter implements SourceAdapter {
   readonly name = "eventbrite";
@@ -61,42 +60,50 @@ export class EventbriteAdapter implements SourceAdapter {
       return [];
     }
 
-    const events: RawEvent[] = [];
-    let page = 1;
-    let hasMore = true;
+    const allEvents: RawEvent[] = [];
+    const seen = new Set<string>();
 
-    while (hasMore && page <= 5) {
-      const url = new URL(`${API_BASE}/events/search/`);
-      url.searchParams.set("location.latitude", GOLD_COAST_LOCATION.split(",")[0]);
-      url.searchParams.set("location.longitude", GOLD_COAST_LOCATION.split(",")[1]);
-      url.searchParams.set("location.within", SEARCH_RADIUS);
-      url.searchParams.set("expand", "venue,ticket_availability");
-      url.searchParams.set("page", String(page));
+    for (const loc of AU_LOCATIONS) {
+      console.log(`[eventbrite] Fetching ${loc.name} (${loc.state})...`);
+      let page = 1;
+      let hasMore = true;
 
-      const res = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      while (hasMore && page <= 5) {
+        const url = new URL(`${API_BASE}/events/search/`);
+        url.searchParams.set("location.latitude", String(loc.lat));
+        url.searchParams.set("location.longitude", String(loc.lon));
+        url.searchParams.set("location.within", `${AU_SEARCH_RADIUS_KM}km`);
+        url.searchParams.set("expand", "venue,ticket_availability");
+        url.searchParams.set("page", String(page));
 
-      if (!res.ok) {
-        console.error(`[eventbrite] API error ${res.status}: ${await res.text()}`);
-        break;
+        const res = await fetch(url.toString(), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+          console.error(`[eventbrite] API error ${res.status} for ${loc.name}: ${await res.text()}`);
+          break;
+        }
+
+        const data: EventbriteResponse = await res.json();
+
+        for (const eb of data.events) {
+          if (!seen.has(eb.id)) {
+            seen.add(eb.id);
+            allEvents.push(mapEvent(eb, loc));
+          }
+        }
+
+        hasMore = data.pagination.has_more_items;
+        page++;
       }
-
-      const data: EventbriteResponse = await res.json();
-
-      for (const eb of data.events) {
-        events.push(mapEvent(eb));
-      }
-
-      hasMore = data.pagination.has_more_items;
-      page++;
     }
 
-    return events;
+    return allEvents;
   }
 }
 
-function mapEvent(eb: EventbriteEvent): RawEvent {
+function mapEvent(eb: EventbriteEvent, fallback: { name: string; state: string }): RawEvent {
   return {
     sourceId: eb.id,
     name: eb.name.text,
@@ -107,8 +114,8 @@ function mapEvent(eb: EventbriteEvent): RawEvent {
     url: eb.url,
     venueName: eb.venue?.name ?? undefined,
     venueAddress: eb.venue?.address?.localized_address_display ?? undefined,
-    city: eb.venue?.address?.city ?? "Gold Coast",
-    state: eb.venue?.address?.region ?? "QLD",
+    city: eb.venue?.address?.city ?? fallback.name,
+    state: eb.venue?.address?.region ?? fallback.state,
     latitude: eb.venue?.address?.latitude
       ? parseFloat(eb.venue.address.latitude)
       : undefined,

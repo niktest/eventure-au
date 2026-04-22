@@ -1,16 +1,7 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
-
-/**
- * Meetup adapter using the public GraphQL API.
- * No API key required — uses the public search endpoint.
- * Targets Gold Coast area events.
- */
+import { AU_LOCATIONS, AU_SEARCH_RADIUS_KM } from "../au-locations";
 
 const GRAPHQL_URL = "https://www.meetup.com/gql";
-
-const GOLD_COAST_LAT = -28.0167;
-const GOLD_COAST_LON = 153.4;
-const RADIUS_KM = 50;
 
 interface MeetupNode {
   id: string;
@@ -104,57 +95,69 @@ const SEARCH_QUERY = `
   }
 `;
 
+/**
+ * Meetup adapter using the public GraphQL API.
+ * Searches all major AU cities. No API key required.
+ */
 export class MeetupAdapter implements SourceAdapter {
   readonly name = "meetup";
 
   async fetch(): Promise<RawEvent[]> {
-    const events: RawEvent[] = [];
-    let after: string | null = null;
-    let pages = 0;
+    const allEvents: RawEvent[] = [];
+    const seen = new Set<string>();
 
-    while (pages < 3) {
-      try {
-        const res = await fetch(GRAPHQL_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: SEARCH_QUERY,
-            variables: {
-              lat: GOLD_COAST_LAT,
-              lon: GOLD_COAST_LON,
-              radius: RADIUS_KM,
-              after,
-            },
-          }),
-        });
+    for (const loc of AU_LOCATIONS) {
+      console.log(`[meetup] Fetching ${loc.name} (${loc.state})...`);
+      let after: string | null = null;
+      let pages = 0;
 
-        if (!res.ok) {
-          console.error(`[meetup] API error ${res.status}: ${await res.text()}`);
+      while (pages < 3) {
+        try {
+          const res = await fetch(GRAPHQL_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: SEARCH_QUERY,
+              variables: {
+                lat: loc.lat,
+                lon: loc.lon,
+                radius: AU_SEARCH_RADIUS_KM,
+                after,
+              },
+            }),
+          });
+
+          if (!res.ok) {
+            console.error(`[meetup] API error ${res.status} for ${loc.name}: ${await res.text()}`);
+            break;
+          }
+
+          const data: MeetupResponse = await res.json();
+          const ranked = data.data?.rankedEvents;
+          if (!ranked || ranked.edges.length === 0) break;
+
+          for (const { node } of ranked.edges) {
+            if (!seen.has(node.id)) {
+              seen.add(node.id);
+              allEvents.push(mapEvent(node, loc));
+            }
+          }
+
+          if (!ranked.pageInfo.hasNextPage) break;
+          after = ranked.pageInfo.endCursor;
+          pages++;
+        } catch (err) {
+          console.error(`[meetup] Fetch error for ${loc.name}:`, err);
           break;
         }
-
-        const data: MeetupResponse = await res.json();
-        const ranked = data.data?.rankedEvents;
-        if (!ranked || ranked.edges.length === 0) break;
-
-        for (const { node } of ranked.edges) {
-          events.push(mapEvent(node));
-        }
-
-        if (!ranked.pageInfo.hasNextPage) break;
-        after = ranked.pageInfo.endCursor;
-        pages++;
-      } catch (err) {
-        console.error("[meetup] Fetch error:", err);
-        break;
       }
     }
 
-    return events;
+    return allEvents;
   }
 }
 
-function mapEvent(node: MeetupNode): RawEvent {
+function mapEvent(node: MeetupNode, fallback: { name: string; state: string }): RawEvent {
   return {
     sourceId: node.id,
     name: node.title,
@@ -165,8 +168,8 @@ function mapEvent(node: MeetupNode): RawEvent {
     url: node.eventUrl,
     venueName: node.venue?.name ?? node.group.name,
     venueAddress: node.venue?.address ?? undefined,
-    city: node.venue?.city ?? node.group.city ?? "Gold Coast",
-    state: node.venue?.state ?? node.group.state ?? "QLD",
+    city: node.venue?.city ?? node.group.city ?? fallback.name,
+    state: node.venue?.state ?? node.group.state ?? fallback.state,
     latitude: node.venue?.lat ?? undefined,
     longitude: node.venue?.lng ?? undefined,
     isFree: node.isFree,

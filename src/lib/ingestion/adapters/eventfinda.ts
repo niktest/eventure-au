@@ -1,13 +1,7 @@
 import type { SourceAdapter, RawEvent, EventCategory } from "@/types/event";
+import { AU_LOCATIONS, AU_SEARCH_RADIUS_KM } from "../au-locations";
 
 const API_BASE = "https://api.eventfinda.com.au/v2";
-
-// Gold Coast & Brisbane locations for initial MVP
-const LOCATIONS = [
-  { name: "Gold Coast", lat: -28.0167, lon: 153.4 },
-  { name: "Brisbane", lat: -27.4705, lon: 153.026 },
-];
-const SEARCH_RADIUS = 50; // km
 
 interface EventfindaEvent {
   id: number;
@@ -60,11 +54,20 @@ function mapCategory(cat: { id: number; name: string } | null): EventCategory | 
   return undefined;
 }
 
+/** Map state abbreviation from location_summary or fallback */
+function extractState(locationSummary: string | undefined, fallbackState: string): string {
+  if (!locationSummary) return fallbackState;
+  const parts = locationSummary.split(",").map((s) => s.trim());
+  const statePart = parts[parts.length - 1]?.toUpperCase();
+  const validStates = ["QLD", "NSW", "VIC", "WA", "SA", "TAS", "NT", "ACT"];
+  if (validStates.includes(statePart)) return statePart;
+  return fallbackState;
+}
+
 /**
  * Eventfinda AU API adapter.
- * Uses the Eventfinda REST API v2 to fetch events near Gold Coast and Brisbane.
+ * Searches all major Australian cities via the Eventfinda REST API v2.
  * Requires EVENTFINDA_USERNAME and EVENTFINDA_PASSWORD env vars (HTTP Basic auth).
- * Free signup at https://www.eventfinda.com.au/api/v2/index
  */
 export class EventfindaAdapter implements SourceAdapter {
   readonly name = "eventfinda";
@@ -79,21 +82,22 @@ export class EventfindaAdapter implements SourceAdapter {
 
     const authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;
     const events: RawEvent[] = [];
+    const seen = new Set<number>();
 
-    for (const loc of LOCATIONS) {
+    for (const loc of AU_LOCATIONS) {
       let page = 1;
       let hasMore = true;
 
       while (hasMore && page <= 5) {
         const url = new URL(`${API_BASE}/events.json`);
         url.searchParams.set("point", `${loc.lat},${loc.lon}`);
-        url.searchParams.set("radius", String(SEARCH_RADIUS));
+        url.searchParams.set("radius", String(AU_SEARCH_RADIUS_KM));
         url.searchParams.set("rows", "20");
         url.searchParams.set("page", String(page));
         url.searchParams.set("order", "date");
         url.searchParams.set("fields", "event:(id,name,description,url,url_slug,datetime_start,datetime_end,datetime_summary,is_free,is_cancelled,address,location_summary,point,location,category,images,ticket_types,restrictions,presented_by)");
 
-        console.log(`[eventfinda] Fetching ${loc.name} page ${page}`);
+        console.log(`[eventfinda] Fetching ${loc.name} (${loc.state}) page ${page}`);
 
         try {
           const res = await fetch(url.toString(), {
@@ -113,7 +117,10 @@ export class EventfindaAdapter implements SourceAdapter {
 
           for (const ef of data.events) {
             if (ef.is_cancelled) continue;
-            events.push(mapEvent(ef, loc.name));
+            if (!seen.has(ef.id)) {
+              seen.add(ef.id);
+              events.push(mapEvent(ef, loc.name, loc.state));
+            }
           }
 
           hasMore = page < attrs.page_count;
@@ -132,7 +139,7 @@ export class EventfindaAdapter implements SourceAdapter {
   }
 }
 
-function mapEvent(ef: EventfindaEvent, fallbackCity: string): RawEvent {
+function mapEvent(ef: EventfindaEvent, fallbackCity: string, fallbackState: string): RawEvent {
   const bestImage = ef.images?.images?.[0]?.transforms?.transforms
     ?.sort((a, b) => b.width - a.width)?.[0]?.url;
 
@@ -152,7 +159,7 @@ function mapEvent(ef: EventfindaEvent, fallbackCity: string): RawEvent {
     venueName: ef.location?.name ?? undefined,
     venueAddress: ef.address ?? undefined,
     city: ef.location_summary?.split(",")[0]?.trim() || fallbackCity,
-    state: "QLD",
+    state: extractState(ef.location_summary, fallbackState),
     latitude: ef.point?.lat ?? undefined,
     longitude: ef.point?.lng ?? undefined,
     category: mapCategory(ef.category),

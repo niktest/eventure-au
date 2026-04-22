@@ -9,31 +9,52 @@ import { TicketmasterAdapter } from "@/lib/ingestion/adapters/ticketmaster";
 import { MeetupAdapter } from "@/lib/ingestion/adapters/meetup";
 import { BandsintownAdapter } from "@/lib/ingestion/adapters/bandsintown";
 
-// Scraper adapters (P1 Gold Coast)
+// Scraper adapters (P1 — venue-specific, Gold Coast)
 import { DestinationGCAdapter } from "@/lib/ingestion/adapters/destination-gc";
 import { CityOfGCAdapter } from "@/lib/ingestion/adapters/city-of-gc";
 import { HOTAAdapter } from "@/lib/ingestion/adapters/hota";
 import { StarGCAdapter } from "@/lib/ingestion/adapters/star-gc";
 import { MiamiMarkettaAdapter } from "@/lib/ingestion/adapters/miami-marketta";
 import { SandstonePointAdapter } from "@/lib/ingestion/adapters/sandstone-point";
+
+// Scraper adapters (AU-wide platform scrapers)
 import { HumanitixAdapter } from "@/lib/ingestion/adapters/humanitix";
 import { MoshtixAdapter } from "@/lib/ingestion/adapters/moshtix";
 import { TryBookingAdapter } from "@/lib/ingestion/adapters/trybooking";
 
+// P2 API adapters (national expansion)
+import { EventfindaAdapter } from "@/lib/ingestion/adapters/eventfinda";
+import { StickyTicketsAdapter } from "@/lib/ingestion/adapters/sticky-tickets";
+
+// P2 Scraper adapters (national expansion)
+import { OztixAdapter } from "@/lib/ingestion/adapters/oztix";
+import { MegatixAdapter } from "@/lib/ingestion/adapters/megatix";
+import { VisitBrisbaneAdapter } from "@/lib/ingestion/adapters/visit-brisbane";
+
 const adapters: SourceAdapter[] = [
+  // API-based (AU-wide)
   new EventbriteAdapter(),
   new TicketmasterAdapter(),
   new MeetupAdapter(),
   new BandsintownAdapter(),
+  new EventfindaAdapter(),
+  new StickyTicketsAdapter(),
+
+  // Venue-specific scrapers (Gold Coast)
   new DestinationGCAdapter(),
   new CityOfGCAdapter(),
   new HOTAAdapter(),
   new StarGCAdapter(),
   new MiamiMarkettaAdapter(),
   new SandstonePointAdapter(),
+
+  // Platform scrapers (AU-wide)
   new HumanitixAdapter(),
   new MoshtixAdapter(),
   new TryBookingAdapter(),
+  new OztixAdapter(),
+  new MegatixAdapter(),
+  new VisitBrisbaneAdapter(),
 ];
 
 export const maxDuration = 300; // 5 min max for Vercel Pro

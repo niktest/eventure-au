@@ -1,9 +1,7 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { AU_LOCATIONS, AU_SEARCH_RADIUS_KM } from "../au-locations";
 
 const API_BASE = "https://app.ticketmaster.com/discovery/v2";
-const GOLD_COAST_LATLONG = "-28.0167,153.4000";
-const RADIUS = "50";
-const UNIT = "km";
 
 interface TmEvent {
   id: string;
@@ -50,8 +48,8 @@ const SEGMENT_MAP: Record<string, RawEvent["category"]> = {
 };
 
 /**
- * Ticketmaster Discovery API adapter for Gold Coast events.
- * Requires TICKETMASTER_API_KEY env var (consumer key).
+ * Ticketmaster Discovery API adapter for Australian events.
+ * Searches all major AU cities. Requires TICKETMASTER_API_KEY env var (consumer key).
  */
 export class TicketmasterAdapter implements SourceAdapter {
   readonly name = "ticketmaster";
@@ -63,45 +61,53 @@ export class TicketmasterAdapter implements SourceAdapter {
       return [];
     }
 
-    const events: RawEvent[] = [];
-    let page = 0;
-    let totalPages = 1;
+    const allEvents: RawEvent[] = [];
+    const seen = new Set<string>();
 
-    while (page < totalPages && page < 5) {
-      const url = new URL(`${API_BASE}/events.json`);
-      url.searchParams.set("apikey", apiKey);
-      url.searchParams.set("latlong", GOLD_COAST_LATLONG);
-      url.searchParams.set("radius", RADIUS);
-      url.searchParams.set("unit", UNIT);
-      url.searchParams.set("countryCode", "AU");
-      url.searchParams.set("size", "100");
-      url.searchParams.set("page", String(page));
-      url.searchParams.set("sort", "date,asc");
+    for (const loc of AU_LOCATIONS) {
+      console.log(`[ticketmaster] Fetching ${loc.name} (${loc.state})...`);
+      let page = 0;
+      let totalPages = 1;
 
-      const res = await fetch(url.toString());
+      while (page < totalPages && page < 5) {
+        const url = new URL(`${API_BASE}/events.json`);
+        url.searchParams.set("apikey", apiKey);
+        url.searchParams.set("latlong", `${loc.lat},${loc.lon}`);
+        url.searchParams.set("radius", String(AU_SEARCH_RADIUS_KM));
+        url.searchParams.set("unit", "km");
+        url.searchParams.set("countryCode", "AU");
+        url.searchParams.set("size", "100");
+        url.searchParams.set("page", String(page));
+        url.searchParams.set("sort", "date,asc");
 
-      if (!res.ok) {
-        console.error(`[ticketmaster] API error ${res.status}: ${await res.text()}`);
-        break;
-      }
+        const res = await fetch(url.toString());
 
-      const data: TmResponse = await res.json();
-      totalPages = data.page.totalPages;
-
-      if (data._embedded?.events) {
-        for (const tm of data._embedded.events) {
-          events.push(mapEvent(tm));
+        if (!res.ok) {
+          console.error(`[ticketmaster] API error ${res.status} for ${loc.name}: ${await res.text()}`);
+          break;
         }
-      }
 
-      page++;
+        const data: TmResponse = await res.json();
+        totalPages = data.page.totalPages;
+
+        if (data._embedded?.events) {
+          for (const tm of data._embedded.events) {
+            if (!seen.has(tm.id)) {
+              seen.add(tm.id);
+              allEvents.push(mapEvent(tm, loc));
+            }
+          }
+        }
+
+        page++;
+      }
     }
 
-    return events;
+    return allEvents;
   }
 }
 
-function mapEvent(tm: TmEvent): RawEvent {
+function mapEvent(tm: TmEvent, fallback: { name: string; state: string }): RawEvent {
   const venue = tm._embedded?.venues?.[0];
   const bestImage = tm.images
     ?.sort((a, b) => b.width - a.width)
@@ -125,8 +131,8 @@ function mapEvent(tm: TmEvent): RawEvent {
     url: tm.url,
     venueName: venue?.name ?? undefined,
     venueAddress: venue?.address?.line1 ?? undefined,
-    city: venue?.city?.name ?? "Gold Coast",
-    state: venue?.state?.stateCode ?? "QLD",
+    city: venue?.city?.name ?? fallback.name,
+    state: venue?.state?.stateCode ?? fallback.state,
     latitude: venue?.location?.latitude
       ? parseFloat(venue.location.latitude)
       : undefined,

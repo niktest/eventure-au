@@ -1,39 +1,47 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { AU_LOCATIONS } from "../au-locations";
 
 /**
  * TryBooking scraper adapter.
- * Scrapes trybooking.com for Gold Coast community event listings.
+ * Scrapes trybooking.com for Australian community event listings.
+ * Searches all major AU cities.
  */
 export class TryBookingAdapter implements SourceAdapter {
   readonly name = "trybooking";
 
   async fetch(): Promise<RawEvent[]> {
     const baseUrl = process.env.TRYBOOKING_URL ?? "https://www.trybooking.com";
-    const searchUrl = `${baseUrl}/search?search=Gold+Coast`;
-    console.log(`[trybooking] Scraping ${searchUrl}`);
+    const allEvents: RawEvent[] = [];
 
-    try {
-      const res = await fetch(searchUrl, {
-        headers: {
-          "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
-        },
-      });
+    for (const loc of AU_LOCATIONS) {
+      const searchUrl = `${baseUrl}/search?search=${encodeURIComponent(loc.name)}`;
+      console.log(`[trybooking] Scraping ${loc.name} (${loc.state})`);
 
-      if (!res.ok) {
-        console.error(`[trybooking] HTTP ${res.status}`);
-        return [];
+      try {
+        const res = await fetch(searchUrl, {
+          headers: {
+            "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+          },
+        });
+
+        if (!res.ok) {
+          console.error(`[trybooking] HTTP ${res.status} for ${loc.name}`);
+          continue;
+        }
+
+        const html = await res.text();
+        const events = parseTryBookingEvents(html, baseUrl, loc.name, loc.state);
+        allEvents.push(...events);
+      } catch (err) {
+        console.error(`[trybooking] Fetch failed for ${loc.name}:`, err);
       }
-
-      const html = await res.text();
-      return parseTryBookingEvents(html, baseUrl);
-    } catch (err) {
-      console.error("[trybooking] Fetch failed:", err);
-      return [];
     }
+
+    return allEvents;
   }
 }
 
-function parseTryBookingEvents(html: string, baseUrl: string): RawEvent[] {
+function parseTryBookingEvents(html: string, baseUrl: string, fallbackCity: string, fallbackState: string): RawEvent[] {
   const events: RawEvent[] = [];
   const jsonLdMatches = html.matchAll(
     /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
@@ -57,8 +65,8 @@ function parseTryBookingEvents(html: string, baseUrl: string): RawEvent[] {
           url: eventUrl,
           venueName: item.location?.name ?? undefined,
           venueAddress: item.location?.address?.streetAddress ?? undefined,
-          city: "Gold Coast",
-          state: "QLD",
+          city: item.location?.address?.addressLocality ?? fallbackCity,
+          state: item.location?.address?.addressRegion ?? fallbackState,
           isFree: item.isAccessibleForFree === true,
           rawData: item,
         });
@@ -69,7 +77,7 @@ function parseTryBookingEvents(html: string, baseUrl: string): RawEvent[] {
   }
 
   if (events.length === 0) {
-    console.log("[trybooking] No JSON-LD events found; full HTML parser needed (add cheerio)");
+    console.log(`[trybooking] No JSON-LD events found for ${fallbackCity}; full HTML parser needed (add cheerio)`);
   }
 
   return events;
