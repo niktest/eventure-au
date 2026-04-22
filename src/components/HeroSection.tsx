@@ -20,6 +20,7 @@ export function HeroSection() {
         src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1280&q=80"
         alt="Crowd at an outdoor music festival with colorful stage lights"
         className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay"
+        onError={(e) => { e.currentTarget.style.display = "none"; }}
       />
 
       {/* Content */}

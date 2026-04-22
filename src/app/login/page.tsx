@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LoginForm } from "@/components/LoginForm";
+import { FallbackImage } from "@/components/FallbackImage";
 
 export const metadata: Metadata = {
   title: "Sign In",
@@ -13,7 +14,7 @@ export default function LoginPage() {
       {/* Left side: Hero Image (desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-surface-container-high overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-on-background/20 to-on-background/60 z-10 mix-blend-multiply" />
-        <img
+        <FallbackImage
           src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=960&q=80"
           alt="Vibrant live music concert with a crowd bathed in warm stage lighting"
           className="absolute inset-0 w-full h-full object-cover z-0"

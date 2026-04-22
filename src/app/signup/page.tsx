@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SignupForm } from "@/components/SignupForm";
+import { FallbackImage } from "@/components/FallbackImage";
 
 export const metadata: Metadata = {
   title: "Sign Up",
@@ -89,7 +90,7 @@ export default function SignUpPage() {
       {/* Right Side: Image (desktop only) */}
       <div className="hidden lg:block lg:w-1/2 relative bg-inverse-surface overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-inverse-surface/80 z-10 mix-blend-multiply" />
-        <img
+        <FallbackImage
           src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=960&q=80"
           alt="Vibrant crowd at an outdoor music festival during sunset"
           className="absolute inset-0 h-full w-full object-cover"
