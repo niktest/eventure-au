@@ -24,9 +24,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const now = new Date().toISOString();
+
   const cities = ["gold-coast", "brisbane", "sydney", "melbourne"];
   const cityUrls: MetadataRoute.Sitemap = cities.map((slug) => ({
     url: `${SITE_URL}/city/${slug}`,
+    lastModified: now,
     changeFrequency: "daily",
     priority: 0.9,
   }));
@@ -34,24 +37,64 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
       url: SITE_URL,
+      lastModified: now,
       changeFrequency: "daily",
       priority: 1,
     },
     {
       url: `${SITE_URL}/events`,
+      lastModified: now,
       changeFrequency: "daily",
       priority: 0.9,
     },
     ...cityUrls,
     {
       url: `${SITE_URL}/about`,
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: `${SITE_URL}/contact`,
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.5,
+    },
+    {
+      url: `${SITE_URL}/community`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/discussions`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/faq`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${SITE_URL}/privacy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/terms`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/cookies`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
     },
     ...eventUrls,
   ];
