@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { SearchFilters } from "@/components/SearchFilters";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "All Events",
@@ -79,22 +80,35 @@ export default async function EventsPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12">
-      <h1 className="mb-8 font-heading text-4xl font-bold">Events</h1>
+      <div className="mb-8">
+        <h1 className="font-heading text-4xl font-bold text-slate-900">Events</h1>
+        <p className="mt-2 text-slate-500">
+          Discover what&apos;s happening near you
+        </p>
+      </div>
 
       <Suspense fallback={null}>
         <SearchFilters />
       </Suspense>
 
       {events.length === 0 ? (
-        <p className="text-slate-500">No events found. Check back soon!</p>
+        <div className="rounded-xl bg-slate-50 py-16 text-center">
+          <svg className="mx-auto mb-4 h-12 w-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p className="text-slate-500">No events found matching your criteria.</p>
+          <p className="mt-1 text-sm text-slate-400">Try adjusting your filters or check back soon!</p>
+        </div>
       ) : (
         <>
-          <p className="mb-4 text-sm text-slate-500">
+          <p className="mb-6 text-sm font-medium text-slate-500">
             {events.length} event{events.length !== 1 ? "s" : ""} found
           </p>
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {events.map((event, i) => (
+              <ScrollReveal key={event.id} delay={i * 0.03}>
+                <EventCard event={event} />
+              </ScrollReveal>
             ))}
           </div>
         </>

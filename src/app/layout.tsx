@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MobileNav } from "@/components/MobileNav";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -33,16 +34,17 @@ export default function RootLayout({
       <body className="min-h-screen bg-white text-slate-900 font-body antialiased">
         <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur-sm">
           <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-            <a href="/" className="font-heading text-2xl font-bold tracking-tight text-slate-900">
+            <a href="/" className="flex items-center gap-2 font-heading text-2xl font-bold tracking-tight text-slate-900">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-coral text-sm font-extrabold text-white">
+                E
+              </span>
               Eventure
             </a>
             <MobileNav />
           </nav>
         </header>
         <main>{children}</main>
-        <footer className="mt-16 border-t border-slate-100 bg-slate-900 py-12 text-center text-sm text-slate-300">
-          © {new Date().getFullYear()} Eventure. All rights reserved.
-        </footer>
+        <Footer />
       </body>
     </html>
   );
