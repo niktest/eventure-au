@@ -7,6 +7,7 @@ import { eventJsonLd } from "@/lib/seo/schema";
 import { ShareButtons } from "@/components/ShareButtons";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { InterestedButton } from "@/components/InterestedButton";
 
 export const revalidate = 3600;
 
@@ -310,12 +311,7 @@ export default async function EventDetailPage({
                   Get Tickets
                 </a>
               ) : (
-                <button className="w-full bg-primary-container text-on-primary rounded-full py-4 font-heading text-lg font-bold shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-[20px]">
-                    star
-                  </span>
-                  Interested
-                </button>
+                <InterestedButton eventId={event.id} />
               )}
 
               {event.url && (
