@@ -23,11 +23,11 @@ export default function TrendingDiscussionsPage() {
               className="font-display text-5xl font-extrabold text-on-surface tracking-tight"
               style={{ letterSpacing: "-0.02em" }}
             >
-              Trending Discussions
+              Trending Discussions 🔥
             </h1>
           </div>
           <p className="font-body text-lg text-secondary max-w-2xl">
-            See what the community is buzzing about — jump into conversations, share your takes, and connect with fellow event-goers.
+            See what the community is buzzing about 💬 — jump into conversations, share your takes, and connect with fellow event-goers. 🎉
           </p>
         </section>
 
@@ -37,10 +37,10 @@ export default function TrendingDiscussionsPage() {
             <span className="material-symbols-outlined text-secondary text-4xl">forum</span>
           </div>
           <h2 className="font-heading text-2xl font-bold text-on-surface mb-3">
-            Discussions coming soon
+            Discussions coming soon ✨
           </h2>
           <p className="font-body text-base text-secondary max-w-md mb-8">
-            We&apos;re building a space where you can chat about upcoming events, share tips, and connect with the local community. Check back soon!
+            We&apos;re building a space where you can chat about upcoming events, share tips, and connect with the local community. Check back soon! 👋
           </p>
           <Link
             href="/events"
