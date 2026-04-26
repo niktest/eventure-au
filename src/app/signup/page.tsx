@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { SignupForm } from "@/components/SignupForm";
 import { FallbackImage } from "@/components/FallbackImage";
@@ -82,7 +83,9 @@ export default function SignUpPage() {
           </div>
 
           {/* Email Form */}
-          <SignupForm />
+          <Suspense fallback={null}>
+            <SignupForm />
+          </Suspense>
 
           <p className="mt-8 text-center font-body text-base text-on-surface-variant">
             Already have an account?{" "}
