@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "check:file-size": "node scripts/check-file-size.mjs",
     "prepare": "husky"
   },
   "dependencies": {

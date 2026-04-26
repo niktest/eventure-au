@@ -23,6 +23,9 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      - name: File size guardrail (1000 LOC ceiling)
+        run: npm run check:file-size
+
       - name: Lint
         run: npm run lint
 
