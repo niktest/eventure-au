@@ -3,6 +3,14 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+// Same-origin path only: must start with "/" and must not start with "//" or "/\".
+function safeRedirect(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/")) return null;
+  if (value.startsWith("//") || value.startsWith("/\\")) return null;
+  return value;
+}
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -10,7 +18,11 @@ export function LoginForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const callbackUrl = searchParams?.get("callbackUrl") ?? "/";
+  // Accept both `callbackUrl` (NextAuth middleware default) and `next` (in-app CTAs).
+  const callbackUrl =
+    safeRedirect(searchParams?.get("callbackUrl")) ??
+    safeRedirect(searchParams?.get("next")) ??
+    "/";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

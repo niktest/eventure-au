@@ -1,13 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
+// Same-origin path only: must start with "/" and must not start with "//" or "/\".
+function safeRedirect(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/")) return null;
+  if (value.startsWith("//") || value.startsWith("/\\")) return null;
+  return value;
+}
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Accept both `callbackUrl` (NextAuth convention) and `next` (in-app CTAs).
+  const callbackUrl =
+    safeRedirect(searchParams?.get("callbackUrl")) ??
+    safeRedirect(searchParams?.get("next")) ??
+    "/";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -57,10 +72,14 @@ export function SignupForm() {
       });
 
       if (signInRes.ok || signInRes.type === "opaqueredirect") {
-        window.location.href = "/";
+        window.location.href = callbackUrl;
       } else {
-        // Account created but auto-login failed — redirect to login
-        router.push("/login?registered=true");
+        // Account created but auto-login failed — redirect to login, preserving callback
+        const loginQS =
+          callbackUrl === "/"
+            ? "?registered=true"
+            : `?registered=true&callbackUrl=${encodeURIComponent(callbackUrl)}`;
+        router.push(`/login${loginQS}`);
       }
     } catch {
       setErrors({ _form: "Something went wrong. Please try again." });
