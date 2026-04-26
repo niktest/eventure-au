@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const NAV_LINKS = [
+  { href: "/today", label: "Today" },
   { href: "/events", label: "Browse" },
   { href: "/community", label: "Community" },
   { href: "/discussions", label: "Trending" },
