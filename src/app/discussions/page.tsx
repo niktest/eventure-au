@@ -1,55 +1,137 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import {
+  listThreads,
+  getTrendingEvents,
+} from "@/lib/discussions/queries";
+import {
+  isDiscussionCategory,
+  type DiscussionCategory,
+} from "@/lib/discussions/categories";
+import type { ThreadSort } from "@/types/discussions";
+import { DiscussionsHero } from "@/components/discussions/Hero";
+import { ThreadSearchBar } from "@/components/discussions/ThreadSearchBar";
+import { CategoryChipRow } from "@/components/discussions/CategoryChipRow";
+import { SortAndFilters } from "@/components/discussions/SortAndFilters";
+import { ThreadCard } from "@/components/discussions/ThreadCard";
+import { LoadMore } from "@/components/discussions/LoadMore";
+import { TrendingEventsRail } from "@/components/discussions/TrendingEventsRail";
+import { CommunityRulesCard } from "@/components/discussions/CommunityRulesCard";
+import { EmptyState } from "@/components/discussions/EmptyState";
+
+export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Trending Discussions",
-  description: "Join the conversation — explore trending discussions about events, festivals, music, and more on Eventure Discovery.",
+  title: "Gold Coast Discussions",
+  description:
+    "Real talk from the Gold Coast events community — what's hot, what's worth your weekend, who's going.",
+  openGraph: {
+    title: "Gold Coast Discussions — Eventure",
+    description:
+      "Join Gold Coast event-goers chatting about gigs, festivals, markets and more.",
+  },
 };
 
-export default function TrendingDiscussionsPage() {
+const SORTS = new Set<ThreadSort>(["hot", "new", "top"]);
+
+interface SearchParams {
+  sort?: string;
+  category?: string;
+  q?: string;
+  hasEvent?: string;
+  mine?: string;
+  cursor?: string;
+}
+
+export default async function DiscussionsIndexPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const sort: ThreadSort = SORTS.has(sp.sort as ThreadSort)
+    ? (sp.sort as ThreadSort)
+    : "hot";
+  const category: DiscussionCategory | undefined =
+    sp.category && isDiscussionCategory(sp.category) ? sp.category : undefined;
+  const query = sp.q?.trim() ?? "";
+  const hasEvent = sp.hasEvent === "1";
+  const mine = sp.mine === "1";
+  const cursor = sp.cursor ?? undefined;
+
+  const session = await auth();
+  const viewerId = session?.user?.id ?? null;
+
+  const [{ threads, nextCursor }, trending, totalCount] = await Promise.all([
+    listThreads({
+      sort,
+      category,
+      query: query || undefined,
+      hasEvent,
+      mineUserId: mine && viewerId ? viewerId : undefined,
+      cursor,
+      viewerId,
+    }),
+    getTrendingEvents({ cityId: "gold-coast", limit: 5 }),
+    prisma.thread.count({ where: { cityId: "gold-coast", hiddenAt: null } }),
+  ]);
+
+  const isFiltered = Boolean(category || query || hasEvent || mine);
+  const showZeroCityEmpty = totalCount === 0;
+  const showFilterEmpty =
+    !showZeroCityEmpty && threads.length === 0 && isFiltered;
+
   return (
     <div className="bg-surface-bright min-h-screen">
-      <div className="max-w-[1280px] mx-auto px-6 py-12 space-y-10">
-        {/* Page Header */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-3">
-            <span
-              className="material-symbols-outlined text-primary text-4xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              local_fire_department
-            </span>
-            <h1
-              className="font-display text-5xl font-extrabold text-on-surface tracking-tight"
-              style={{ letterSpacing: "-0.02em" }}
-            >
-              Trending Discussions 🔥
-            </h1>
-          </div>
-          <p className="font-body text-lg text-secondary max-w-2xl">
-            See what the community is buzzing about 💬 — jump into conversations, share your takes, and connect with fellow event-goers. 🎉
-          </p>
-        </section>
+      <div className="max-w-[1280px] mx-auto px-4 md:px-6 py-6 md:py-12 space-y-6 md:space-y-8">
+        <DiscussionsHero
+          city="Gold Coast"
+          threadCount={totalCount}
+          isSignedIn={Boolean(viewerId)}
+        />
 
-        {/* Empty State */}
-        <section className="flex flex-col items-center text-center py-16">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-surface-container-low mb-6">
-            <span className="material-symbols-outlined text-secondary text-4xl">forum</span>
+        <ThreadSearchBar initialQuery={query} />
+
+        <CategoryChipRow active={category ?? "all"} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-4">
+            <SortAndFilters
+              sort={sort}
+              hasEvent={hasEvent}
+              mine={mine}
+              isSignedIn={Boolean(viewerId)}
+            />
+
+            {showZeroCityEmpty ? (
+              <EmptyState isSignedIn={Boolean(viewerId)} context="zero-city" />
+            ) : showFilterEmpty ? (
+              <EmptyState
+                isSignedIn={Boolean(viewerId)}
+                context={query ? "search" : "filter"}
+                query={query || undefined}
+              />
+            ) : (
+              <div className="space-y-3">
+                {threads.map((thread) => (
+                  <ThreadCard key={thread.id} thread={thread} />
+                ))}
+                {nextCursor && <LoadMore cursor={nextCursor} />}
+              </div>
+            )}
           </div>
-          <h2 className="font-heading text-2xl font-bold text-on-surface mb-3">
-            Discussions coming soon ✨
-          </h2>
-          <p className="font-body text-base text-secondary max-w-md mb-8">
-            We&apos;re building a space where you can chat about upcoming events, share tips, and connect with the local community. Check back soon! 👋
-          </p>
-          <Link
-            href="/events"
-            className="inline-flex items-center gap-2 bg-primary text-on-primary font-body text-sm font-semibold px-6 py-3 rounded-full hover:shadow-md transition-all"
-          >
-            <span className="material-symbols-outlined text-[18px]">explore</span>
-            Browse Events
-          </Link>
-        </section>
+
+          <div className="lg:col-span-4 space-y-4">
+            <TrendingEventsRail events={trending} />
+            <CommunityRulesCard />
+          </div>
+        </div>
+
+        <p className="text-center font-body text-sm text-secondary pt-6">
+          More cities coming soon — Brisbane, Sydney, Melbourne 🇦🇺
+        </p>
       </div>
     </div>
   );

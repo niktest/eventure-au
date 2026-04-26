@@ -17,11 +17,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB unavailable at build time
   }
 
+  let threads: Array<{ slug: string; updatedAt: Date }> = [];
+  try {
+    threads = await prisma.thread.findMany({
+      where: { hiddenAt: null, deletedAt: null },
+      select: { slug: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+      take: 1000,
+    });
+  } catch {
+    // DB unavailable at build time
+  }
+
   const eventUrls: MetadataRoute.Sitemap = events.map((event) => ({
     url: `${SITE_URL}/events/${event.slug}`,
     lastModified: event.updatedAt,
     changeFrequency: "daily",
     priority: 0.8,
+  }));
+
+  const threadUrls: MetadataRoute.Sitemap = threads.map((thread) => ({
+    url: `${SITE_URL}/discussions/${thread.slug}`,
+    lastModified: thread.updatedAt,
+    changeFrequency: "daily",
+    priority: 0.5,
   }));
 
   const now = new Date().toISOString();
@@ -103,5 +122,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
     ...eventUrls,
+    ...threadUrls,
   ];
 }

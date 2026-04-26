@@ -57,6 +57,9 @@ model Event {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Discussions (v1: optional event-attached threads)
+  discussionThreads Thread[] @relation("EventThreads")
+
   @@unique([source, sourceId]) // Prevent duplicate imports from same source
   @@index([startDate, status])
   @@index([city, startDate])
@@ -107,6 +110,14 @@ model User {
 
   accounts Account[]
   sessions Session[]
+
+  // Discussions
+  threads        Thread[]
+  replies        Reply[]
+  threadUpvotes  ThreadUpvote[]
+  replyUpvotes   ReplyUpvote[]
+  threadReports  ThreadReport[]
+  replyReports   ReplyReport[]
 }
 
 model Account {
@@ -135,4 +146,138 @@ model Session {
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ── Discussions ──────────────────────────────────────
+
+model Thread {
+  id            String             @id @default(cuid())
+  slug          String             @unique
+  title         String             @db.VarChar(120)
+  body          String             @db.Text
+  category      DiscussionCategory
+  cityId        String             @default("gold-coast")
+  authorId      String
+  author        User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  linkedEventId String?
+  linkedEvent   Event?             @relation("EventThreads", fields: [linkedEventId], references: [id], onDelete: SetNull)
+  upvoteCount   Int                @default(0)
+  replyCount    Int                @default(0)
+  hotScore      Float              @default(0)
+  editedAt      DateTime?
+  deletedAt     DateTime?
+  hiddenAt      DateTime?
+  hiddenById    String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  replies       Reply[]
+  upvotes       ThreadUpvote[]
+  reports       ThreadReport[]
+
+  @@index([cityId, hotScore(sort: Desc), createdAt(sort: Desc)])
+  @@index([cityId, category, createdAt(sort: Desc)])
+  @@index([linkedEventId])
+  @@index([authorId])
+}
+
+model Reply {
+  id          String        @id @default(cuid())
+  threadId    String
+  thread      Thread        @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body        String        @db.Text
+  upvoteCount Int           @default(0)
+  editedAt    DateTime?
+  deletedAt   DateTime?
+  hiddenAt    DateTime?
+  hiddenById  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  upvotes     ReplyUpvote[]
+  reports     ReplyReport[]
+
+  @@index([threadId, createdAt])
+  @@index([threadId, upvoteCount(sort: Desc)])
+}
+
+model ThreadUpvote {
+  threadId  String
+  userId    String
+  createdAt DateTime @default(now())
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([threadId, userId])
+  @@index([userId])
+}
+
+model ReplyUpvote {
+  replyId   String
+  userId    String
+  createdAt DateTime @default(now())
+  reply     Reply    @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([replyId, userId])
+  @@index([userId])
+}
+
+model ThreadReport {
+  id         String       @id @default(cuid())
+  threadId   String
+  reporterId String
+  reason     ReportReason
+  detail     String?      @db.Text
+  status     ReportStatus @default(open)
+  createdAt  DateTime     @default(now())
+  thread     Thread       @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, reporterId])
+  @@index([status, createdAt])
+}
+
+model ReplyReport {
+  id         String       @id @default(cuid())
+  replyId    String
+  reporterId String
+  reason     ReportReason
+  detail     String?      @db.Text
+  status     ReportStatus @default(open)
+  createdAt  DateTime     @default(now())
+  reply      Reply        @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([replyId, reporterId])
+  @@index([status, createdAt])
+}
+
+enum DiscussionCategory {
+  general
+  music
+  festivals
+  nightlife
+  markets
+  family
+  food_drink
+  arts
+  comedy
+  theatre
+  outdoor
+  community
+}
+
+enum ReportReason {
+  spam
+  harassment
+  off_topic
+  other
+}
+
+enum ReportStatus {
+  open
+  reviewed
+  actioned
+  dismissed
 }

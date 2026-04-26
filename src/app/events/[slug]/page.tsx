@@ -8,6 +8,9 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { InterestedButton } from "@/components/InterestedButton";
+import { EventDiscussPanel } from "@/components/discussions/EventDiscussPanel";
+import { listLatestThreadsForEvent } from "@/lib/discussions/queries";
+import { auth } from "@/lib/auth";
 
 export const revalidate = 3600;
 
@@ -73,6 +76,19 @@ export default async function EventDetailPage({
       },
       orderBy: { startDate: "asc" },
       take: 3,
+    });
+  } catch {
+    // Non-critical
+  }
+
+  const session = await auth();
+  const viewerId = session?.user?.id ?? null;
+  let discussionThreads: Awaited<ReturnType<typeof listLatestThreadsForEvent>> = [];
+  try {
+    discussionThreads = await listLatestThreadsForEvent({
+      eventId: event.id,
+      limit: 3,
+      viewerId,
     });
   } catch {
     // Non-critical
@@ -353,6 +369,16 @@ export default async function EventDetailPage({
             </div>
           </div>
         </div>
+
+        {/* Discuss this event */}
+        <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-10">
+          <EventDiscussPanel
+            eventSlug={event.slug}
+            eventName={event.name}
+            threads={discussionThreads}
+            isSignedIn={Boolean(viewerId)}
+          />
+        </section>
 
         {/* Similar Events */}
         {similarEvents.length > 0 && (

@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { href: "/today", label: "Today" },
   { href: "/events", label: "Browse" },
   { href: "/community", label: "Community" },
-  { href: "/discussions", label: "Trending" },
+  { href: "/discussions", label: "Discussions" },
   { href: "/about", label: "About" },
 ];
 
