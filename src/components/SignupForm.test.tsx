@@ -6,6 +6,7 @@ import { SignupForm } from "./SignupForm";
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 // Mock next-auth/react
