@@ -14,9 +14,15 @@ interface ReplyCardProps {
   reply: ReplySummary;
   isSignedIn: boolean;
   redirectTo: string;
+  pulse?: boolean;
 }
 
-export function ReplyCard({ reply, isSignedIn, redirectTo }: ReplyCardProps) {
+export function ReplyCard({
+  reply,
+  isSignedIn,
+  redirectTo,
+  pulse = false,
+}: ReplyCardProps) {
   const [reportOpen, setReportOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const router = useRouter();
@@ -43,7 +49,12 @@ export function ReplyCard({ reply, isSignedIn, redirectTo }: ReplyCardProps) {
   return (
     <article
       id={`reply-${reply.id}`}
-      className="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-4 sm:p-5 space-y-3"
+      className={
+        "rounded-xl p-4 sm:p-5 space-y-3 transition-all duration-1000 " +
+        (pulse
+          ? "bg-primary-container/15 border border-primary ring-2 ring-primary/30"
+          : "bg-surface-container-lowest border border-outline-variant/40")
+      }
     >
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-body text-secondary">
@@ -52,7 +63,12 @@ export function ReplyCard({ reply, isSignedIn, redirectTo }: ReplyCardProps) {
           </span>{" "}
           · {timeAgo(reply.createdAt)}
           {reply.editedAt && (
-            <span className="text-xs"> · edited</span>
+            <span
+              className="text-xs"
+              title={new Date(reply.editedAt).toLocaleString("en-AU")}
+            >
+              {" "}· edited {timeAgo(reply.editedAt)}
+            </span>
           )}
         </div>
         <OverflowMenu actions={overflowActions} ariaLabel="Reply options" />

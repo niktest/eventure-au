@@ -14,9 +14,7 @@ import { prisma } from "@/lib/prisma";
 import type { ReplySort } from "@/types/discussions";
 import { ThreadActions } from "@/components/discussions/ThreadActions";
 import { LinkedEventCard } from "@/components/discussions/LinkedEventCard";
-import { ReplyCard } from "@/components/discussions/ReplyCard";
-import { RepliesHeader } from "@/components/discussions/RepliesHeader";
-import { ReplyComposer } from "@/components/discussions/ReplyComposer";
+import { RepliesSection } from "@/components/discussions/RepliesSection";
 
 export const revalidate = 30;
 export const dynamic = "force-dynamic";
@@ -133,7 +131,9 @@ export default async function ThreadDetailPage({
               {thread.editedAt && (
                 <>
                   <span aria-hidden="true">·</span>
-                  <span>edited</span>
+                  <span title={new Date(thread.editedAt).toLocaleString("en-AU")}>
+                    edited {timeAgo(thread.editedAt)}
+                  </span>
                 </>
               )}
             </div>
@@ -170,36 +170,13 @@ export default async function ThreadDetailPage({
 
           <hr className="border-outline-variant/40" />
 
-          <RepliesHeader sort={replySort} count={replies.length} slug={thread.slug} />
-
-          {replies.length === 0 ? (
-            <p className="font-body text-sm text-secondary text-center py-6">
-              No replies yet — kick it off.
-            </p>
-          ) : (
-            <div
-              className="space-y-3"
-              aria-live="polite"
-              aria-label="Replies"
-            >
-              {replies.map((reply) => (
-                <ReplyCard
-                  key={reply.id}
-                  reply={reply}
-                  isSignedIn={Boolean(viewerId)}
-                  redirectTo={`/discussions/${thread.slug}#reply-${reply.id}`}
-                />
-              ))}
-            </div>
-          )}
-
-          <hr className="border-outline-variant/40" />
-
-          <ReplyComposer
+          <RepliesSection
             threadId={thread.id}
             threadSlug={thread.slug}
             isSignedIn={Boolean(viewerId)}
             authorHandle={viewerHandle}
+            initialReplies={replies}
+            replySort={replySort}
           />
         </div>
       </div>

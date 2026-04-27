@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import type { ReplySummary } from "@/types/discussions";
 import { useToast } from "./Toast";
 import { LoginGate } from "./LoginGate";
 
@@ -10,6 +10,7 @@ interface ReplyComposerProps {
   threadSlug: string;
   isSignedIn: boolean;
   authorHandle: string | null;
+  onInsert?: (reply: ReplySummary) => void;
 }
 
 const MAX_LEN = 2000;
@@ -19,11 +20,11 @@ export function ReplyComposer({
   threadSlug,
   isSignedIn,
   authorHandle,
+  onInsert,
 }: ReplyComposerProps) {
   const [value, setValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const { toast } = useToast();
 
   if (!isSignedIn) {
@@ -52,9 +53,14 @@ export function ReplyComposer({
       } else if (!res.ok) {
         setError("Couldn't post your reply. Check your connection and try again.");
       } else {
+        const data = (await res.json().catch(() => ({}))) as {
+          reply?: ReplySummary;
+        };
         setValue("");
         toast("Reply posted ✓");
-        router.refresh();
+        if (data.reply && onInsert) {
+          onInsert(data.reply);
+        }
       }
     } catch {
       setError("Couldn't post your reply. Check your connection and try again.");

@@ -7,7 +7,10 @@ import {
   jsonError,
   requireUser,
 } from "@/lib/discussions/api-helpers";
-import { listRepliesForThread } from "@/lib/discussions/queries";
+import {
+  getReplyById,
+  listRepliesForThread,
+} from "@/lib/discussions/queries";
 import { hotScore } from "@/lib/discussions/hot-score";
 import { RL_REPLIES_CREATE } from "@/lib/discussions/rate-limit";
 
@@ -92,7 +95,11 @@ export async function POST(
       });
       return created;
     });
-    return NextResponse.json({ id: reply.id }, { status: 201 });
+    const summary = await getReplyById(reply.id, auth.userId);
+    return NextResponse.json(
+      { id: reply.id, reply: summary },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("[reply:create]", err);
     return jsonError(

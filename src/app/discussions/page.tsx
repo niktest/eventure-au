@@ -19,6 +19,7 @@ import { LoadMore } from "@/components/discussions/LoadMore";
 import { TrendingEventsRail } from "@/components/discussions/TrendingEventsRail";
 import { CommunityRulesCard } from "@/components/discussions/CommunityRulesCard";
 import { EmptyState } from "@/components/discussions/EmptyState";
+import { EventFilterPill } from "@/components/discussions/EventFilterPill";
 
 export const revalidate = 60;
 export const dynamic = "force-dynamic";
@@ -43,6 +44,7 @@ interface SearchParams {
   hasEvent?: string;
   mine?: string;
   cursor?: string;
+  eventSlug?: string;
 }
 
 export default async function DiscussionsIndexPage({
@@ -60,9 +62,17 @@ export default async function DiscussionsIndexPage({
   const hasEvent = sp.hasEvent === "1";
   const mine = sp.mine === "1";
   const cursor = sp.cursor ?? undefined;
+  const eventSlug = sp.eventSlug?.trim() || undefined;
 
   const session = await auth();
   const viewerId = session?.user?.id ?? null;
+
+  const linkedEvent = eventSlug
+    ? await prisma.event.findUnique({
+        where: { slug: eventSlug },
+        select: { id: true, slug: true, name: true },
+      })
+    : null;
 
   const [{ threads, nextCursor }, trending, totalCount] = await Promise.all([
     listThreads({
@@ -73,12 +83,15 @@ export default async function DiscussionsIndexPage({
       mineUserId: mine && viewerId ? viewerId : undefined,
       cursor,
       viewerId,
+      eventId: linkedEvent?.id,
     }),
     getTrendingEvents({ cityId: "gold-coast", limit: 5 }),
     prisma.thread.count({ where: { cityId: "gold-coast", hiddenAt: null } }),
   ]);
 
-  const isFiltered = Boolean(category || query || hasEvent || mine);
+  const isFiltered = Boolean(
+    category || query || hasEvent || mine || linkedEvent
+  );
   const showZeroCityEmpty = totalCount === 0;
   const showFilterEmpty =
     !showZeroCityEmpty && threads.length === 0 && isFiltered;
@@ -104,6 +117,13 @@ export default async function DiscussionsIndexPage({
               mine={mine}
               isSignedIn={Boolean(viewerId)}
             />
+
+            {linkedEvent && (
+              <EventFilterPill
+                eventName={linkedEvent.name}
+                eventSlug={linkedEvent.slug}
+              />
+            )}
 
             {showZeroCityEmpty ? (
               <EmptyState isSignedIn={Boolean(viewerId)} context="zero-city" />

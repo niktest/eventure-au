@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/today", label: "Today" },
@@ -12,12 +12,19 @@ const NAV_LINKS = [
   { href: "/about", label: "About" },
 ];
 
+function isNavActive(href: string, pathname: string | null): boolean {
+  if (!pathname) return false;
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function MobileNav() {
   const [user, setUser] = useState<{ name?: string | null } | null>(null);
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const router = useRouter();
+  const pathname = usePathname();
   const menuRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const searchPanelRef = useRef<HTMLDivElement>(null);
@@ -115,15 +122,24 @@ export function MobileNav() {
     <>
       {/* Desktop nav links */}
       <nav className="hidden md:flex items-center gap-6 ml-auto font-heading text-sm font-semibold tracking-tight" aria-label="Main navigation">
-        {NAV_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-secondary hover:text-primary-container transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
-          >
-            {link.label}
-          </Link>
-        ))}
+        {NAV_LINKS.map((link) => {
+          const active = isNavActive(link.href, pathname);
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={active ? "page" : undefined}
+              className={
+                "transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm " +
+                (active
+                  ? "text-primary border-b-2 border-primary pb-0.5"
+                  : "text-secondary hover:text-primary-container")
+              }
+            >
+              {link.label}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Desktop auth actions */}
@@ -243,16 +259,25 @@ export function MobileNav() {
           className="md:hidden absolute top-full left-0 right-0 border-b border-surface-container-high bg-white shadow-md z-50"
         >
           <div className="flex flex-col px-6 py-4 space-y-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="text-on-surface font-heading font-semibold text-sm py-3 px-2 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active = isNavActive(link.href, pathname);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={
+                    "font-heading font-semibold text-sm py-3 px-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset " +
+                    (active
+                      ? "bg-primary-container/15 text-primary"
+                      : "text-on-surface hover:bg-surface-container-low")
+                  }
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <div className="border-t border-surface-container-high my-2" />
             {user ? (
               <>
