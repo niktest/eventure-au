@@ -4,6 +4,7 @@ import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
 import { DesktopSearch } from "@/components/DesktopSearch";
 import { Footer } from "@/components/Footer";
+import { getSiteUrl } from "@/lib/seo/site-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,9 +27,7 @@ export const metadata: Metadata = {
   },
   description:
     "Discover the best events happening near you — live music, festivals, markets, sports, family fun, nightlife, and more. Starting on the Gold Coast.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://eventure.com.au"
-  ),
+  metadataBase: new URL(getSiteUrl()),
   openGraph: {
     type: "website",
     locale: "en_AU",

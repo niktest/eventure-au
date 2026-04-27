@@ -15,14 +15,14 @@ import type { ReplySort } from "@/types/discussions";
 import { ThreadActions } from "@/components/discussions/ThreadActions";
 import { LinkedEventCard } from "@/components/discussions/LinkedEventCard";
 import { RepliesSection } from "@/components/discussions/RepliesSection";
+import { getSiteUrl } from "@/lib/seo/site-url";
 
 export const revalidate = 30;
 export const dynamic = "force-dynamic";
 
 const REPLY_SORTS = new Set<ReplySort>(["top", "new"]);
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://eventure.com.au";
+const SITE_URL = getSiteUrl();
 
 export async function generateMetadata({
   params,

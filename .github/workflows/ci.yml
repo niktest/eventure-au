@@ -36,4 +36,4 @@ jobs:
         run: npm run build
         env:
           DATABASE_URL: "postgresql://placeholder:placeholder@localhost:5432/placeholder"
-          NEXT_PUBLIC_SITE_URL: "https://eventure.com.au"
+          NEXT_PUBLIC_SITE_URL: "https://eventure-au.vercel.app"
