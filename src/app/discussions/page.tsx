@@ -150,7 +150,7 @@ export default async function DiscussionsIndexPage({
         </div>
 
         <p className="text-center font-body text-sm text-secondary pt-6">
-          More cities coming soon — Brisbane, Sydney, Melbourne 🇦🇺
+          More cities coming soon — Brisbane, Sydney, Melbourne.
         </p>
       </div>
     </div>

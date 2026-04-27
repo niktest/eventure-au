@@ -29,7 +29,7 @@ export function DiscussionsHero({
               className="font-display text-4xl md:text-5xl font-extrabold text-on-surface tracking-tight"
               style={{ letterSpacing: "-0.02em" }}
             >
-              Discussions <span aria-hidden="true">🔥</span>
+              Discussions
             </h1>
           </div>
           <p className="font-body text-base md:text-lg text-secondary max-w-2xl">

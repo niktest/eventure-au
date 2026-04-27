@@ -17,7 +17,7 @@ export default function AboutPage() {
 
         <div className="space-y-8 font-body text-base text-on-surface-variant leading-relaxed">
           <div className="rounded-xl bg-primary-container/10 p-6 border border-primary-container/20">
-            <p className="text-on-primary-container">
+            <p className="text-on-surface-variant">
               Eventure is Australia&apos;s events and entertainment aggregator. We
               scan and curate events happening near you — live music, festivals,
               markets, sports, family fun, nightlife, food and drink, arts, comedy,
