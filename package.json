@@ -17,7 +17,7 @@
     "test": "NODE_ENV=test vitest run",
     "test:watch": "NODE_ENV=test vitest",
     "test:e2e": "playwright test",
-    "lighthouse": "node scripts/lighthouse.mjs",
+    "lighthouse": "node --env-file-if-exists=.env.local scripts/lighthouse.mjs",
     "check:file-size": "node scripts/check-file-size.mjs",
     "prepare": "husky"
   },
