@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { EventCard } from "@/components/EventCard";
@@ -34,7 +35,9 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-surface-bright">
       <HeroSection>
-        <NearMeButton />
+        <Suspense fallback={null}>
+          <NearMeButton />
+        </Suspense>
       </HeroSection>
 
       <section
@@ -43,7 +46,9 @@ export default async function HomePage() {
         style={{ background: "var(--color-surface-0)" }}
       >
         <div className="max-w-[1280px] mx-auto px-6 pb-10 md:pb-12 flex flex-col gap-6">
-          <CalendarStrip days={calendarDays} />
+          <Suspense fallback={<div className="h-[84px] md:h-[92px] lg:h-[104px]" />}>
+            <CalendarStrip days={calendarDays} />
+          </Suspense>
           <HomepageCategoryRow />
         </div>
       </section>
