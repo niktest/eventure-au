@@ -31,7 +31,7 @@ export function HomepageCategoryRow({ active }: HomepageCategoryRowProps) {
             key={cat.slug}
             href={categoryHref(cat.slug)}
             aria-current={isActive ? "page" : undefined}
-            className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-coral-glow whitespace-nowrap ${stateClasses}`}
+            className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 min-h-[44px] font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-coral-glow whitespace-nowrap ${stateClasses}`}
           >
             <Icon size={18} aria-hidden="true" className="shrink-0" />
             <span>{cat.label}</span>
