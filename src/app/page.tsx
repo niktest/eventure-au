@@ -3,22 +3,16 @@ import { prisma } from "@/lib/prisma";
 import { EventCard } from "@/components/EventCard";
 import { HeroSection } from "@/components/HeroSection";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { CalendarStrip } from "@/components/home/CalendarStrip";
+import { HomepageCategoryRow } from "@/components/home/HomepageCategoryRow";
+import { NearMeButton } from "@/components/home/NearMeButton";
+import { buildCalendarDays } from "@/lib/calendar/buildCalendarDays";
 
-export const revalidate = 3600; // ISR: revalidate homepage every hour
-
-const CATEGORY_FILTERS = [
-  { key: "all", label: "All Vibes" },
-  { key: "music", label: "Music" },
-  { key: "food_drink", label: "Food & Drink" },
-  { key: "arts", label: "Arts" },
-  { key: "festival", label: "Festivals" },
-  { key: "markets", label: "Markets" },
-  { key: "sports", label: "Sports" },
-  { key: "family", label: "Family" },
-  { key: "nightlife", label: "Nightlife" },
-];
+export const revalidate = 3600;
 
 export default async function HomePage() {
+  const calendarDays = await buildCalendarDays({ withCounts: true });
+
   let upcomingEvents: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
   let totalCount = 0;
   try {
@@ -34,36 +28,27 @@ export default async function HomePage() {
       where: { status: "published", startDate: { gte: new Date() } },
     });
   } catch {
-    // DB unavailable — render empty state, ISR will retry
+    // DB unavailable — render empty state, ISR will retry.
   }
 
   return (
-    <div className="bg-surface-bright min-h-screen">
-      {/* Hero Section */}
-      <HeroSection />
+    <div className="min-h-screen bg-surface-bright">
+      <HeroSection>
+        <NearMeButton />
+      </HeroSection>
 
-      {/* Main Content */}
-      <div className="max-w-[1280px] mx-auto px-6 md:px-6 py-12 flex flex-col gap-12">
-        {/* Category Filter Chips */}
-        <section>
-          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-            {CATEGORY_FILTERS.map((cat) => (
-              <Link
-                key={cat.key}
-                href={cat.key === "all" ? "/events" : `/events?category=${cat.key}`}
-                className={`px-4 py-2 rounded-full font-body text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-                  cat.key === "all"
-                    ? "bg-primary text-on-primary"
-                    : "bg-surface-container-low text-on-surface hover:bg-surface-container"
-                }`}
-              >
-                {cat.label}
-              </Link>
-            ))}
-          </div>
-        </section>
+      <section
+        aria-label="Browse by date and category"
+        className="relative"
+        style={{ background: "var(--color-surface-0)" }}
+      >
+        <div className="max-w-[1280px] mx-auto px-6 pb-10 md:pb-12 flex flex-col gap-6">
+          <CalendarStrip days={calendarDays} />
+          <HomepageCategoryRow />
+        </div>
+      </section>
 
-        {/* Upcoming Events Grid */}
+      <div className="max-w-[1280px] mx-auto px-6 py-12 flex flex-col gap-12">
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-heading text-3xl font-bold text-on-surface tracking-tight">
@@ -93,7 +78,7 @@ export default async function HomePage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {upcomingEvents.map((event, i) => (
                 <ScrollReveal key={event.id} delay={i * 0.05}>
-                  <EventCard event={event} />
+                  <EventCard event={event} variant="homepage" />
                 </ScrollReveal>
               ))}
             </div>
@@ -114,7 +99,6 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* City Quick Links */}
         <section>
           <h2 className="font-heading text-2xl font-bold text-on-surface mb-6 tracking-tight">
             Explore by City
@@ -139,31 +123,6 @@ export default async function HomePage() {
                 </p>
               </Link>
             ))}
-          </div>
-        </section>
-
-        {/* CTA Banner */}
-        <section className="bg-inverse-surface rounded-2xl p-8 md:p-12 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
-            Never miss an event
-          </h2>
-          <p className="font-body text-lg text-surface-variant mb-8 max-w-lg mx-auto">
-            Eventure is growing fast. Starting on the Gold Coast, expanding to
-            Brisbane, then all of Australia.
-          </p>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/events"
-              className="inline-flex items-center gap-2 bg-primary-container text-on-primary rounded-full px-8 py-3.5 font-body font-semibold shadow-lg hover:scale-105 transition-all"
-            >
-              Explore events
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 border border-surface-variant/30 text-surface-variant rounded-full px-8 py-3.5 font-body font-semibold hover:border-white hover:text-white transition-all"
-            >
-              Create account
-            </Link>
           </div>
         </section>
       </div>

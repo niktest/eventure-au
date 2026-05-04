@@ -85,6 +85,54 @@
   --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
   --shadow-xl: 0 20px 40px rgba(15, 23, 42, 0.16);
+
+  /* ─── Neon palette (EVE-126 spec, additive) ─── */
+  --color-neon-coral: #FF5A36;
+  --color-neon-coral-glow: #FF8866;
+  --color-neon-ocean: #1FE3D6;
+  --color-neon-ocean-glow: #5AF0E6;
+  --color-neon-sunshine: #FFD23F;
+  --color-neon-magenta: #FF3FA4;
+
+  /* ─── Dark surfaces (homepage hero band, footer) ─── */
+  --color-surface-0: #0B0D12;
+  --color-surface-1: #13161D;
+  --color-surface-2: #1B1F28;
+  --color-surface-3: #262B36;
+  --color-on-dark-strong: #F4F6FB;
+  --color-on-dark-muted: #A8B0C0;
+  --color-on-dark-subtle: #6B7488;
+
+  /* ─── Neon glow shadows ─── */
+  --shadow-glow-coral: 0 0 0 2px rgba(255, 90, 54, 0.2), 0 8px 24px rgba(255, 90, 54, 0.18);
+  --shadow-glow-magenta: 0 0 0 2px rgba(255, 63, 164, 0.2), 0 8px 24px rgba(255, 63, 164, 0.18);
+}
+
+/* Gradients live outside @theme so Tailwind doesn't try to expose them as utilities. */
+:root {
+  --gradient-neon-dusk: linear-gradient(180deg, #0B0D12 0%, #1B0F1A 60%, #2A0E18 100%);
+  --gradient-neon-cta: linear-gradient(90deg, #FF5A36 0%, #FF3FA4 100%);
+  --gradient-calendar-today: linear-gradient(135deg, #FFD23F 0%, #FF5A36 100%);
+}
+
+/* Reduced-motion: disable glow pulses (colour transitions are kept). */
+@media (prefers-reduced-motion: reduce) {
+  .anim-glow-pulse { animation: none !important; }
+}
+
+/* Hero → grid 16/24px gradient bleed seam (used as ::after on hero section). */
+.hero-seam-bleed::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: linear-gradient(180deg, #0B0D12 0%, #ffffff 100%);
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .hero-seam-bleed::after { height: 24px; }
 }
 
 /* ─── Material Symbols (self-hosted — Google Fonts link stripped by Vercel) ─── */

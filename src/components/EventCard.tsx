@@ -10,11 +10,23 @@ function formatDay(d: Date): string {
   return new Date(d).toLocaleDateString("en-AU", { day: "numeric" });
 }
 
-export function EventCard({ event }: { event: Event }) {
+type EventCardVariant = "default" | "homepage";
+
+export function EventCard({
+  event,
+  variant = "default",
+}: {
+  event: Event;
+  variant?: EventCardVariant;
+}) {
+  const hoverClass =
+    variant === "homepage"
+      ? "hover:-translate-y-1 hover:border-coral hover:shadow-glow-coral transition-all duration-300"
+      : "card-hover";
   return (
     <Link
       href={`/events/${event.slug}`}
-      className="group bg-surface-bright rounded-xl overflow-hidden shadow-sm border border-surface-container-high flex flex-col card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      className={`group bg-surface-bright rounded-xl overflow-hidden shadow-sm border border-surface-container-high flex flex-col ${hoverClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`}
     >
       {/* Image with 16:9 aspect ratio */}
       <div className="relative w-full aspect-video overflow-hidden">

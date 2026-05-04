@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { resolveCategoryFilter, HOMEPAGE_CATEGORIES } from "@/lib/categories";
 
 export const metadata: Metadata = {
   title: "Browse Events",
@@ -13,6 +14,11 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 3600;
+
+const NEAR_TO_CITY: Record<string, string> = {
+  "gold-coast": "Gold Coast",
+  "brisbane": "Brisbane",
+};
 
 export default async function EventsPage({
   searchParams,
@@ -23,6 +29,9 @@ export default async function EventsPage({
     q?: string;
     dateFrom?: string;
     dateTo?: string;
+    date?: string;
+    near?: string;
+    radius?: string;
     free?: string;
   }>;
 }) {
@@ -32,22 +41,55 @@ export default async function EventsPage({
     { status: "published" },
   ];
 
-  // Default: only future events unless a dateFrom is explicitly set in the past
-  const dateFrom = params.dateFrom ? new Date(params.dateFrom) : new Date();
-  conditions.push({ startDate: { gte: dateFrom } });
+  // ?date=YYYY-MM-DD — same-day window (UTC for v1; venue-local-tz follow-up).
+  if (params.date && /^\d{4}-\d{2}-\d{2}$/.test(params.date)) {
+    const dayStart = new Date(`${params.date}T00:00:00.000Z`);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+    conditions.push({ startDate: { gte: dayStart, lt: dayEnd } });
+  } else {
+    // Default: only future events unless a dateFrom is explicitly set in the past
+    const dateFrom = params.dateFrom ? new Date(params.dateFrom) : new Date();
+    conditions.push({ startDate: { gte: dateFrom } });
 
-  if (params.dateTo) {
-    const dateTo = new Date(params.dateTo);
-    dateTo.setHours(23, 59, 59, 999);
-    conditions.push({ startDate: { lte: dateTo } });
+    if (params.dateTo) {
+      const dateTo = new Date(params.dateTo);
+      dateTo.setHours(23, 59, 59, 999);
+      conditions.push({ startDate: { lte: dateTo } });
+    }
   }
 
   if (params.category) {
-    conditions.push({ category: params.category.toUpperCase() as Prisma.EventWhereInput["category"] });
+    const slug = params.category;
+    const homepageMatch = HOMEPAGE_CATEGORIES.some((c) => c.slug === slug);
+    if (homepageMatch) {
+      const filter = resolveCategoryFilter(slug);
+      if (filter) {
+        const orParts: Prisma.EventWhereInput[] = [];
+        if (filter.enums?.length) {
+          orParts.push({
+            category: { in: filter.enums as unknown as Prisma.EnumEventCategoryFilter["in"] },
+          });
+        }
+        if (filter.tags?.length) {
+          orParts.push({ tags: { hasSome: filter.tags } });
+        }
+        if (orParts.length === 1) conditions.push(orParts[0]!);
+        else if (orParts.length > 1) conditions.push({ OR: orParts });
+      }
+    } else {
+      conditions.push({
+        category: slug.toUpperCase() as Prisma.EventWhereInput["category"],
+      });
+    }
   }
 
   if (params.city) {
     conditions.push({ city: params.city });
+  }
+
+  // ?near={citySlug} — v1 city-slug match (no real geo radius). Radius is hint.
+  if (params.near && NEAR_TO_CITY[params.near]) {
+    conditions.push({ city: NEAR_TO_CITY[params.near] });
   }
 
   if (params.free === "1") {
