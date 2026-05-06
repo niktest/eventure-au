@@ -1,6 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Event } from "@/types/event";
+import {
+  EventCardImage,
+  EventCardImagePlaceholder,
+} from "./EventCardImage";
 
 function formatMonth(d: Date): string {
   return new Date(d).toLocaleDateString("en-AU", { month: "short" });
@@ -31,20 +34,9 @@ export function EventCard({
       {/* Image with 16:9 aspect ratio */}
       <div className="relative w-full aspect-video overflow-hidden">
         {event.imageUrl ? (
-          <Image
-            src={event.imageUrl}
-            alt={event.name}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            placeholder="empty"
-          />
+          <EventCardImage src={event.imageUrl} alt={event.name} />
         ) : (
-          <div className="flex h-full items-center justify-center bg-surface-dim">
-            <span className="material-symbols-outlined text-4xl text-secondary">
-              calendar_month
-            </span>
-          </div>
+          <EventCardImagePlaceholder />
         )}
 
         {/* Coral date badge — top right */}
