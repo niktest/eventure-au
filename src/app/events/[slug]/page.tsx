@@ -229,7 +229,7 @@ export default async function EventDetailPage({
                         : `https://www.google.com/maps/embed/v1/place?key=${mapsKey}&q=${addressQuery}&zoom=15`;
                       return (
                         <div className="w-full md:w-1/2 h-48 md:h-auto bg-surface-dim relative">
-                          <iframe title={`Map of ${event.venueName}`} width="100%" height="100%" style={{ border: 0, minHeight: "200px" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={src} />
+                          <iframe title={`Map of ${event.venueName}`} width="100%" height="100%" style={{ border: 0, minHeight: "200px" }} referrerPolicy="no-referrer-when-downgrade" src={src} />
                         </div>
                       );
                     }
@@ -238,7 +238,7 @@ export default async function EventDetailPage({
                       // OpenStreetMap with coordinates
                       return (
                         <div className="w-full md:w-1/2 h-48 md:h-auto bg-surface-dim relative">
-                          <iframe title={`Map of ${event.venueName}`} width="100%" height="100%" style={{ border: 0, minHeight: "200px" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" src={`https://www.openstreetmap.org/export/embed.html?bbox=${event.longitude! - 0.005},${event.latitude! - 0.005},${event.longitude! + 0.005},${event.latitude! + 0.005}&layer=mapnik&marker=${event.latitude},${event.longitude}`} />
+                          <iframe title={`Map of ${event.venueName}`} width="100%" height="100%" style={{ border: 0, minHeight: "200px" }} referrerPolicy="no-referrer-when-downgrade" src={`https://www.openstreetmap.org/export/embed.html?bbox=${event.longitude! - 0.005},${event.latitude! - 0.005},${event.longitude! + 0.005},${event.latitude! + 0.005}&layer=mapnik&marker=${event.latitude},${event.longitude}`} />
                         </div>
                       );
                     }
