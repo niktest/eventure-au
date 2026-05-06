@@ -123,7 +123,7 @@ export default async function EventDetailPage({
 
       <div className="bg-surface-bright min-h-screen">
         {/* Hero Section */}
-        <section className="relative w-full h-[320px] md:h-[480px] bg-surface-dim overflow-hidden">
+        <section className="relative w-full h-[280px] md:h-[480px] bg-surface-dim overflow-hidden">
           {event.imageUrl ? (
             <Image
               src={event.imageUrl}
@@ -136,11 +136,11 @@ export default async function EventDetailPage({
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary-container to-primary" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 md:via-background/40 to-transparent" />
         </section>
 
         {/* Content Container */}
-        <div className="max-w-[1280px] mx-auto px-6 md:px-12 -mt-20 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-16">
+        <div className="max-w-[1280px] mx-auto px-6 md:px-12 mt-4 md:-mt-20 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-16">
           {/* Left Column: Details */}
           <div className="lg:col-span-8 space-y-8">
             {/* Header Card */}
