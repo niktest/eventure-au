@@ -44,7 +44,13 @@ export function CategoryChipRow({ active }: CategoryChipRowProps) {
   return (
     <nav
       aria-label="Filter by category"
-      className="-mx-1 flex items-center gap-2 overflow-x-auto pb-1"
+      className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 snap-x"
+      style={{
+        WebkitMaskImage:
+          "linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%)",
+        maskImage:
+          "linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%)",
+      }}
     >
       {items.map((item) => {
         const isActive = item.value === active;
@@ -54,7 +60,7 @@ export function CategoryChipRow({ active }: CategoryChipRowProps) {
             href={buildHref(item.value)}
             onClick={(e) => onActivate(e, item.value)}
             className={
-              "shrink-0 rounded-full px-3 py-1.5 font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 " +
+              "snap-start shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 " +
               (isActive
                 ? "bg-primary text-on-primary"
                 : "bg-surface-container-low text-on-surface hover:bg-surface-container")
