@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalise } from "./index";
+import { normalise, decodeHtmlEntities, cleanTitle } from "./index";
 import type { RawEvent } from "@/types/event";
 
 function makeRawEvent(overrides: Partial<RawEvent> = {}): RawEvent {
@@ -195,5 +195,148 @@ describe("category inference", () => {
   it("uses explicit category when provided", () => {
     const raw = makeRawEvent({ name: "My Event", category: "SPORTS" });
     expect(normalise("test", raw).category).toBe("SPORTS");
+  });
+});
+
+describe("decodeHtmlEntities", () => {
+  it("decodes numeric entities", () => {
+    expect(decodeHtmlEntities("&#39;Hello&#39;")).toBe("'Hello'");
+  });
+
+  it("decodes hex entities", () => {
+    expect(decodeHtmlEntities("&#x27;Hello&#x27;")).toBe("'Hello'");
+  });
+
+  it("decodes named entities", () => {
+    expect(decodeHtmlEntities("Tom &amp; Jerry &lt;3 &quot;quote&quot;")).toBe(
+      'Tom & Jerry <3 "quote"',
+    );
+  });
+
+  it("collapses double-encoded sequences (&amp;#39; → ')", () => {
+    expect(decodeHtmlEntities("&amp;#39;THE MISSING&amp;#39;")).toBe("'THE MISSING'");
+  });
+
+  it("leaves unknown entities intact", () => {
+    expect(decodeHtmlEntities("&unknown;")).toBe("&unknown;");
+  });
+});
+
+describe("cleanTitle", () => {
+  it("strips trailing URLs from titles", () => {
+    expect(cleanTitle("Some Event https://example.com/x")).toBe("Some Event");
+  });
+
+  it("decodes entities and strips URLs in one pass", () => {
+    expect(
+      cleanTitle("&#39;THE MISSING MOTHER&#39; BY MALI CORNISH BOOK LAUNCH https://moshtix.com/x"),
+    ).toBe("'THE MISSING MOTHER' BY MALI CORNISH BOOK LAUNCH");
+  });
+
+  it("collapses internal whitespace", () => {
+    expect(cleanTitle("  Multi   space   title  ")).toBe("Multi space title");
+  });
+});
+
+describe("normalise — entity-encoded source data (EVE-141 regression)", () => {
+  it("decodes &#39; in titles instead of storing it literally", () => {
+    const raw = makeRawEvent({
+      name: "&#39;THE MISSING MOTHER&#39; BY MALI CORNISH BOOK LAUNCH",
+      sourceId: "moshtix-abc",
+    });
+    const result = normalise("moshtix", raw);
+    expect(result.name).toBe("'THE MISSING MOTHER' BY MALI CORNISH BOOK LAUNCH");
+  });
+
+  it("produces a clean slug without numeric entity remnants", () => {
+    const raw = makeRawEvent({
+      name: "&#39;THE MISSING MOTHER&#39; BY MALI CORNISH BOOK LAUNCH",
+      sourceId: "moshtix-abc12345",
+    });
+    const result = normalise("moshtix", raw);
+    expect(result.slug).not.toMatch(/39/);
+    expect(result.slug).toMatch(/^the-missing-mother-by-mali-cornish-book-launch-/);
+  });
+
+  it("strips trailing URLs from slug and title", () => {
+    const raw = makeRawEvent({
+      name: "Cool Event https://www.moshtix.com.au/foo",
+      sourceId: "x",
+    });
+    const result = normalise("moshtix", raw);
+    expect(result.name).toBe("Cool Event");
+    expect(result.slug).not.toMatch(/https/);
+    expect(result.slug).toMatch(/^cool-event-/);
+  });
+
+  it("decodes entities in description as well", () => {
+    const raw = makeRawEvent({
+      description: "Tickets at &amp;quot;the door&amp;quot;",
+    });
+    const result = normalise("test", raw);
+    expect(result.description).toBe('Tickets at "the door"');
+  });
+
+  it("upgrades http:// image URLs to https://", () => {
+    const raw = makeRawEvent({
+      imageUrl: "http://www.moshtix.com.au/uploads/abc123",
+    });
+    const result = normalise("moshtix", raw);
+    expect(result.imageUrl).toBe("https://www.moshtix.com.au/uploads/abc123");
+  });
+
+  it("leaves https:// image URLs untouched", () => {
+    const raw = makeRawEvent({
+      imageUrl: "https://cdn.example.com/img.jpg",
+    });
+    const result = normalise("test", raw);
+    expect(result.imageUrl).toBe("https://cdn.example.com/img.jpg");
+  });
+
+  it("falls back to source-id-only slug when title is entirely entity garbage", () => {
+    const raw = makeRawEvent({ name: "&#9;&#10;", sourceId: "abc12345" });
+    const result = normalise("test", raw);
+    // Slug should still be unique and non-empty
+    expect(result.slug.length).toBeGreaterThan(0);
+    expect(result.slug).not.toMatch(/^-/);
+  });
+});
+
+describe("normalise — entity-encoded venue fields (EVE-144 regression)", () => {
+  it("decodes &#39; in venueName", () => {
+    const raw = makeRawEvent({
+      venueName: "Brunswick Artists&#39; Bar",
+    });
+    expect(normalise("test", raw).venueName).toBe("Brunswick Artists' Bar");
+  });
+
+  it("decodes &amp; in venueAddress", () => {
+    const raw = makeRawEvent({
+      venueAddress: "Smith &amp; Jones St, BRUNSWICK",
+    });
+    expect(normalise("test", raw).venueAddress).toBe("Smith & Jones St, BRUNSWICK");
+  });
+
+  it("decodes entities in city/state", () => {
+    const raw = makeRawEvent({
+      city: "St&#39;Kilda",
+      state: "VIC&amp;",
+    });
+    const result = normalise("test", raw);
+    expect(result.city).toBe("St'Kilda");
+    expect(result.state).toBe("VIC&");
+  });
+
+  it("returns null for venue fields that decode to whitespace", () => {
+    const raw = makeRawEvent({ venueName: "   ", venueAddress: "" });
+    const result = normalise("test", raw);
+    expect(result.venueName).toBeNull();
+    expect(result.venueAddress).toBeNull();
+  });
+
+  it("falls back to Unknown when city/state decode to empty", () => {
+    const raw = makeRawEvent({ city: "   " });
+    const result = normalise("test", raw);
+    expect(result.city).toBe("Unknown");
   });
 });

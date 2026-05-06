@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "ingest": "tsx src/lib/ingestion/run.ts",
+    "backfill:eve-141": "tsx scripts/backfill-entity-titles.ts",
     "setup": "NODE_ENV=development npm install --include=dev",
     "visual-check": "tsx scripts/screenshot-pages.ts",
     "test": "NODE_ENV=test vitest run",
