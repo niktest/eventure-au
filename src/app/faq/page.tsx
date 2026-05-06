@@ -5,25 +5,24 @@ import { CONTACT_EMAILS } from "@/lib/contact";
 
 const faqItems = [
   {
-    question: "What is Eventure?",
+    question: "What is Festlio?",
     answer: (
       <p>
-        Eventure is Australia&apos;s events and entertainment aggregator. We
-        scan and curate events happening near you — live music, festivals,
-        markets, sports, family fun, nightlife, food and drink, arts, comedy,
-        theatre, outdoor adventures, and community gatherings — all in one
-        place.
+        Festlio is the easiest way to find out what&apos;s on near you. We pull
+        together live music, festivals, markets, sport, family days out, food
+        and drink, arts, comedy, theatre, and community events from across
+        Australia into a single, skimmable calendar.
       </p>
     ),
   },
   {
-    question: "Does Eventure sell tickets?",
+    question: "Does Festlio sell tickets?",
     answer: (
       <p>
-        No. Eventure is an aggregation platform — we help you discover events,
-        but we do not sell tickets or manage bookings. When you find an event
-        you&apos;re interested in, we link you directly to the official
-        ticketing provider or event organiser&apos;s website.
+        No. Festlio is a discovery platform — we help you find events, but we
+        don&apos;t sell tickets or manage bookings. When something looks good,
+        we send you straight to the official ticketing provider or the
+        organiser&apos;s site.
       </p>
     ),
   },
@@ -33,7 +32,7 @@ const faqItems = [
       <p>
         We aggregate publicly available event information from ticketing
         platforms, venue websites, tourism boards, and community calendars. Our
-        system regularly scans these sources to keep listings up to date.
+        system scans those sources daily so listings stay current.
       </p>
     ),
   },
@@ -42,47 +41,45 @@ const faqItems = [
     answer: (
       <div>
         <p>
-          We make every effort to keep event information current and accurate,
-          but details can change without notice by the event organiser. We
-          always recommend verifying event details (dates, times, pricing,
-          availability) directly with the official event or venue website before
-          attending.
+          We work hard to keep listings accurate, but organisers can change
+          details without notice — venues move, times shift, gigs sell out.
+          Always confirm the details on the official event or venue page before
+          you head out or buy a ticket.
         </p>
       </div>
     ),
   },
   {
-    question: "What areas does Eventure cover?",
+    question: "What areas does Festlio cover?",
     answer: (
       <p>
-        We&apos;re launching on the Gold Coast, Queensland, and expanding to
-        Brisbane and then Australia-wide. Our goal is to be the go-to
-        destination for discovering events across the entire country.
+        We&apos;re starting on the Gold Coast and rolling out to Brisbane next,
+        then across the rest of Australia. The goal is one calendar for the
+        whole country — but done properly, city by city.
       </p>
     ),
   },
   {
-    question: "How can I get my event listed on Eventure?",
+    question: "How can I get my event listed on Festlio?",
     answer: (
       <p>
-        If you organise events and want them to appear on Eventure, we&apos;d
-        love to hear from you. Contact us at{" "}
+        If you run events, we&apos;d love to have them on Festlio. Email us at{" "}
         <a
           href={`mailto:${CONTACT_EMAILS.partners}`}
           className="text-primary hover:text-primary-container transition-colors"
         >
           {CONTACT_EMAILS.partners}
         </a>{" "}
-        and we&apos;ll get your events added.
+        and we&apos;ll get them added — there&apos;s no fee.
       </p>
     ),
   },
   {
-    question: "Is Eventure free to use?",
+    question: "Is Festlio free to use?",
     answer: (
       <p>
-        Yes! Eventure is completely free for users. Browse, search, and discover
-        events without any cost or sign-up required.
+        Yes. Festlio is completely free for event-goers. Browse, search, and
+        discover — no sign-up, no paywall.
       </p>
     ),
   },
@@ -90,23 +87,23 @@ const faqItems = [
     question: "How do I report incorrect event information?",
     answer: (
       <p>
-        If you spot an error in an event listing, please let us know by emailing{" "}
+        Spotted something wrong? Let us know at{" "}
         <a
           href={`mailto:${CONTACT_EMAILS.general}`}
           className="text-primary hover:text-primary-container transition-colors"
         >
           {CONTACT_EMAILS.general}
-        </a>
-        . We&apos;ll investigate and update the listing as quickly as possible.
+        </a>{" "}
+        and we&apos;ll fix it as quickly as we can.
       </p>
     ),
   },
   {
-    question: "Does Eventure use cookies?",
+    question: "Does Festlio use cookies?",
     answer: (
       <p>
-        Yes, we use a small number of cookies to make the Website work and to
-        understand how visitors use it. For full details, see our{" "}
+        Yes — a small number, mostly to make the site work and to understand
+        how people use it. Full details are in our{" "}
         <a
           href="/cookies"
           className="text-primary hover:text-primary-container transition-colors"
@@ -118,10 +115,10 @@ const faqItems = [
     ),
   },
   {
-    question: "How do I contact Eventure?",
+    question: "How do I contact Festlio?",
     answer: (
       <div>
-        <p>You can reach us via email:</p>
+        <p>You can reach us by email:</p>
         <ul className="mt-2 list-disc space-y-1 pl-6">
           <li>
             General enquiries:{" "}
@@ -166,7 +163,7 @@ export default function FaqPage() {
       <div className="space-y-8">
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
           <p className="text-primary">
-            Find answers to common questions about Eventure below. Can&apos;t
+            Find answers to common questions about Festlio below. Can&apos;t
             find what you&apos;re looking for?{" "}
             <a
               href="/contact"

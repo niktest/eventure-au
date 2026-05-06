@@ -4,7 +4,7 @@ import { CONTACT_EMAILS } from "@/lib/contact";
 export const metadata: Metadata = {
   title: "Cookie Policy",
   description:
-    "Eventure's Cookie Policy — how we use cookies and similar tracking technologies on our website.",
+    "Festlio's Cookie Policy — how we use cookies and similar tracking technologies on our website.",
 };
 
 export default function CookiePolicyPage() {
@@ -17,10 +17,11 @@ export default function CookiePolicyPage() {
       <div className="space-y-8 text-on-surface-variant leading-relaxed">
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
           <p className="text-on-surface-variant">
-            This Cookie Policy explains how Eventure (&ldquo;we&rdquo;,
-            &ldquo;us&rdquo;, &ldquo;our&rdquo;) uses cookies and similar
-            tracking technologies on our website at festlio.com. This policy
-            should be read alongside our{" "}
+            This Cookie Policy explains how Festlio Events &amp;
+            Entertainment (&ldquo;we&rdquo;, &ldquo;us&rdquo;,
+            &ldquo;our&rdquo;) uses cookies and similar tracking technologies
+            on our website at festlio.com. This policy should be read alongside
+            our{" "}
             <a
               href="/privacy"
               className="font-semibold text-primary underline hover:no-underline"

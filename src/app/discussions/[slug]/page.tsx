@@ -34,7 +34,7 @@ export async function generateMetadata({
   if (!thread) return { title: "Thread not found" };
   const description =
     thread.body.replace(/\s+/g, " ").trim().slice(0, 160) ||
-    `${thread.title} — Gold Coast Discussions on Eventure.`;
+    `${thread.title} — Gold Coast Discussions on Festlio.`;
   return {
     title: `${thread.title} — Gold Coast Discussions`,
     description,

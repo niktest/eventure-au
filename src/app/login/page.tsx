@@ -6,7 +6,7 @@ import { FallbackImage } from "@/components/FallbackImage";
 
 export const metadata: Metadata = {
   title: "Sign In",
-  description: "Sign in to Eventure Discovery to access your saved events and collections.",
+  description: "Sign in to Festlio to access your saved events and collections.",
 };
 
 export default function LoginPage() {
@@ -38,7 +38,7 @@ export default function LoginPage() {
             <Link href="/" className="inline-flex items-center gap-2 mb-12">
               <span className="material-symbols-outlined text-primary text-[32px]" aria-hidden="true">auto_awesome_motion</span>
               <span className="font-heading text-2xl font-bold text-on-surface tracking-tight">
-                <span className="text-primary font-extrabold">Eventure</span> Discovery
+                <span className="text-primary font-extrabold">Festlio</span>
               </span>
             </Link>
             <h2 className="font-display text-5xl font-extrabold text-on-surface mb-2 tracking-tight" style={{ letterSpacing: "-0.02em" }}>

@@ -4,7 +4,7 @@ import { CONTACT_EMAILS } from "@/lib/contact";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with the Eventure team. Questions about events, partnerships, or listing your venue — we'd love to hear from you.",
+    "Talk to the Festlio team — questions, partnership enquiries, or list your venue. We'd love to hear from you.",
 };
 
 export default function ContactPage() {
@@ -12,13 +12,13 @@ export default function ContactPage() {
     <div className="bg-surface-bright min-h-screen">
       <div className="mx-auto max-w-3xl px-6 py-12">
         <h1 className="mb-6 font-display text-4xl font-extrabold text-on-surface tracking-tight" style={{ letterSpacing: "-0.02em" }}>
-          Contact Us
+          Contact Festlio
         </h1>
 
         <div className="space-y-8 font-body text-base text-on-surface-variant leading-relaxed">
           <p>
-            Have a question, feedback, or want to partner with us? We&apos;d love
-            to hear from you.
+            Got a question, feedback, or want to put your events in front of
+            more people? We read everything — drop us a line.
           </p>
 
           <div className="rounded-xl border border-surface-container-high bg-surface-container-lowest p-6 space-y-6 shadow-sm">
@@ -34,10 +34,11 @@ export default function ContactPage() {
                 Event Organisers &amp; Venues
               </h2>
               <p className="text-secondary">
-                Want your events featured on Eventure? Reach out at{" "}
+                Want your events on Festlio? Email{" "}
                 <a href={`mailto:${CONTACT_EMAILS.partners}`} className="text-primary hover:text-primary-container transition-colors">
                   {CONTACT_EMAILS.partners}
-                </a>
+                </a>{" "}
+                and we&apos;ll get you added.
               </p>
             </div>
 
@@ -52,9 +53,9 @@ export default function ContactPage() {
           <div className="rounded-xl bg-primary-container/10 p-6 border border-primary-container/20">
             <h2 className="mb-3 font-heading font-bold text-on-surface">Based on the Gold Coast</h2>
             <p className="text-on-surface-variant">
-              Eventure is proudly based on the Gold Coast, Queensland, Australia.
-              We&apos;re building the best way to discover events across
-              Australia.
+              Festlio is built on the Gold Coast, Queensland. We&apos;re
+              starting in our own backyard and working outward — Brisbane next,
+              then the rest of the country.
             </p>
           </div>
         </div>

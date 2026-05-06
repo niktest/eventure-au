@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "My Profile",
   description:
-    "View your profile, saved events, collections, and activity on Eventure Discovery.",
+    "View your profile, saved events, collections, and activity on Festlio.",
 };
 
 export default function ProfilePage() {
@@ -25,7 +25,7 @@ export default function ProfilePage() {
             Your Profile
           </h1>
           <p className="font-body text-base text-secondary max-w-md mb-3">
-            User profiles are coming soon. You&apos;ll be able to save events, create collections, and track your activity across Eventure.
+            User profiles are coming soon. You&apos;ll be able to save events, create collections, and track your activity across Festlio.
           </p>
           <p className="font-body text-sm text-secondary/70 mb-8">
             Stay tuned — we&apos;re working on it!

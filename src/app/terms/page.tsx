@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
-    "Eventure's Terms and Conditions — the rules governing your use of the Eventure events aggregation website.",
+    "Festlio's Terms and Conditions — the rules governing your use of the Festlio events aggregation website.",
 };
 
 export default function TermsPage() {
@@ -17,19 +17,20 @@ export default function TermsPage() {
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
           <p className="text-on-surface-variant">
             These Terms and Conditions (&ldquo;Terms&rdquo;) govern your access
-            to and use of the Eventure website at festlio.com (the
-            &ldquo;Website&rdquo;), operated by Eventure (&ldquo;we&rdquo;,
-            &ldquo;us&rdquo;, &ldquo;our&rdquo;). By accessing or using the
-            Website, you agree to be bound by these Terms.
+            to and use of the Festlio website at festlio.com (the
+            &ldquo;Website&rdquo;), operated by Festlio Events &amp;
+            Entertainment (&ldquo;we&rdquo;, &ldquo;us&rdquo;,
+            &ldquo;our&rdquo;). By accessing or using the Website, you agree to
+            be bound by these Terms.
           </p>
         </div>
 
         <section>
           <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
-            1. About Eventure
+            1. About Festlio
           </h2>
           <p>
-            Eventure is an events aggregation platform. We collect, organise,
+            Festlio is an events aggregation platform. We collect, organise,
             and display publicly available event information from third-party
             sources to help users discover events happening near them in
             Australia.
@@ -94,7 +95,7 @@ export default function TermsPage() {
           </h2>
           <p>
             The listing of any event on the Website does not constitute an
-            endorsement, recommendation, or guarantee by Eventure. We do not
+            endorsement, recommendation, or guarantee by Festlio. We do not
             vet, review, or approve events or event organisers.
           </p>
         </section>
@@ -112,7 +113,7 @@ export default function TermsPage() {
           </p>
           <p className="mt-3">
             <strong>Affiliate links:</strong> Some outbound links may be
-            affiliate links, meaning Eventure may earn a commission if you
+            affiliate links, meaning Festlio may earn a commission if you
             complete a transaction on a third-party site. Affiliate
             relationships do not influence which events are listed or how they
             are displayed.
@@ -125,8 +126,9 @@ export default function TermsPage() {
           </h2>
           <p>
             The Website&apos;s design, layout, logos, branding, and original
-            written content are owned by or licensed to Eventure and are
-            protected by Australian copyright and intellectual property laws.
+            written content are owned by or licensed to Festlio Events &amp;
+            Entertainment and are protected by Australian copyright and
+            intellectual property laws.
             Event information, images, and descriptions sourced from third
             parties remain the intellectual property of their respective owners.
           </p>
@@ -182,7 +184,8 @@ export default function TermsPage() {
             8. Indemnity
           </h2>
           <p>
-            You agree to indemnify and hold harmless Eventure, its directors,
+            You agree to indemnify and hold harmless Festlio Events &amp;
+            Entertainment, its directors,
             officers, employees, and agents from and against any claims, losses,
             damages, liabilities, and expenses arising from your use of the
             Website or your breach of these Terms.

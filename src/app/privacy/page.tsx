@@ -4,7 +4,7 @@ import { CONTACT_EMAILS } from "@/lib/contact";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Eventure's Privacy Policy — how we collect, hold, use, and disclose personal information in accordance with the Privacy Act 1988 (Cth) and the Australian Privacy Principles.",
+    "Festlio's Privacy Policy — how we collect, hold, use, and disclose personal information in accordance with the Privacy Act 1988 (Cth) and the Australian Privacy Principles.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -17,16 +17,16 @@ export default function PrivacyPolicyPage() {
       <div className="space-y-8 text-on-surface-variant leading-relaxed">
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
           <p className="text-on-surface-variant">
-            This Privacy Policy describes how Eventure (&ldquo;we&rdquo;,
-            &ldquo;us&rdquo;, &ldquo;our&rdquo;) collects, holds, uses, and
-            discloses personal information in accordance with the{" "}
-            <em>Privacy Act 1988</em> (Cth) and the Australian Privacy
-            Principles (APPs).
+            This Privacy Policy describes how Festlio Events &amp;
+            Entertainment (&ldquo;we&rdquo;, &ldquo;us&rdquo;,
+            &ldquo;our&rdquo;) collects, holds, uses, and discloses personal
+            information in accordance with the <em>Privacy Act 1988</em> (Cth)
+            and the Australian Privacy Principles (APPs).
           </p>
         </div>
 
         <p>
-          Eventure operates an events aggregation website accessible at
+          Festlio operates an events aggregation website accessible at
           festlio.com (the &ldquo;Website&rdquo;). We aggregate publicly
           available event information from third-party sources and present it in
           a searchable, user-friendly format. By using the Website, you consent

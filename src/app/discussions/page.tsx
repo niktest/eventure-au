@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   description:
     "Real talk from the Gold Coast events community — what's hot, what's worth your weekend, who's going.",
   openGraph: {
-    title: "Gold Coast Discussions — Eventure",
+    title: "Gold Coast Discussions — Festlio",
     description:
       "Join Gold Coast event-goers chatting about gigs, festivals, markets and more.",
   },

@@ -22,16 +22,16 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Eventure Discovery — Find Your Vibe",
-    template: "%s | Eventure Discovery",
+    default: "Festlio — What's on near you",
+    template: "%s | Festlio",
   },
   description:
-    "Discover the best events happening near you — live music, festivals, markets, sports, family fun, nightlife, and more. Starting on the Gold Coast.",
+    "Find what's on near you tonight — live music, festivals, markets, sport and more. Festlio aggregates Australia's events into one calendar, starting on the Gold Coast.",
   metadataBase: new URL(getSiteUrl()),
   openGraph: {
     type: "website",
     locale: "en_AU",
-    siteName: "Eventure Discovery",
+    siteName: "Festlio",
   },
   robots: {
     index: true,
@@ -59,7 +59,7 @@ export default function RootLayout({
               href="/"
               className="text-2xl font-extrabold tracking-tighter text-on-surface font-heading"
             >
-              Eventure Discovery
+              Festlio
             </Link>
 
             {/* Desktop Search */}

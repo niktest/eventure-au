@@ -5,8 +5,6 @@ import { Search } from "lucide-react";
 
 /**
  * Hero band per EVE-126 §5. Dark surface with neon-dusk gradient.
- * h1 wording is preserved verbatim ("Find your vibe, join the community.")
- * to avoid SEO regression.
  */
 export function HeroSection({ children }: { children?: React.ReactNode }) {
   return (
@@ -34,9 +32,7 @@ export function HeroSection({ children }: { children?: React.ReactNode }) {
             className="font-display text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.1] mb-4"
             style={{ letterSpacing: "-0.02em" }}
           >
-            Find your vibe,
-            <br />
-            join the community.
+            Find what&apos;s on near you.
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -44,8 +40,8 @@ export function HeroSection({ children }: { children?: React.ReactNode }) {
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             className="font-body text-lg text-on-dark-muted max-w-lg"
           >
-            Live music, festivals, markets, sport — discover what&apos;s
-            happening near you tonight.
+            Live music, festivals, markets, sport — one calendar for everything
+            happening near you.
           </motion.p>
         </div>
 

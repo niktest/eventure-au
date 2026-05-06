@@ -6,7 +6,7 @@ import { FallbackImage } from "@/components/FallbackImage";
 
 export const metadata: Metadata = {
   title: "Sign Up",
-  description: "Create an Eventure Discovery account to discover and curate your next experience.",
+  description: "Create a Festlio account to discover and curate your next experience.",
 };
 
 export default function SignUpPage() {
@@ -21,7 +21,7 @@ export default function SignUpPage() {
               explore
             </span>
             <span className="font-heading text-2xl font-bold tracking-tight text-primary">
-              Eventure Discovery
+              Festlio
             </span>
           </Link>
         </div>
@@ -114,7 +114,7 @@ export default function SignUpPage() {
               </span>
             </div>
             <p className="font-heading text-xl font-bold text-white">
-              &quot;Eventure transformed how I connect with my city. The curated collections are unmatched.&quot;
+              &quot;Festlio transformed how I connect with my city. The curated collections are unmatched.&quot;
             </p>
           </div>
         </div>

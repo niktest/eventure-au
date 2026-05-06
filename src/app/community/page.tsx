@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Community Hub",
-  description: "Explore curated collections, join trending conversations, and connect with curators on Eventure.",
+  description: "Explore curated collections, join trending conversations, and connect with curators on Festlio.",
 };
 
 export default function CommunityPage() {

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Collections",
-  description: "Browse curated event collections on Eventure Discovery — handpicked events grouped by the community.",
+  description: "Browse curated event collections on Festlio — handpicked events grouped by the community.",
 };
 
 export default function CollectionsPage() {
