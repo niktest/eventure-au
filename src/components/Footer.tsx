@@ -30,11 +30,11 @@ export function Footer() {
             href="/"
             className="text-lg font-extrabold font-heading mb-4 block text-neon-coral"
           >
-            Eventure Discovery
+            Festlio
           </Link>
           <p className="font-body text-sm text-on-dark-muted">
-            &copy; {new Date().getFullYear()} Eventure Discovery. Built for the
-            community.
+            &copy; {new Date().getFullYear()} Festlio Events &amp; Entertainment.
+            Built for the community.
           </p>
         </div>
 

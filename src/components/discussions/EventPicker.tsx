@@ -95,12 +95,12 @@ export function EventPicker({ value, onChange }: EventPickerProps) {
         search
       </span>
       <label htmlFor="event-search" className="sr-only">
-        Search Eventure events
+        Search Festlio events
       </label>
       <input
         id="event-search"
         type="search"
-        placeholder="Search Eventure events…"
+        placeholder="Search Festlio events…"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
