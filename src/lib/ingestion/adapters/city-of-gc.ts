@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
 /**
  * City of Gold Coast events calendar scraper adapter.
@@ -16,7 +17,7 @@ export class CityOfGCAdapter implements SourceAdapter {
     try {
       const res = await fetch(eventsUrl, {
         headers: {
-          "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+          "User-Agent": SCRAPER_USER_AGENT,
         },
       });
 

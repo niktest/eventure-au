@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CONTACT_EMAILS } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -26,7 +27,7 @@ export default function PrivacyPolicyPage() {
 
         <p>
           Eventure operates an events aggregation website accessible at
-          eventure.com.au (the &ldquo;Website&rdquo;). We aggregate publicly
+          festlio.com (the &ldquo;Website&rdquo;). We aggregate publicly
           available event information from third-party sources and present it in
           a searchable, user-friendly format. By using the Website, you consent
           to the collection and use of information in accordance with this
@@ -281,10 +282,10 @@ export default function PrivacyPolicyPage() {
           </p>
           <p className="mt-3">
             <a
-              href="mailto:privacy@eventure.com.au"
+              href={`mailto:${CONTACT_EMAILS.privacy}`}
               className="text-primary hover:text-primary-container transition-colors"
             >
-              privacy@eventure.com.au
+              {CONTACT_EMAILS.privacy}
             </a>
           </p>
         </section>

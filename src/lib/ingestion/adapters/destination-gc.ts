@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
 /**
  * Destination Gold Coast scraper adapter.
@@ -17,7 +18,7 @@ export class DestinationGCAdapter implements SourceAdapter {
     try {
       const res = await fetch(`${baseUrl}/things-to-do/events`, {
         headers: {
-          "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+          "User-Agent": SCRAPER_USER_AGENT,
         },
       });
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CONTACT_EMAILS } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
@@ -18,7 +19,7 @@ export default function CookiePolicyPage() {
           <p className="text-on-surface-variant">
             This Cookie Policy explains how Eventure (&ldquo;we&rdquo;,
             &ldquo;us&rdquo;, &ldquo;our&rdquo;) uses cookies and similar
-            tracking technologies on our website at eventure.com.au. This policy
+            tracking technologies on our website at festlio.com. This policy
             should be read alongside our{" "}
             <a
               href="/privacy"
@@ -224,10 +225,10 @@ export default function CookiePolicyPage() {
           </p>
           <p className="mt-3">
             <a
-              href="mailto:privacy@eventure.com.au"
+              href={`mailto:${CONTACT_EMAILS.privacy}`}
               className="text-primary hover:text-primary-container transition-colors"
             >
-              privacy@eventure.com.au
+              {CONTACT_EMAILS.privacy}
             </a>
           </p>
         </section>

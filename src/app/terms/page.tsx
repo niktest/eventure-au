@@ -17,7 +17,7 @@ export default function TermsPage() {
         <div className="rounded-xl bg-primary-container/10 border border-primary-container/20 p-6">
           <p className="text-on-surface-variant">
             These Terms and Conditions (&ldquo;Terms&rdquo;) govern your access
-            to and use of the Eventure website at eventure.com.au (the
+            to and use of the Eventure website at festlio.com (the
             &ldquo;Website&rdquo;), operated by Eventure (&ldquo;we&rdquo;,
             &ldquo;us&rdquo;, &ldquo;our&rdquo;). By accessing or using the
             Website, you agree to be bound by these Terms.
@@ -238,10 +238,10 @@ export default function TermsPage() {
           </p>
           <p className="mt-3">
             <a
-              href="mailto:legal@eventure.com.au"
+              href="mailto:legal@festlio.com"
               className="text-primary hover:text-primary-container transition-colors"
             >
-              legal@eventure.com.au
+              legal@festlio.com
             </a>
           </p>
         </section>

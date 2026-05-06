@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
 /**
  * The Star Gold Coast scraper adapter.
@@ -14,7 +15,7 @@ export class StarGCAdapter implements SourceAdapter {
     try {
       const res = await fetch(`${baseUrl}/whats-on`, {
         headers: {
-          "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+          "User-Agent": SCRAPER_USER_AGENT,
         },
       });
 

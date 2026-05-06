@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
 /** AU state codes to search on Megatix */
 const MEGATIX_STATES = ["QLD", "NSW", "VIC", "WA", "SA", "TAS", "NT", "ACT"];
@@ -30,7 +31,7 @@ export class MegatixAdapter implements SourceAdapter {
       try {
         const res = await fetch(searchUrl, {
           headers: {
-            "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+            "User-Agent": SCRAPER_USER_AGENT,
             Accept: "text/html,application/xhtml+xml",
           },
         });

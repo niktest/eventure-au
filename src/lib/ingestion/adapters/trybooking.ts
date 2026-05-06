@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 import { AU_LOCATIONS } from "../au-locations";
 
 /**
@@ -20,7 +21,7 @@ export class TryBookingAdapter implements SourceAdapter {
       try {
         const res = await fetch(searchUrl, {
           headers: {
-            "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+            "User-Agent": SCRAPER_USER_AGENT,
           },
         });
 

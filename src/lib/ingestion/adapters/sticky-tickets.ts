@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
 /**
  * Sticky Tickets Public Events API adapter.
@@ -48,7 +49,7 @@ export class StickyTicketsAdapter implements SourceAdapter {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
-          "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+          "User-Agent": SCRAPER_USER_AGENT,
         },
       });
 

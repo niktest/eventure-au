@@ -1,6 +1,7 @@
 "use client";
 
 import { Accordion } from "@/components/Accordion";
+import { CONTACT_EMAILS } from "@/lib/contact";
 
 const faqItems = [
   {
@@ -67,10 +68,10 @@ const faqItems = [
         If you organise events and want them to appear on Eventure, we&apos;d
         love to hear from you. Contact us at{" "}
         <a
-          href="mailto:partners@eventure.com.au"
+          href={`mailto:${CONTACT_EMAILS.partners}`}
           className="text-primary hover:text-primary-container transition-colors"
         >
-          partners@eventure.com.au
+          {CONTACT_EMAILS.partners}
         </a>{" "}
         and we&apos;ll get your events added.
       </p>
@@ -91,10 +92,10 @@ const faqItems = [
       <p>
         If you spot an error in an event listing, please let us know by emailing{" "}
         <a
-          href="mailto:hello@eventure.com.au"
+          href={`mailto:${CONTACT_EMAILS.general}`}
           className="text-primary hover:text-primary-container transition-colors"
         >
-          hello@eventure.com.au
+          {CONTACT_EMAILS.general}
         </a>
         . We&apos;ll investigate and update the listing as quickly as possible.
       </p>
@@ -125,28 +126,28 @@ const faqItems = [
           <li>
             General enquiries:{" "}
             <a
-              href="mailto:hello@eventure.com.au"
+              href={`mailto:${CONTACT_EMAILS.general}`}
               className="text-primary hover:text-primary-container transition-colors"
             >
-              hello@eventure.com.au
+              {CONTACT_EMAILS.general}
             </a>
           </li>
           <li>
             Event organisers &amp; venues:{" "}
             <a
-              href="mailto:partners@eventure.com.au"
+              href={`mailto:${CONTACT_EMAILS.partners}`}
               className="text-primary hover:text-primary-container transition-colors"
             >
-              partners@eventure.com.au
+              {CONTACT_EMAILS.partners}
             </a>
           </li>
           <li>
             Privacy questions:{" "}
             <a
-              href="mailto:privacy@eventure.com.au"
+              href={`mailto:${CONTACT_EMAILS.privacy}`}
               className="text-primary hover:text-primary-container transition-colors"
             >
-              privacy@eventure.com.au
+              {CONTACT_EMAILS.privacy}
             </a>
           </li>
         </ul>

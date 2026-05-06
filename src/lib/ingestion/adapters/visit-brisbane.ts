@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
 /**
  * Visit Brisbane / Brisbane City Council scraper adapter.
@@ -18,7 +19,7 @@ export class VisitBrisbaneAdapter implements SourceAdapter {
     try {
       const res = await fetch(searchUrl, {
         headers: {
-          "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+          "User-Agent": SCRAPER_USER_AGENT,
           Accept: "text/html,application/xhtml+xml",
         },
         redirect: "follow",

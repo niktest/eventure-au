@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CONTACT_EMAILS } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -23,8 +24,8 @@ export default function ContactPage() {
           <div className="rounded-xl border border-surface-container-high bg-surface-container-lowest p-6 space-y-6 shadow-sm">
             <div>
               <h2 className="font-heading font-bold text-on-surface">General Enquiries</h2>
-              <a href="mailto:hello@eventure.com.au" className="text-primary hover:text-primary-container transition-colors">
-                hello@eventure.com.au
+              <a href={`mailto:${CONTACT_EMAILS.general}`} className="text-primary hover:text-primary-container transition-colors">
+                {CONTACT_EMAILS.general}
               </a>
             </div>
 
@@ -34,16 +35,16 @@ export default function ContactPage() {
               </h2>
               <p className="text-secondary">
                 Want your events featured on Eventure? Reach out at{" "}
-                <a href="mailto:partners@eventure.com.au" className="text-primary hover:text-primary-container transition-colors">
-                  partners@eventure.com.au
+                <a href={`mailto:${CONTACT_EMAILS.partners}`} className="text-primary hover:text-primary-container transition-colors">
+                  {CONTACT_EMAILS.partners}
                 </a>
               </p>
             </div>
 
             <div>
               <h2 className="font-heading font-bold text-on-surface">Press &amp; Media</h2>
-              <a href="mailto:press@eventure.com.au" className="text-primary hover:text-primary-container transition-colors">
-                press@eventure.com.au
+              <a href={`mailto:${CONTACT_EMAILS.press}`} className="text-primary hover:text-primary-container transition-colors">
+                {CONTACT_EMAILS.press}
               </a>
             </div>
           </div>

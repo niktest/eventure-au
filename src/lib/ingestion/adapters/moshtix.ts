@@ -1,4 +1,5 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
+import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
 /** Moshtix location slugs mapped from city names */
 const MOSHTIX_LOCATIONS = [
@@ -38,7 +39,7 @@ export class MoshtixAdapter implements SourceAdapter {
       try {
         const res = await fetch(searchUrl, {
           headers: {
-            "User-Agent": "Eventure/1.0 (events aggregator; contact@eventure.com.au)",
+            "User-Agent": SCRAPER_USER_AGENT,
           },
         });
 

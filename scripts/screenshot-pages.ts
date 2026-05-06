@@ -13,7 +13,7 @@ import * as fs from "fs";
 import * as sharpModule from "sharp";
 const sharp = (sharpModule as any).default ?? sharpModule;
 
-const DEFAULT_BASE_URL = "https://eventure-au.vercel.app";
+const DEFAULT_BASE_URL = "https://festlio.com";
 
 // Max dimension (width or height) for output images.
 // Claude's API limits images to 2000px per dimension in many-image requests.

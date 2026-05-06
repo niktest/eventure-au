@@ -15,14 +15,14 @@ describe("getSiteUrl", () => {
     else process.env[ENV_KEY] = original;
   });
 
-  it("falls back to the staging URL when env var is unset", () => {
+  it("falls back to the production URL when env var is unset", () => {
     delete process.env[ENV_KEY];
-    expect(getSiteUrl()).toBe("https://eventure-au.vercel.app");
+    expect(getSiteUrl()).toBe("https://festlio.com");
   });
 
-  it("falls back to the staging URL when env var is empty or whitespace", () => {
+  it("falls back to the production URL when env var is empty or whitespace", () => {
     process.env[ENV_KEY] = "   ";
-    expect(getSiteUrl()).toBe("https://eventure-au.vercel.app");
+    expect(getSiteUrl()).toBe("https://festlio.com");
   });
 
   it("strips a trailing newline", () => {
@@ -41,7 +41,7 @@ describe("getSiteUrl", () => {
   });
 
   it("returns the value unchanged when clean", () => {
-    process.env[ENV_KEY] = "https://eventure-au.vercel.app";
-    expect(getSiteUrl()).toBe("https://eventure-au.vercel.app");
+    process.env[ENV_KEY] = "https://festlio.com";
+    expect(getSiteUrl()).toBe("https://festlio.com");
   });
 });
