@@ -64,19 +64,38 @@ export default async function EventDetailPage({
   const event = await prisma.event.findUnique({ where: { slug } });
   if (!event || event.status === "draft") return notFound();
 
-  // Fetch similar events (same category, different event)
+  // Similar events: same category first, then same city, then any upcoming.
+  // Layered so a sparse DB still surfaces something rather than an empty slot.
+  const SIMILAR_TARGET = 3;
   let similarEvents: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
   try {
+    const baseWhere = {
+      status: "published" as const,
+      startDate: { gte: new Date() },
+    };
     similarEvents = await prisma.event.findMany({
-      where: {
-        category: event.category,
-        status: "published",
-        startDate: { gte: new Date() },
-        id: { not: event.id },
-      },
+      where: { ...baseWhere, category: event.category, id: { not: event.id } },
       orderBy: { startDate: "asc" },
-      take: 3,
+      take: SIMILAR_TARGET,
     });
+    if (similarEvents.length < SIMILAR_TARGET && event.city) {
+      const exclude = [event.id, ...similarEvents.map((e) => e.id)];
+      const fillCity = await prisma.event.findMany({
+        where: { ...baseWhere, city: event.city, id: { notIn: exclude } },
+        orderBy: { startDate: "asc" },
+        take: SIMILAR_TARGET - similarEvents.length,
+      });
+      similarEvents = [...similarEvents, ...fillCity];
+    }
+    if (similarEvents.length < SIMILAR_TARGET) {
+      const exclude = [event.id, ...similarEvents.map((e) => e.id)];
+      const fillAny = await prisma.event.findMany({
+        where: { ...baseWhere, id: { notIn: exclude } },
+        orderBy: { startDate: "asc" },
+        take: SIMILAR_TARGET - similarEvents.length,
+      });
+      similarEvents = [...similarEvents, ...fillAny];
+    }
   } catch {
     // Non-critical
   }
@@ -337,7 +356,7 @@ export default async function EventDetailPage({
               </ul>
 
               {/* CTA Buttons */}
-              {event.ticketUrl ? (
+              {event.ticketUrl && (
                 <a
                   href={event.ticketUrl}
                   target="_blank"
@@ -349,9 +368,8 @@ export default async function EventDetailPage({
                   </span>
                   Get Tickets
                 </a>
-              ) : (
-                <InterestedButton eventId={event.id} />
               )}
+              <InterestedButton eventId={event.id} />
 
               {event.url && (
                 <a
@@ -381,19 +399,19 @@ export default async function EventDetailPage({
         </section>
 
         {/* Similar Events */}
-        {similarEvents.length > 0 && (
-          <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-16 space-y-6">
-            <div className="flex justify-between items-end">
-              <h2 className="font-heading text-3xl font-bold text-on-surface tracking-tight">
-                Similar events you might like
-              </h2>
-              <Link
-                href={`/events?category=${event.category.toLowerCase()}`}
-                className="hidden md:inline-block font-body text-sm font-semibold text-primary hover:underline"
-              >
-                View all
-              </Link>
-            </div>
+        <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-16 space-y-6">
+          <div className="flex justify-between items-end">
+            <h2 className="font-heading text-3xl font-bold text-on-surface tracking-tight">
+              Similar events you might like
+            </h2>
+            <Link
+              href={`/events?category=${event.category.toLowerCase()}`}
+              className="hidden md:inline-block font-body text-sm font-semibold text-primary hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+          {similarEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {similarEvents.map((ev, i) => (
                 <ScrollReveal key={ev.id} delay={i * 0.05}>
@@ -401,8 +419,20 @@ export default async function EventDetailPage({
                 </ScrollReveal>
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            <div className="rounded-xl border border-surface-container-high bg-surface-container-lowest p-8 text-center">
+              <p className="font-body text-secondary mb-3">
+                No similar events yet — check back soon.
+              </p>
+              <Link
+                href="/events"
+                className="font-body text-sm font-semibold text-primary hover:underline"
+              >
+                Explore all events →
+              </Link>
+            </div>
+          )}
+        </section>
       </div>
     </>
   );
