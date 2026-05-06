@@ -2,11 +2,11 @@
 
 /* Festlio Design System — per DESIGN.md */
 @theme {
-  /* ─── Brand Colours (Material 3 inspired) ─── */
-  --color-primary: #a43c12;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #b8551d;
-  --color-on-primary-container: #ffffff;
+  /* ─── Brand Colours (Material 3 inspired, repointed to Festlio neon palette) ─── */
+  --color-primary: #FF5A36;
+  --color-on-primary: #0B0D12;
+  --color-primary-container: #FF8866;
+  --color-on-primary-container: #0B0D12;
   --color-inverse-primary: #ffb59c;
 
   --color-secondary: #565e74;
@@ -37,7 +37,7 @@
   --color-on-surface-variant: #57423b;
   --color-inverse-surface: #213145;
   --color-inverse-on-surface: #eaf1ff;
-  --color-surface-tint: #a43c12;
+  --color-surface-tint: #FF5A36;
   --color-surface-variant: #d3e4fe;
 
   --color-outline: #8b7169;
@@ -183,7 +183,7 @@
   font-weight: 600;
   border-radius: 0.5rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  outline: 2px solid #a43c12;
+  outline: 2px solid #FF5A36;
   outline-offset: 2px;
 }
 
@@ -203,8 +203,8 @@ html {
 
 /* ─── Pulse glow for CTA buttons ─── */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(164, 60, 18, 0.3); }
-  50% { box-shadow: 0 0 20px 6px rgba(164, 60, 18, 0.1); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 90, 54, 0.3); }
+  50% { box-shadow: 0 0 20px 6px rgba(255, 90, 54, 0.1); }
 }
 
 .btn-glow {

@@ -12,7 +12,7 @@ function Error({ statusCode }: { statusCode?: number }) {
           ? "Page not found."
           : "An unexpected error occurred."}
       </p>
-      <Link href="/" style={{ display: "inline-block", marginTop: "2rem", color: "#a43c12" }}>
+      <Link href="/" style={{ display: "inline-block", marginTop: "2rem", color: "#FF5A36" }}>
         Back to home
       </Link>
     </div>
