@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 const FOOTER_LINKS = [
@@ -28,9 +29,15 @@ export function Footer() {
         <div className="col-span-1">
           <Link
             href="/"
-            className="text-lg font-extrabold font-heading mb-4 block text-neon-coral"
+            aria-label="Festlio — home"
+            className="mb-4 inline-flex items-center"
           >
-            Festlio
+            <Image
+              src="/brand/festlio-wordmark-light.svg"
+              alt="Festlio"
+              width={140}
+              height={42}
+            />
           </Link>
           <p className="font-body text-sm text-on-dark-muted">
             &copy; {new Date().getFullYear()} Festlio Events &amp; Entertainment.

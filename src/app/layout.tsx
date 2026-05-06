@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
 import { DesktopSearch } from "@/components/DesktopSearch";
@@ -28,10 +29,31 @@ export const metadata: Metadata = {
   description:
     "Find what's on near you tonight — live music, festivals, markets, sport and more. Festlio aggregates Australia's events into one calendar, starting on the Gold Coast.",
   metadataBase: new URL(getSiteUrl()),
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
   openGraph: {
     type: "website",
     locale: "en_AU",
     siteName: "Festlio",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Festlio — Find what's on near you.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -55,11 +77,14 @@ export default function RootLayout({
         <header className="fixed top-0 w-full z-50 border-b border-surface-container-high bg-white/90 backdrop-blur-md shadow-sm">
           <div className="flex justify-between items-center h-16 px-6 md:px-12 max-w-[1280px] mx-auto">
             {/* Brand */}
-            <Link
-              href="/"
-              className="text-2xl font-extrabold tracking-tighter text-on-surface font-heading"
-            >
-              Festlio
+            <Link href="/" aria-label="Festlio — home" className="inline-flex items-center">
+              <Image
+                src="/brand/festlio-wordmark.svg"
+                alt="Festlio"
+                width={140}
+                height={42}
+                priority
+              />
             </Link>
 
             {/* Desktop Search */}

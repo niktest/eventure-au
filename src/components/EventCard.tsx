@@ -21,7 +21,7 @@ export function EventCard({
 }) {
   const hoverClass =
     variant === "homepage"
-      ? "hover:-translate-y-1 hover:border-coral hover:shadow-glow-coral transition-all duration-300"
+      ? "hover:-translate-y-1 hover:border-neon-coral hover:shadow-glow-coral transition-all duration-300"
       : "card-hover";
   return (
     <Link
