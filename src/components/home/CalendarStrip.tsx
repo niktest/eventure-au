@@ -78,12 +78,12 @@ export function CalendarStrip({ days }: CalendarStripProps) {
       role="tablist"
       aria-label="Filter events by date"
       onKeyDown={onKeyDown}
-      className="flex items-stretch gap-2 overflow-x-auto hide-scrollbar pb-1 md:gap-2.5 lg:gap-3 snap-x snap-mandatory"
+      className="-mx-6 flex items-stretch gap-2 overflow-x-auto hide-scrollbar pb-1 px-6 scroll-pl-6 scroll-pr-6 md:mx-0 md:px-0 md:scroll-pl-0 md:scroll-pr-0 md:gap-2.5 lg:gap-3 snap-x snap-mandatory"
       style={{
         WebkitMaskImage:
-          "linear-gradient(90deg, #000 0, #000 calc(100% - 12px), transparent 100%)",
+          "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
         maskImage:
-          "linear-gradient(90deg, #000 0, #000 calc(100% - 12px), transparent 100%)",
+          "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
       }}
     >
       {days.map((d) => {
