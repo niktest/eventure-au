@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { eventJsonLd } from "./schema";
+import {
+  eventJsonLd,
+  itemListJsonLd,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "./schema";
 import type { Event } from "@/types/event";
 
 function makeEvent(overrides: Partial<Event> = {}): Event {
@@ -140,5 +145,61 @@ describe("eventJsonLd", () => {
   it("sets attendance mode to offline", () => {
     const ld = eventJsonLd(makeEvent());
     expect(ld.eventAttendanceMode).toBe("https://schema.org/OfflineEventAttendanceMode");
+  });
+});
+
+describe("websiteJsonLd", () => {
+  it("produces a WebSite with SearchAction pointing at /events?q=", () => {
+    const ld = websiteJsonLd();
+    expect(ld["@context"]).toBe("https://schema.org");
+    expect(ld["@type"]).toBe("WebSite");
+    expect(ld.name).toBe("Festlio");
+
+    const url = ld.url as string;
+    expect(url).toMatch(/^https?:\/\//);
+
+    const action = ld.potentialAction as Record<string, unknown>;
+    expect(action["@type"]).toBe("SearchAction");
+    expect(action["query-input"]).toBe("required name=search_term_string");
+
+    const target = action.target as Record<string, unknown>;
+    expect(target["@type"]).toBe("EntryPoint");
+    expect(target.urlTemplate).toBe(`${url}/events?q={search_term_string}`);
+  });
+});
+
+describe("organizationJsonLd", () => {
+  it("produces an Organization with the Festlio brand", () => {
+    const ld = organizationJsonLd();
+    expect(ld["@context"]).toBe("https://schema.org");
+    expect(ld["@type"]).toBe("Organization");
+    expect(ld.name).toBe("Festlio");
+    expect(typeof ld.url).toBe("string");
+    expect(typeof ld.logo).toBe("string");
+  });
+});
+
+describe("itemListJsonLd", () => {
+  it("emits ListItem entries with 1-based positions", () => {
+    const ld = itemListJsonLd([
+      { name: "Event A", url: "https://festlio.com/events/a" },
+      { name: "Event B", url: "https://festlio.com/events/b" },
+    ]);
+    expect(ld["@type"]).toBe("ItemList");
+
+    const items = ld.itemListElement as Array<Record<string, unknown>>;
+    expect(items).toHaveLength(2);
+    expect(items[0]).toMatchObject({
+      "@type": "ListItem",
+      position: 1,
+      url: "https://festlio.com/events/a",
+      name: "Event A",
+    });
+    expect(items[1].position).toBe(2);
+  });
+
+  it("returns an empty list when given no items", () => {
+    const ld = itemListJsonLd([]);
+    expect(ld.itemListElement).toEqual([]);
   });
 });

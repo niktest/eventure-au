@@ -8,6 +8,12 @@ import { CalendarStrip } from "@/components/home/CalendarStrip";
 import { HomepageCategoryRow } from "@/components/home/HomepageCategoryRow";
 import { NearMeButton } from "@/components/home/NearMeButton";
 import { buildCalendarDays } from "@/lib/calendar/buildCalendarDays";
+import {
+  itemListJsonLd,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo/schema";
+import { getSiteUrl } from "@/lib/seo/site-url";
 
 export const revalidate = 3600;
 
@@ -32,8 +38,21 @@ export default async function HomePage() {
     // DB unavailable — render empty state, ISR will retry.
   }
 
+  const siteUrl = getSiteUrl();
+  const itemList = itemListJsonLd(
+    upcomingEvents.map((event) => ({
+      name: event.name,
+      url: `${siteUrl}/events/${event.slug}`,
+    })),
+  );
+  const jsonLd = [websiteJsonLd(), organizationJsonLd(), itemList];
+
   return (
     <div className="min-h-screen bg-surface-bright">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HeroSection>
         <Suspense fallback={null}>
           <NearMeButton />
