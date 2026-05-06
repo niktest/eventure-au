@@ -48,9 +48,26 @@ function slugify(text: string): string {
     .slice(0, 120);
 }
 
+// Pull a stable, meaningful disambiguator out of a sourceId. URL-shaped
+// sourceIds like `https://www.moshtix.com.au/v2/event/foo/149068` would
+// otherwise serialise to `https` (the leading 8 chars), which is what
+// produced the `-https` slug residue cleaned up in EVE-155.
+export function suffixFromSourceId(sourceId: string): string {
+  const segments = sourceId.split(/[^a-z0-9]+/i).filter(Boolean);
+  const last = segments[segments.length - 1] ?? "";
+  if (last && !/^https?$/i.test(last)) {
+    return last.slice(0, 12).toLowerCase();
+  }
+  return sourceId
+    .replace(/[^a-z0-9]/gi, "")
+    .replace(/^https?/i, "")
+    .slice(0, 8)
+    .toLowerCase();
+}
+
 function makeUniqueSlug(name: string, sourceId: string): string {
   const base = slugify(name);
-  const suffix = sourceId.slice(0, 8).replace(/[^a-z0-9]/gi, "").toLowerCase();
+  const suffix = suffixFromSourceId(sourceId);
   return base ? `${base}-${suffix}` : suffix;
 }
 

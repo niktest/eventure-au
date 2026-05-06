@@ -11,7 +11,7 @@
  * Run via: `npm run backfill:eve-141` against production.
  */
 import { prisma } from "@/lib/prisma";
-import { cleanTitle, decodeHtmlEntities } from "@/lib/ingestion/normaliser";
+import { cleanTitle, decodeHtmlEntities, suffixFromSourceId } from "@/lib/ingestion/normaliser";
 
 function slugify(text: string): string {
   return cleanTitle(text)
@@ -25,7 +25,7 @@ function slugify(text: string): string {
 
 function rebuildSlug(name: string, sourceId: string): string {
   const base = slugify(name);
-  const suffix = sourceId.slice(0, 8).replace(/[^a-z0-9]/gi, "").toLowerCase();
+  const suffix = suffixFromSourceId(sourceId);
   return base ? `${base}-${suffix}` : suffix;
 }
 
