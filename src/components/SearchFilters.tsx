@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition } from "react";
+import { EventSearchAutocomplete } from "./EventSearchAutocomplete";
 
 const CATEGORIES = [
   "MUSIC",
@@ -73,25 +74,16 @@ export function SearchFilters() {
           <div className="h-full w-1/3 bg-primary loading-bar" />
         </div>
       )}
-      {/* Text search */}
-      <div className="relative">
-        <label htmlFor="event-search" className="sr-only">Search events</label>
-        <span className="material-symbols-outlined absolute left-3 top-3.5 text-secondary text-[20px]" aria-hidden="true">
-          search
-        </span>
-        <input
-          id="event-search"
-          type="search"
-          placeholder="Search events, artists, venues..."
-          defaultValue={currentQuery}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              updateParams({ q: (e.target as HTMLInputElement).value || null });
-            }
-          }}
-          className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 pl-10 font-body text-base text-on-surface placeholder:text-secondary shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-        />
-      </div>
+      {/* Text search with live autocomplete; submit preserves URL filter state */}
+      <EventSearchAutocomplete
+        inputId="event-search"
+        placeholder="Search events, artists, venues..."
+        initialQuery={currentQuery}
+        wrapperClassName="relative w-full"
+        iconClassName="material-symbols-outlined absolute left-3 top-3.5 text-secondary text-[20px] pointer-events-none"
+        inputClassName="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 pl-10 font-body text-base text-on-surface placeholder:text-secondary shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+        onSubmit={(q) => updateParams({ q: q || null })}
+      />
 
       {/* Date range and free toggle */}
       <div className="flex flex-wrap items-end gap-3">

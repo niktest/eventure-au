@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { EventSearchAutocomplete } from "./EventSearchAutocomplete";
 
 const NAV_LINKS = [
   { href: "/today", label: "Today" },
@@ -22,8 +23,6 @@ export function MobileNav() {
   const [user, setUser] = useState<{ name?: string | null } | null>(null);
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const router = useRouter();
   const pathname = usePathname();
   const menuRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -35,15 +34,6 @@ export function MobileNav() {
       .then((data) => setUser(data?.user ?? null))
       .catch(() => setUser(null));
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      router.push(`/events?q=${encodeURIComponent(query.trim())}`);
-      setSearchOpen(false);
-      setQuery("");
-    }
-  };
 
   const closeMenu = useCallback(() => {
     setOpen(false);
@@ -224,29 +214,16 @@ export function MobileNav() {
           ref={searchPanelRef}
           className="absolute top-full left-0 right-0 border-b border-surface-container-high bg-white px-4 py-3 shadow-md z-50"
         >
-          <form onSubmit={handleSearch} className="mx-auto flex max-w-2xl gap-2">
-            <div className="relative flex-1">
-              <label htmlFor="mobile-search" className="sr-only">Search events</label>
-              <span className="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-[20px]" aria-hidden="true">
-                search
-              </span>
-              <input
-                id="mobile-search"
-                type="search"
-                placeholder="Search events, venues, categories..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                autoFocus
-                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2.5 pl-10 pr-4 text-sm font-body text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded-full bg-primary-container px-5 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-            >
-              Search
-            </button>
-          </form>
+          <div className="mx-auto max-w-2xl">
+            <EventSearchAutocomplete
+              inputId="mobile-search"
+              placeholder="Search events, venues, categories..."
+              autoFocus
+              onAfterNavigate={() => setSearchOpen(false)}
+              inputClassName="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2.5 pl-10 pr-4 text-sm font-body text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              iconClassName="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-[20px] pointer-events-none"
+            />
+          </div>
         </div>
       )}
 
