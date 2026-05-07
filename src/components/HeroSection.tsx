@@ -10,18 +10,27 @@ export function HeroSection({ children }: { children?: React.ReactNode }) {
   return (
     <section
       aria-label="Discover events"
-      className="hero-seam-bleed relative overflow-hidden text-on-dark-strong"
+      // z-20 promotes the hero into its own stacking context so the
+      // autocomplete dropdown — which extends below the hero's bottom edge —
+      // paints above the following calendar-strip section (EVE-176).
+      className="hero-seam-bleed relative z-20 text-on-dark-strong"
       style={{ background: "var(--gradient-neon-dusk)" }}
     >
-      <img
-        src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1280&q=80"
-        alt=""
+      {/* Clip the bg image only, so the autocomplete dropdown can extend past
+          the section bottom (EVE-176). */}
+      <div
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-overlay pointer-events-none"
-        onError={(e) => {
-          e.currentTarget.style.display = "none";
-        }}
-      />
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+      >
+        <img
+          src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1280&q=80"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-overlay"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      </div>
 
       <div className="relative z-10 max-w-[1280px] mx-auto px-6 py-12 md:py-16 flex flex-col gap-8">
         <div className="max-w-2xl">
