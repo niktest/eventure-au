@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Event } from "@/types/event";
+import type { EventCardData } from "@/lib/events/eventCardSelect";
 import {
   EventCardImage,
   EventCardImagePlaceholder,
@@ -19,7 +19,7 @@ export function EventCard({
   event,
   variant = "default",
 }: {
-  event: Event;
+  event: EventCardData;
   variant?: EventCardVariant;
 }) {
   const hoverClass =

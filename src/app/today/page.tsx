@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
 
 export const metadata: Metadata = {
   title: "Events Today",
@@ -43,13 +45,16 @@ function getBrisbaneDayWindow(): { start: Date; end: Date } {
 export default async function TodayPage() {
   const { start, end } = getBrisbaneDayWindow();
 
-  let events: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  let events: Array<
+    Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
+  > = [];
   try {
     events = await prisma.event.findMany({
       where: {
         status: "published",
         startDate: { gte: start, lte: end },
       },
+      select: EVENT_CARD_SELECT,
       orderBy: { startDate: "asc" },
       take: 100,
     });

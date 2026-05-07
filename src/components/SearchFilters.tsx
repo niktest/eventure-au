@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useTransition } from "react";
 
 const CATEGORIES = [
   "MUSIC",
@@ -28,6 +28,10 @@ function formatCategory(cat: string): string {
 export function SearchFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // `loading.tsx` doesn't fire on same-segment search-param changes, so we
+  // surface the SSR roundtrip after a filter click via `isPending` —
+  // dimmed controls + thin top progress bar (board feedback EVE-164).
+  const [isPending, startTransition] = useTransition();
 
   const currentCategory = searchParams?.get("category") ?? "";
   const currentQuery = searchParams?.get("q") ?? "";
@@ -45,13 +49,30 @@ export function SearchFilters() {
           params.set(key, value);
         }
       }
-      router.push(`/events?${params.toString()}`);
+      startTransition(() => {
+        router.push(`/events?${params.toString()}`);
+      });
     },
     [router, searchParams]
   );
 
   return (
-    <div className="mb-8 space-y-4">
+    <div
+      data-pending={isPending ? "1" : undefined}
+      className={`mb-8 space-y-4 transition-opacity ${
+        isPending ? "opacity-60" : "opacity-100"
+      }`}
+    >
+      {isPending && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-label="Loading events"
+          className="fixed top-0 inset-x-0 h-0.5 bg-primary/30 z-50 overflow-hidden"
+        >
+          <div className="h-full w-1/3 bg-primary loading-bar" />
+        </div>
+      )}
       {/* Text search */}
       <div className="relative">
         <label htmlFor="event-search" className="sr-only">Search events</label>

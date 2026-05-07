@@ -6,6 +6,7 @@ import { EventCard } from "@/components/EventCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { resolveCategoryFilter, HOMEPAGE_CATEGORIES } from "@/lib/categories";
+import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
 
 export const metadata: Metadata = {
   title: "Browse Events",
@@ -109,10 +110,13 @@ export default async function EventsPage({
     });
   }
 
-  let events: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  let events: Array<
+    Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
+  > = [];
   try {
     events = await prisma.event.findMany({
       where: { AND: conditions },
+      select: EVENT_CARD_SELECT,
       orderBy: { startDate: "asc" },
       take: 60,
     });

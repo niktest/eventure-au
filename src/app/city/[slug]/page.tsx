@@ -1,9 +1,11 @@
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
 
 const CITIES: Record<string, { name: string; state: string; tagline: string; icon: string }> = {
   "gold-coast": {
@@ -61,7 +63,9 @@ export default async function CityPage({
   const city = CITIES[slug];
   if (!city) return notFound();
 
-  let events: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  let events: Array<
+    Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
+  > = [];
   let eventCount = 0;
   try {
     events = await prisma.event.findMany({
@@ -70,6 +74,7 @@ export default async function CityPage({
         startDate: { gte: new Date() },
         status: "published",
       },
+      select: EVENT_CARD_SELECT,
       orderBy: { startDate: "asc" },
       take: 50,
     });

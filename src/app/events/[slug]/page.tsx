@@ -11,6 +11,10 @@ import { InterestedButton } from "@/components/InterestedButton";
 import { EventDiscussPanel } from "@/components/discussions/EventDiscussPanel";
 import { listLatestThreadsForEvent } from "@/lib/discussions/queries";
 import { auth } from "@/lib/auth";
+import {
+  EVENT_CARD_SELECT,
+  type EventCardData,
+} from "@/lib/events/eventCardSelect";
 
 export const revalidate = 3600;
 
@@ -66,35 +70,47 @@ export default async function EventDetailPage({
 
   // Similar events: same category first, then same city, then any upcoming.
   // Layered so a sparse DB still surfaces something rather than an empty slot.
+  // Three candidate pools fire in parallel so we wait one Neon round-trip
+  // instead of three sequential ones, then pick layered fallbacks in JS.
   const SIMILAR_TARGET = 3;
-  let similarEvents: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  let similarEvents: EventCardData[] = [];
   try {
     const baseWhere = {
       status: "published" as const,
       startDate: { gte: new Date() },
+      id: { not: event.id },
     };
-    similarEvents = await prisma.event.findMany({
-      where: { ...baseWhere, category: event.category, id: { not: event.id } },
-      orderBy: { startDate: "asc" },
-      take: SIMILAR_TARGET,
-    });
-    if (similarEvents.length < SIMILAR_TARGET && event.city) {
-      const exclude = [event.id, ...similarEvents.map((e) => e.id)];
-      const fillCity = await prisma.event.findMany({
-        where: { ...baseWhere, city: event.city, id: { notIn: exclude } },
+    const [byCategory, byCity, anyUpcoming] = await Promise.all([
+      prisma.event.findMany({
+        where: { ...baseWhere, category: event.category },
+        select: EVENT_CARD_SELECT,
         orderBy: { startDate: "asc" },
-        take: SIMILAR_TARGET - similarEvents.length,
-      });
-      similarEvents = [...similarEvents, ...fillCity];
-    }
-    if (similarEvents.length < SIMILAR_TARGET) {
-      const exclude = [event.id, ...similarEvents.map((e) => e.id)];
-      const fillAny = await prisma.event.findMany({
-        where: { ...baseWhere, id: { notIn: exclude } },
+        take: SIMILAR_TARGET,
+      }),
+      event.city
+        ? prisma.event.findMany({
+            where: { ...baseWhere, city: event.city },
+            select: EVENT_CARD_SELECT,
+            orderBy: { startDate: "asc" },
+            take: SIMILAR_TARGET,
+          })
+        : Promise.resolve([] as EventCardData[]),
+      prisma.event.findMany({
+        where: baseWhere,
+        select: EVENT_CARD_SELECT,
         orderBy: { startDate: "asc" },
-        take: SIMILAR_TARGET - similarEvents.length,
-      });
-      similarEvents = [...similarEvents, ...fillAny];
+        take: SIMILAR_TARGET,
+      }),
+    ]);
+    const seen = new Set<string>();
+    for (const pool of [byCategory, byCity, anyUpcoming]) {
+      for (const e of pool) {
+        if (similarEvents.length >= SIMILAR_TARGET) break;
+        if (seen.has(e.id)) continue;
+        seen.add(e.id);
+        similarEvents.push(e);
+      }
+      if (similarEvents.length >= SIMILAR_TARGET) break;
     }
   } catch {
     // Non-critical

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { CalendarDay } from "@/lib/calendar/buildCalendarDays";
 
@@ -17,6 +17,9 @@ export function CalendarStrip({ days }: CalendarStripProps) {
   const pathname = usePathname();
   const params = useSearchParams();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  // Same-segment ?date changes don't trigger loading.tsx, so a pending bar
+  // gives the user immediate feedback while the SSR roundtrip finishes (EVE-164).
+  const [isPending, startTransition] = useTransition();
 
   const initialSelected = params?.get("date") ?? null;
   const [selected, setSelected] = useState<string | null>(initialSelected);
@@ -46,7 +49,9 @@ export function CalendarStrip({ days }: CalendarStripProps) {
         setSelected(date);
       }
       const qs = next.toString();
-      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+      startTransition(() => {
+        router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+      });
     },
     [params, pathname, router, selected]
   );
@@ -73,31 +78,43 @@ export function CalendarStrip({ days }: CalendarStripProps) {
   );
 
   return (
-    <div
-      ref={scrollerRef}
-      role="tablist"
-      aria-label="Filter events by date"
-      onKeyDown={onKeyDown}
-      className="-mx-6 flex items-stretch gap-2 overflow-x-auto hide-scrollbar pb-1 px-6 scroll-pl-6 scroll-pr-6 md:mx-0 md:px-0 md:scroll-pl-0 md:scroll-pr-0 md:gap-2.5 lg:gap-3 snap-x snap-mandatory"
-      style={{
-        WebkitMaskImage:
-          "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
-        maskImage:
-          "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
-      }}
-    >
-      {days.map((d) => {
-        const isSelected = selected === d.date;
-        return (
-          <CalendarCell
-            key={d.date}
-            day={d}
-            isSelected={isSelected}
-            onSelect={onSelect}
-          />
-        );
-      })}
-    </div>
+    <>
+      {isPending && (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-label="Loading events"
+          className="fixed top-0 inset-x-0 h-0.5 bg-primary/30 z-50 overflow-hidden"
+        >
+          <div className="h-full w-1/3 bg-primary loading-bar" />
+        </div>
+      )}
+      <div
+        ref={scrollerRef}
+        role="tablist"
+        aria-label="Filter events by date"
+        onKeyDown={onKeyDown}
+        className="-mx-6 flex items-stretch gap-2 overflow-x-auto hide-scrollbar pb-1 px-6 scroll-pl-6 scroll-pr-6 md:mx-0 md:px-0 md:scroll-pl-0 md:scroll-pr-0 md:gap-2.5 lg:gap-3 snap-x snap-mandatory"
+        style={{
+          WebkitMaskImage:
+            "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
+          maskImage:
+            "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
+        }}
+      >
+        {days.map((d) => {
+          const isSelected = selected === d.date;
+          return (
+            <CalendarCell
+              key={d.date}
+              day={d}
+              isSelected={isSelected}
+              onSelect={onSelect}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 }
 

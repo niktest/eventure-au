@@ -10,6 +10,7 @@ import { HomepageCategoryRow } from "@/components/home/HomepageCategoryRow";
 import { NearMeButton } from "@/components/home/NearMeButton";
 import { buildCalendarDays } from "@/lib/calendar/buildCalendarDays";
 import { parseDateParam, formatDateLabel } from "@/lib/calendar/dateFilter";
+import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
 import {
   itemListJsonLd,
   organizationJsonLd,
@@ -30,8 +31,6 @@ export default async function HomePage({
   const dateRange = parseDateParam(params.date);
   const selectedDate = dateRange ? params.date! : null;
 
-  const calendarDays = await buildCalendarDays({ withCounts: true });
-
   const where: Prisma.EventWhereInput = dateRange
     ? {
         status: "published",
@@ -42,17 +41,30 @@ export default async function HomePage({
         startDate: { gte: new Date() },
       };
 
-  let upcomingEvents: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
+  let calendarDays: Awaited<ReturnType<typeof buildCalendarDays>> = [];
+  let upcomingEvents: Array<
+    Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
+  > = [];
   let totalCount = 0;
   try {
-    upcomingEvents = await prisma.event.findMany({
-      where,
-      orderBy: { startDate: "asc" },
-      take: 12,
-    });
-    totalCount = await prisma.event.count({ where });
+    // Fire calendar + grid + count in parallel so the homepage waits on the
+    // slowest single Neon round-trip rather than three sequential ones.
+    const [calDays, events, count] = await Promise.all([
+      buildCalendarDays({ withCounts: true }),
+      prisma.event.findMany({
+        where,
+        select: EVENT_CARD_SELECT,
+        orderBy: { startDate: "asc" },
+        take: 12,
+      }),
+      prisma.event.count({ where }),
+    ]);
+    calendarDays = calDays;
+    upcomingEvents = events;
+    totalCount = count;
   } catch {
     // DB unavailable — render empty state, ISR will retry.
+    calendarDays = await buildCalendarDays();
   }
 
   const siteUrl = getSiteUrl();
