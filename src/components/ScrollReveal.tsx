@@ -32,8 +32,14 @@ export function ScrollReveal({
     return () => clearTimeout(timer);
   }, []);
 
+  // `min-w-0` defaults the wrapper to a 0 min-width so it can shrink inside
+  // CSS Grid / Flex parents. Without it, descendants with `truncate`
+  // (white-space: nowrap) would push the grid track wider than the viewport
+  // and create horizontal scroll on mobile event listings (EVE-172).
+  const wrapperClass = ["min-w-0", className].filter(Boolean).join(" ");
+
   if (reduceMotion) {
-    return <div className={className}>{children}</div>;
+    return <div className={wrapperClass}>{children}</div>;
   }
 
   const offsets = {
@@ -47,7 +53,7 @@ export function ScrollReveal({
   return (
     <motion.div
       ref={ref}
-      className={className}
+      className={wrapperClass}
       initial={{ opacity: 0, ...offsets[direction] }}
       animate={visible ? { opacity: 1, x: 0, y: 0 } : undefined}
       transition={{ duration: 0.5, delay, ease: "easeOut" }}

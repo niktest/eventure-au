@@ -29,7 +29,7 @@ export function EventCard({
   return (
     <Link
       href={`/events/${event.slug}`}
-      className={`group bg-surface-bright rounded-xl overflow-hidden shadow-sm border border-surface-container-high flex flex-col ${hoverClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`}
+      className={`group bg-surface-bright rounded-xl overflow-hidden shadow-sm border border-surface-container-high flex flex-col min-w-0 ${hoverClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`}
     >
       {/* Image with 16:9 aspect ratio */}
       <div className="relative w-full aspect-video overflow-hidden">
@@ -73,13 +73,13 @@ export function EventCard({
           </p>
         )}
 
-        <div className="mt-auto flex items-center gap-1 text-secondary">
+        <div className="mt-auto flex items-center gap-1 text-secondary min-w-0">
           {event.venueName && (
-            <p className="flex items-center gap-1 text-sm">
-              <span className="material-symbols-outlined text-[16px]">
+            <p className="flex items-center gap-1 text-sm min-w-0">
+              <span className="material-symbols-outlined text-[16px] shrink-0">
                 location_on
               </span>
-              <span className="truncate">
+              <span className="truncate min-w-0">
                 {event.venueName}, {event.city}
               </span>
             </p>
