@@ -42,6 +42,36 @@ const PAGES = [
   { name: "cookies", path: "/cookies" },
 ];
 
+// Discover a current event slug from the live /events listing so detail-page
+// screenshots stay valid as events age out (hard-coded slugs 404 over time).
+async function discoverEventDetailPage(
+  page: Page,
+  baseUrl: string
+): Promise<{ name: string; path: string } | null> {
+  try {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${baseUrl}/events`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await page
+      .waitForSelector('a[href^="/events/"]', { timeout: 10_000 })
+      .catch(() => null);
+    const slug = await page.evaluate(() => {
+      const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href^="/events/"]'));
+      for (const a of anchors) {
+        const href = a.getAttribute("href") ?? "";
+        const match = href.match(/^\/events\/([^/?#]+)/);
+        if (match && match[1]) return match[1];
+      }
+      return null;
+    });
+    if (!slug) return null;
+    return { name: "event-detail", path: `/events/${slug}` };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`  [warn] event-detail discovery failed: ${msg}`);
+    return null;
+  }
+}
+
 function parseArgs(): { baseUrl: string } {
   const args = process.argv.slice(2);
   let baseUrl = DEFAULT_BASE_URL;
@@ -115,7 +145,16 @@ async function main() {
 
     const results: { file: string; ok: boolean; error?: string }[] = [];
 
-    for (const pageDef of PAGES) {
+    const detailPage = await discoverEventDetailPage(page, baseUrl);
+    if (detailPage) {
+      console.log(`  Detail   : ${detailPage.path}`);
+    } else {
+      console.log(`  Detail   : (no events found — skipping /events/[slug] capture)`);
+    }
+
+    const pagesToCapture = detailPage ? [...PAGES, detailPage] : PAGES;
+
+    for (const pageDef of pagesToCapture) {
       for (const viewport of VIEWPORTS) {
         const result = await screenshotPage(page, baseUrl, pageDef, viewport, outDir);
         const status = result.ok ? "OK" : "FAIL";
