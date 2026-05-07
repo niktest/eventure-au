@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { EventSearchAutocomplete } from "./EventSearchAutocomplete";
 
 /**
  * Hero band per EVE-126 §5. Dark surface with neon-dusk gradient.
@@ -46,30 +46,16 @@ export function HeroSection({ children }: { children?: React.ReactNode }) {
         </div>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-          <form
-            role="search"
-            action="/events"
-            method="get"
-            className="flex-1 flex items-center gap-2 rounded-full bg-surface-1 border border-surface-3 px-4 h-12 focus-within:border-neon-coral focus-within:ring-2 focus-within:ring-neon-coral-glow transition-colors"
-          >
-            <Search size={18} aria-hidden="true" className="text-on-dark-muted shrink-0" />
-            <label htmlFor="hero-search" className="sr-only">
-              Search events
-            </label>
-            <input
-              id="hero-search"
-              type="search"
-              name="q"
+          <div data-primary-search className="flex-1">
+            <EventSearchAutocomplete
+              inputId="hero-search"
               placeholder="Search events…"
-              className="flex-1 bg-transparent outline-none text-on-dark-strong placeholder:text-on-dark-subtle font-body"
+              wrapperClassName="relative w-full"
+              iconClassName="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-dark-muted text-[20px] pointer-events-none"
+              inputClassName="w-full h-12 rounded-full bg-surface-1 border border-surface-3 pl-11 pr-4 font-body text-on-dark-strong placeholder:text-on-dark-subtle outline-none focus:border-neon-coral focus:ring-2 focus:ring-neon-coral-glow transition-colors"
+              panelClassName="absolute left-0 right-0 top-full mt-2 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl z-50 max-h-80 overflow-y-auto text-on-surface"
             />
-            <button
-              type="submit"
-              className="rounded-full bg-neon-coral text-[#0B0D12] px-4 h-9 font-body text-sm font-semibold hover:bg-[#E84A2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-coral-glow"
-            >
-              Go
-            </button>
-          </form>
+          </div>
           {children}
         </div>
       </div>

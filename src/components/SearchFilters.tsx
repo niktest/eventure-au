@@ -75,15 +75,17 @@ export function SearchFilters() {
         </div>
       )}
       {/* Text search with live autocomplete; submit preserves URL filter state */}
-      <EventSearchAutocomplete
-        inputId="event-search"
-        placeholder="Search events, artists, venues..."
-        initialQuery={currentQuery}
-        wrapperClassName="relative w-full"
-        iconClassName="material-symbols-outlined absolute left-3 top-3.5 text-secondary text-[20px] pointer-events-none"
-        inputClassName="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 pl-10 font-body text-base text-on-surface placeholder:text-secondary shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-        onSubmit={(q) => updateParams({ q: q || null })}
-      />
+      <div data-primary-search>
+        <EventSearchAutocomplete
+          inputId="event-search"
+          placeholder="Search events, artists, venues..."
+          initialQuery={currentQuery}
+          wrapperClassName="relative w-full"
+          iconClassName="material-symbols-outlined absolute left-3 top-3.5 text-secondary text-[20px] pointer-events-none"
+          inputClassName="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 pl-10 font-body text-base text-on-surface placeholder:text-secondary shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+          onSubmit={(q) => updateParams({ q: q || null })}
+        />
+      </div>
 
       {/* Date range and free toggle */}
       <div className="flex flex-wrap items-end gap-3">

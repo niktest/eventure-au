@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { EventSearchAutocomplete } from "./EventSearchAutocomplete";
+import { usePrimarySearchVisible } from "@/hooks/usePrimarySearchVisible";
 
 const NAV_LINKS = [
   { href: "/today", label: "Today" },
@@ -24,6 +25,7 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
+  const primaryVisible = usePrimarySearchVisible();
   const menuRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const searchPanelRef = useRef<HTMLDivElement>(null);
@@ -185,7 +187,12 @@ export function MobileNav() {
             setSearchOpen(!searchOpen);
             setOpen(false);
           }}
-          className="p-2 text-secondary hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
+          aria-hidden={primaryVisible ? "true" : undefined}
+          tabIndex={primaryVisible ? -1 : undefined}
+          className={
+            "p-2 text-secondary hover:text-primary transition-opacity duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md " +
+            (primaryVisible ? "opacity-0 pointer-events-none" : "opacity-100")
+          }
           aria-label="Search"
         >
           <span className="material-symbols-outlined text-[22px]" aria-hidden="true">search</span>
