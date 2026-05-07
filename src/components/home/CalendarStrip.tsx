@@ -24,9 +24,56 @@ export function CalendarStrip({ days }: CalendarStripProps) {
   const initialSelected = params?.get("date") ?? null;
   const [selected, setSelected] = useState<string | null>(initialSelected);
 
+  // Mouse drag-to-scroll state (EVE-162). Touch is left to native overflow-x-auto
+  // so iOS/Android keep momentum scrolling. `moved` gates the trailing click
+  // so a drag never accidentally selects a day.
+  const dragRef = useRef({ isDown: false, startX: 0, startScroll: 0, moved: false });
+
   useEffect(() => {
     setSelected(params?.get("date") ?? null);
   }, [params]);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onMove = (e: MouseEvent) => {
+      const s = dragRef.current;
+      if (!s.isDown) return;
+      const dx = e.clientX - s.startX;
+      if (Math.abs(dx) > 4) s.moved = true;
+      if (s.moved) {
+        e.preventDefault();
+        el.scrollLeft = s.startScroll - dx;
+      }
+    };
+    const onUp = () => {
+      dragRef.current.isDown = false;
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
+
+  const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || !scrollerRef.current) return;
+    dragRef.current = {
+      isDown: true,
+      moved: false,
+      startX: e.clientX,
+      startScroll: scrollerRef.current.scrollLeft,
+    };
+  }, []);
+
+  const onClickCapture = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (dragRef.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragRef.current.moved = false;
+    }
+  }, []);
 
   // Auto-scroll to today (or the deep-linked date) on mount.
   useEffect(() => {
@@ -94,12 +141,15 @@ export function CalendarStrip({ days }: CalendarStripProps) {
         role="tablist"
         aria-label="Filter events by date"
         onKeyDown={onKeyDown}
-        className="-mx-6 flex items-stretch gap-2 overflow-x-auto hide-scrollbar pb-1 px-6 scroll-pl-6 scroll-pr-6 md:mx-0 md:px-0 md:scroll-pl-0 md:scroll-pr-0 md:gap-2.5 lg:gap-3 snap-x snap-mandatory"
+        onMouseDown={onMouseDown}
+        onClickCapture={onClickCapture}
+        className="-mx-6 flex items-stretch gap-2 overflow-x-auto hide-scrollbar pb-1 px-6 scroll-pl-6 scroll-pr-6 md:mx-0 md:px-0 md:scroll-pl-0 md:scroll-pr-0 md:gap-2.5 lg:gap-3 snap-x snap-mandatory cursor-grab active:cursor-grabbing select-none"
         style={{
           WebkitMaskImage:
             "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
           maskImage:
             "linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent 100%)",
+          touchAction: "pan-x pan-y",
         }}
       >
         {days.map((d) => {
