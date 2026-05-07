@@ -1,33 +1,46 @@
-import type { SourceAdapter, RawEvent } from "@/types/event";
+import * as cheerio from "cheerio";
+import type { RawEvent, SourceAdapter } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
+import { extractJsonLdEvents } from "../utils/extract-json-ld";
+import { ensureHttps, parseHumanDate, resolveUrl } from "../utils/scrape-helpers";
+
+const SOURCE = "cityofgc";
 
 /**
- * City of Gold Coast events calendar scraper adapter.
- * Scrapes cityofgoldcoast.com.au for civic/community event listings.
+ * What's On Gold Coast — whatsongoldcoast.au
+ *
+ * The City of Gold Coast retired its in-house events calendar
+ * (cityofgoldcoast.com.au/Council-region/Events 404s) and now points the
+ * public at whatsongoldcoast.au, run by Council. The home page renders
+ * full event tiles with absolute permalinks; we extract those directly.
  */
 export class CityOfGCAdapter implements SourceAdapter {
-  readonly name = "cityofgc";
+  readonly name = SOURCE;
 
   async fetch(): Promise<RawEvent[]> {
-    const baseUrl =
-      process.env.CITY_OF_GC_URL ?? "https://www.cityofgoldcoast.com.au";
-    const eventsUrl = `${baseUrl}/Council-region/Events`;
-    console.log(`[cityofgc] Scraping ${eventsUrl}`);
+    const baseUrl = process.env.CITY_OF_GC_URL ?? "https://www.whatsongoldcoast.au";
+    const target = `${baseUrl}/Home`;
+    console.log(`[cityofgc] Scraping ${target}`);
 
     try {
-      const res = await fetch(eventsUrl, {
-        headers: {
-          "User-Agent": SCRAPER_USER_AGENT,
-        },
+      const res = await fetch(target, {
+        headers: { "User-Agent": SCRAPER_USER_AGENT },
       });
-
       if (!res.ok) {
         console.error(`[cityofgc] HTTP ${res.status}`);
         return [];
       }
 
       const html = await res.text();
-      return parseCityOfGCEvents(html);
+      const jsonLd = extractJsonLdEvents(html, {
+        sourceIdPrefix: SOURCE,
+        city: "Gold Coast",
+        state: "QLD",
+        category: "COMMUNITY",
+      });
+      if (jsonLd.length > 0) return jsonLd;
+
+      return parseWhatsOnTiles(html, baseUrl);
     } catch (err) {
       console.error("[cityofgc] Fetch failed:", err);
       return [];
@@ -35,43 +48,47 @@ export class CityOfGCAdapter implements SourceAdapter {
   }
 }
 
-function parseCityOfGCEvents(html: string): RawEvent[] {
+function parseWhatsOnTiles(html: string, baseUrl: string): RawEvent[] {
+  const $ = cheerio.load(html);
+  const seen = new Set<string>();
   const events: RawEvent[] = [];
-  const jsonLdMatches = html.matchAll(
-    /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
-  );
 
-  for (const match of jsonLdMatches) {
-    try {
-      const data = JSON.parse(match[1]);
-      const items = Array.isArray(data) ? data : [data];
+  $(".CoGC-EventTile.list-item-container").each((_, tile) => {
+    const $tile = $(tile);
+    const link = $tile.find("article > a, a.list-item-link, a").first();
+    const url = resolveUrl(link.attr("href"), baseUrl);
+    if (!url || seen.has(url)) return;
+    seen.add(url);
 
-      for (const item of items) {
-        if (item["@type"] !== "Event") continue;
-        events.push({
-          sourceId: item.url ?? `cityofgc-${item.name?.replace(/\s+/g, "-").toLowerCase()}`,
-          name: item.name ?? "Unknown Event",
-          description: item.description ?? undefined,
-          startDate: item.startDate ? new Date(item.startDate) : new Date(),
-          endDate: item.endDate ? new Date(item.endDate) : undefined,
-          imageUrl: typeof item.image === "string" ? item.image : item.image?.[0] ?? undefined,
-          url: item.url ?? undefined,
-          venueName: item.location?.name ?? undefined,
-          venueAddress: item.location?.address?.streetAddress ?? undefined,
-          city: "Gold Coast",
-          state: "QLD",
-          category: "COMMUNITY",
-          rawData: item,
-        });
-      }
-    } catch {
-      // Ignore malformed JSON-LD
-    }
-  }
+    const name = $tile.find(".list-item-title").first().text().trim();
+    if (!name) return;
+
+    const day = $tile.find(".list-item-block-date .part-date").first().text().trim();
+    const month = $tile.find(".list-item-block-date .part-month").first().text().trim();
+    const year = $tile.find(".list-item-block-date .part-year").first().text().trim();
+    if (!day || !month) return;
+    const startDate = parseHumanDate(`${day} ${month}${year ? ` ${year}` : ""}`);
+    if (!startDate) return;
+
+    const img = $tile.find("picture img.large-thumbnail-image, picture img").first();
+    const imageRaw = img.attr("src") ?? img.attr("data-src");
+    const suburb = $tile.find(".CoGC-EventTileSuburb").first().text().trim() || undefined;
+
+    events.push({
+      sourceId: url,
+      name,
+      startDate,
+      imageUrl: ensureHttps(resolveUrl(imageRaw, baseUrl)),
+      url,
+      venueName: suburb,
+      city: "Gold Coast",
+      state: "QLD",
+      category: "COMMUNITY",
+    });
+  });
 
   if (events.length === 0) {
-    console.log("[cityofgc] No JSON-LD events found; full HTML parser needed (add cheerio)");
+    console.log("[cityofgc] HTML parser found no event tiles (selectors may have drifted)");
   }
-
   return events;
 }

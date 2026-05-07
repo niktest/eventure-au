@@ -1,32 +1,58 @@
-import type { SourceAdapter, RawEvent } from "@/types/event";
+import * as cheerio from "cheerio";
+import type { RawEvent, SourceAdapter } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
+import { extractJsonLdEvents } from "../utils/extract-json-ld";
+import {
+  ensureHttps,
+  extractBackgroundImage,
+  parseHumanDate,
+  resolveUrl,
+} from "../utils/scrape-helpers";
+
+const SOURCE = "sandstonepoint";
+const VENUE_NAME = "Sandstone Point Hotel";
+const VENUE_ADDRESS = "1800 Bribie Island Rd, Sandstone Point QLD 4511";
+const LATITUDE = -27.0833;
+const LONGITUDE = 153.1333;
 
 /**
- * Sandstone Point Hotel scraper adapter.
- * Scrapes sandstonepointhotel.com.au for live music/outdoor event listings.
+ * Sandstone Point Hotel — sandstonepointhotel.com.au/entertainment-and-events/
+ *
+ * The legacy /whats-on path 404s; the live listing is under
+ * /entertainment-and-events/ as an Isotope grid of `.event-item` cards.
  */
 export class SandstonePointAdapter implements SourceAdapter {
-  readonly name = "sandstonepoint";
+  readonly name = SOURCE;
 
   async fetch(): Promise<RawEvent[]> {
     const baseUrl =
       process.env.SANDSTONE_POINT_URL ?? "https://www.sandstonepointhotel.com.au";
-    console.log(`[sandstonepoint] Scraping ${baseUrl}/whats-on`);
+    const target = `${baseUrl}/entertainment-and-events/`;
+    console.log(`[sandstonepoint] Scraping ${target}`);
 
     try {
-      const res = await fetch(`${baseUrl}/whats-on`, {
-        headers: {
-          "User-Agent": SCRAPER_USER_AGENT,
-        },
+      const res = await fetch(target, {
+        headers: { "User-Agent": SCRAPER_USER_AGENT },
       });
-
       if (!res.ok) {
         console.error(`[sandstonepoint] HTTP ${res.status}`);
         return [];
       }
 
       const html = await res.text();
-      return parseSandstonePointEvents(html);
+      const jsonLd = extractJsonLdEvents(html, {
+        sourceIdPrefix: SOURCE,
+        venueName: VENUE_NAME,
+        venueAddress: VENUE_ADDRESS,
+        city: "Sandstone Point",
+        state: "QLD",
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        category: "MUSIC",
+      });
+      if (jsonLd.length > 0) return jsonLd;
+
+      return parseSandstoneCards(html, baseUrl);
     } catch (err) {
       console.error("[sandstonepoint] Fetch failed:", err);
       return [];
@@ -34,45 +60,55 @@ export class SandstonePointAdapter implements SourceAdapter {
   }
 }
 
-function parseSandstonePointEvents(html: string): RawEvent[] {
+function parseSandstoneCards(html: string, baseUrl: string): RawEvent[] {
+  const $ = cheerio.load(html);
   const events: RawEvent[] = [];
-  const jsonLdMatches = html.matchAll(
-    /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
-  );
 
-  for (const match of jsonLdMatches) {
-    try {
-      const data = JSON.parse(match[1]);
-      const items = Array.isArray(data) ? data : [data];
+  $("#events .event-item").each((_, el) => {
+    const $el = $(el);
 
-      for (const item of items) {
-        if (item["@type"] !== "Event") continue;
-        events.push({
-          sourceId: item.url ?? `sandstone-${item.name?.replace(/\s+/g, "-").toLowerCase()}`,
-          name: item.name ?? "Unknown Event",
-          description: item.description ?? undefined,
-          startDate: item.startDate ? new Date(item.startDate) : new Date(),
-          endDate: item.endDate ? new Date(item.endDate) : undefined,
-          imageUrl: typeof item.image === "string" ? item.image : item.image?.[0] ?? undefined,
-          url: item.url ?? undefined,
-          venueName: "Sandstone Point Hotel",
-          venueAddress: "1800 Bribie Island Rd, Sandstone Point QLD 4511",
-          city: "Gold Coast",
-          state: "QLD",
-          latitude: -27.0833,
-          longitude: 153.1333,
-          category: "MUSIC",
-          rawData: item,
-        });
-      }
-    } catch {
-      // Ignore malformed JSON-LD
-    }
-  }
+    const link = $el.find(".event-text .readmore a").first();
+    const url = resolveUrl(link.attr("href"), baseUrl);
+    if (!url) return;
+
+    const name = $el.find(".event-text h3").first().text().trim();
+    if (!name) return;
+
+    // Recurring/no-date items (e.g. "TRIVIA TUESDAYS") — skip; they have
+    // no anchor date for the calendar and would crowd out dated events.
+    const dateText = $el.find(".event-text .event-date strong em, .event-text .event-date").first().text().trim();
+    const startDate = parseHumanDate(dateText);
+    if (!startDate) return;
+
+    const imageRaw = extractBackgroundImage($el.find(".post-thumb").attr("style"));
+    const blurb = $el.find(".event-text .desc").first().text().replace(/\s+/g, " ").trim() || undefined;
+
+    const ticket = $el.find(".event-ticket a").first();
+    const ticketLabel = ticket.text().trim().toLowerCase();
+    const isFree = /free/i.test(ticketLabel) || undefined;
+    const ticketUrl = resolveUrl(ticket.attr("href"), baseUrl);
+
+    events.push({
+      sourceId: url,
+      name,
+      description: blurb,
+      startDate,
+      imageUrl: ensureHttps(resolveUrl(imageRaw, baseUrl)),
+      url,
+      venueName: VENUE_NAME,
+      venueAddress: VENUE_ADDRESS,
+      city: "Sandstone Point",
+      state: "QLD",
+      latitude: LATITUDE,
+      longitude: LONGITUDE,
+      category: "MUSIC",
+      isFree,
+      ticketUrl,
+    });
+  });
 
   if (events.length === 0) {
-    console.log("[sandstonepoint] No JSON-LD events found; full HTML parser needed (add cheerio)");
+    console.log("[sandstonepoint] HTML parser found no event cards (selectors may have drifted)");
   }
-
   return events;
 }
