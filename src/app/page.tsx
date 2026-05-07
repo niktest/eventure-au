@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { EventCard } from "@/components/EventCard";
 import { HeroSection } from "@/components/HeroSection";
@@ -8,6 +9,7 @@ import { CalendarStrip } from "@/components/home/CalendarStrip";
 import { HomepageCategoryRow } from "@/components/home/HomepageCategoryRow";
 import { NearMeButton } from "@/components/home/NearMeButton";
 import { buildCalendarDays } from "@/lib/calendar/buildCalendarDays";
+import { parseDateParam, formatDateLabel } from "@/lib/calendar/dateFilter";
 import {
   itemListJsonLd,
   organizationJsonLd,
@@ -15,25 +17,40 @@ import {
 } from "@/lib/seo/schema";
 import { getSiteUrl } from "@/lib/seo/site-url";
 
+// `searchParams` opts this page into dynamic rendering when `?date` is present
+// so the calendar-strip filter actually takes effect (EVE-163).
 export const revalidate = 3600;
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ date?: string }>;
+}) {
+  const params = (await searchParams) ?? {};
+  const dateRange = parseDateParam(params.date);
+  const selectedDate = dateRange ? params.date! : null;
+
   const calendarDays = await buildCalendarDays({ withCounts: true });
+
+  const where: Prisma.EventWhereInput = dateRange
+    ? {
+        status: "published",
+        startDate: { gte: dateRange.dayStart, lt: dateRange.dayEnd },
+      }
+    : {
+        status: "published",
+        startDate: { gte: new Date() },
+      };
 
   let upcomingEvents: Awaited<ReturnType<typeof prisma.event.findMany>> = [];
   let totalCount = 0;
   try {
     upcomingEvents = await prisma.event.findMany({
-      where: {
-        startDate: { gte: new Date() },
-        status: "published",
-      },
+      where,
       orderBy: { startDate: "asc" },
       take: 12,
     });
-    totalCount = await prisma.event.count({
-      where: { status: "published", startDate: { gte: new Date() } },
-    });
+    totalCount = await prisma.event.count({ where });
   } catch {
     // DB unavailable — render empty state, ISR will retry.
   }
@@ -75,11 +92,24 @@ export default async function HomePage() {
       <div className="max-w-[1280px] mx-auto px-6 py-12 flex flex-col gap-12">
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-heading text-3xl font-bold text-on-surface tracking-tight">
-              Upcoming Events
-            </h2>
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h2 className="font-heading text-3xl font-bold text-on-surface tracking-tight">
+                {selectedDate
+                  ? `Events on ${formatDateLabel(selectedDate)}`
+                  : "Upcoming Events"}
+              </h2>
+              {selectedDate && (
+                <Link
+                  href="/"
+                  scroll={false}
+                  className="text-primary font-body text-sm font-semibold hover:underline"
+                >
+                  Clear date
+                </Link>
+              )}
+            </div>
             <Link
-              href="/events"
+              href={selectedDate ? `/events?date=${selectedDate}` : "/events"}
               className="text-primary font-body text-sm font-semibold hover:underline flex items-center gap-1"
             >
               View all
@@ -90,16 +120,33 @@ export default async function HomePage() {
           </div>
 
           {upcomingEvents.length === 0 ? (
-            <div className="rounded-xl bg-surface-container-low py-16 text-center">
+            <div
+              data-testid="home-events-empty"
+              className="rounded-xl bg-surface-container-low py-16 text-center"
+            >
               <span className="material-symbols-outlined text-4xl text-secondary mb-4 block">
                 calendar_month
               </span>
               <p className="text-secondary font-body">
-                No upcoming events yet. Check back soon!
+                {selectedDate
+                  ? `No events on ${formatDateLabel(selectedDate)}.`
+                  : "No upcoming events yet. Check back soon!"}
               </p>
+              {selectedDate && (
+                <Link
+                  href="/"
+                  scroll={false}
+                  className="mt-4 inline-block text-primary font-body text-sm font-semibold hover:underline"
+                >
+                  Show all upcoming events
+                </Link>
+              )}
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div
+              data-testid="home-events-grid"
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            >
               {upcomingEvents.map((event, i) => (
                 <ScrollReveal key={event.id} delay={i * 0.05}>
                   <EventCard event={event} variant="homepage" />
@@ -111,10 +158,12 @@ export default async function HomePage() {
           {totalCount > 12 && (
             <div className="mt-8 text-center">
               <Link
-                href="/events"
+                href={selectedDate ? `/events?date=${selectedDate}` : "/events"}
                 className="inline-flex items-center gap-2 bg-primary text-on-primary rounded-full px-8 py-3 font-body font-semibold hover:scale-[1.02] transition-transform shadow-sm"
               >
-                Browse all {totalCount} events
+                {selectedDate
+                  ? `Browse all ${totalCount} events on ${formatDateLabel(selectedDate)}`
+                  : `Browse all ${totalCount} events`}
                 <span className="material-symbols-outlined text-[18px]">
                   arrow_forward
                 </span>
