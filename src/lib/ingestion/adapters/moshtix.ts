@@ -1,5 +1,6 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
+import { upgradeMoshtixImage } from "../utils/scrape-helpers";
 
 /** Moshtix location slugs mapped from city names */
 const MOSHTIX_LOCATIONS = [
@@ -80,7 +81,9 @@ function parseMoshtixEvents(html: string, baseUrl: string, fallbackCity: string,
           description: item.description ?? undefined,
           startDate: item.startDate ? new Date(item.startDate) : new Date(),
           endDate: item.endDate ? new Date(item.endDate) : undefined,
-          imageUrl: typeof item.image === "string" ? item.image : item.image?.[0] ?? undefined,
+          imageUrl: upgradeMoshtixImage(
+            typeof item.image === "string" ? item.image : item.image?.[0] ?? undefined
+          ),
           url: eventUrl,
           venueName: item.location?.name ?? undefined,
           venueAddress: item.location?.address?.streetAddress ?? undefined,

@@ -4,6 +4,10 @@ import {
   extractBackgroundImage,
   parseHumanDate,
   resolveUrl,
+  upgradeHotaImage,
+  upgradeMoshtixImage,
+  upgradeStylelabsImage,
+  upgradeWordpressThumbnail,
 } from "./scrape-helpers";
 
 describe("resolveUrl", () => {
@@ -90,5 +94,113 @@ describe("parseHumanDate", () => {
     expect(parseHumanDate("TBA", { now })).toBeNull();
     expect(parseHumanDate("", { now })).toBeNull();
     expect(parseHumanDate("Tuesdays at 7pm", { now })).toBeNull();
+  });
+});
+
+describe("upgradeStylelabsImage", () => {
+  it("strips a `t=300x300` thumbnail param while preserving `v=`", () => {
+    expect(
+      upgradeStylelabsImage(
+        "https://destinationgoldcoast.stylelabs.cloud/api/public/content/abc?v=feeabacf&t=300x300"
+      )
+    ).toBe(
+      "https://destinationgoldcoast.stylelabs.cloud/api/public/content/abc?v=feeabacf"
+    );
+  });
+
+  it("strips a `t=` param when it is the only query param", () => {
+    expect(
+      upgradeStylelabsImage(
+        "https://destinationgoldcoast.stylelabs.cloud/api/public/content/abc?t=300x300"
+      )
+    ).toBe(
+      "https://destinationgoldcoast.stylelabs.cloud/api/public/content/abc"
+    );
+  });
+
+  it("leaves non-stylelabs URLs alone", () => {
+    expect(upgradeStylelabsImage("https://other.com/x.jpg?t=300x300")).toBe(
+      "https://other.com/x.jpg?t=300x300"
+    );
+  });
+
+  it("returns undefined for empty input", () => {
+    expect(upgradeStylelabsImage(undefined)).toBeUndefined();
+  });
+});
+
+describe("upgradeHotaImage", () => {
+  it("rewrites a 480w listing thumb to 1280w", () => {
+    expect(upgradeHotaImage("/generated/480w-3-2/foo-jpg.jpg?123")).toBe(
+      "/generated/1280w-3-2/foo-jpg.jpg?123"
+    );
+  });
+
+  it("rewrites portrait 360w-2-3 too, preserving aspect ratio", () => {
+    expect(upgradeHotaImage("/generated/360w-2-3/poster-jpg.jpg")).toBe(
+      "/generated/1280w-2-3/poster-jpg.jpg"
+    );
+  });
+
+  it("leaves a 1280w URL unchanged", () => {
+    expect(upgradeHotaImage("/generated/1280w-3-2/foo.jpg")).toBe(
+      "/generated/1280w-3-2/foo.jpg"
+    );
+  });
+
+  it("leaves URLs without the /generated/<width>w-<aspect>/ pattern alone", () => {
+    expect(upgradeHotaImage("https://cdn.example.com/foo.jpg")).toBe(
+      "https://cdn.example.com/foo.jpg"
+    );
+  });
+});
+
+describe("upgradeWordpressThumbnail", () => {
+  it("strips the `-WIDTHxHEIGHT` suffix to expose the original upload", () => {
+    expect(
+      upgradeWordpressThumbnail(
+        "https://sandstonepointhotel.com.au/wp-content/uploads/2026/02/foo_-650x366.jpg"
+      )
+    ).toBe(
+      "https://sandstonepointhotel.com.au/wp-content/uploads/2026/02/foo_.jpg"
+    );
+  });
+
+  it("preserves a query string after the suffix", () => {
+    expect(
+      upgradeWordpressThumbnail(
+        "https://example.com/foo-1024x576.jpg?v=2"
+      )
+    ).toBe("https://example.com/foo.jpg?v=2");
+  });
+
+  it("leaves URLs without a thumbnail suffix unchanged", () => {
+    expect(upgradeWordpressThumbnail("https://example.com/foo.jpg")).toBe(
+      "https://example.com/foo.jpg"
+    );
+  });
+});
+
+describe("upgradeMoshtixImage", () => {
+  it("upgrades x140x140 to x600x600", () => {
+    expect(
+      upgradeMoshtixImage(
+        "https://www.moshtix.com.au/uploads/1fb03b9c-525f-497f-b291-8106eb08d102x140x140"
+      )
+    ).toBe(
+      "https://www.moshtix.com.au/uploads/1fb03b9c-525f-497f-b291-8106eb08d102x600x600"
+    );
+  });
+
+  it("rewrites x300x300 thumbnails too", () => {
+    expect(
+      upgradeMoshtixImage("http://www.moshtix.com.au/uploads/abcx300x300")
+    ).toBe("http://www.moshtix.com.au/uploads/abcx600x600");
+  });
+
+  it("leaves non-moshtix URLs alone", () => {
+    expect(upgradeMoshtixImage("https://other.com/foo")).toBe(
+      "https://other.com/foo"
+    );
   });
 });

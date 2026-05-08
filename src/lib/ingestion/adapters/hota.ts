@@ -6,6 +6,7 @@ import {
   ensureHttps,
   parseHumanDate,
   resolveUrl,
+  upgradeHotaImage,
 } from "../utils/scrape-helpers";
 
 const SOURCE = "hota";
@@ -79,10 +80,11 @@ function parseHotaCards(html: string, baseUrl: string): RawEvent[] {
     if (!startDate) return;
 
     const figureImg = card.find("figure img").first();
-    const imageRaw =
+    const imageRaw = upgradeHotaImage(
       figureImg.attr("data-src") ??
-      figureImg.attr("src") ??
-      card.find("noscript img").first().attr("src");
+        figureImg.attr("src") ??
+        card.find("noscript img").first().attr("src")
+    );
 
     const subtitle = card.find("p.lead, p.lead-xxs").first().text().trim() || undefined;
 

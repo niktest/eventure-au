@@ -2,7 +2,12 @@ import * as cheerio from "cheerio";
 import type { EventCategory, RawEvent, SourceAdapter } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
 import { extractJsonLdEvents } from "../utils/extract-json-ld";
-import { ensureHttps, parseHumanDate, resolveUrl } from "../utils/scrape-helpers";
+import {
+  ensureHttps,
+  parseHumanDate,
+  resolveUrl,
+  upgradeStylelabsImage,
+} from "../utils/scrape-helpers";
 
 const SOURCE = "destinationgc";
 
@@ -108,7 +113,9 @@ function parseExperienceGCCards(
     const dates = parseExperienceGCDate(dateText);
     if (!dates) return;
 
-    const imageRaw = $el.find(".img-cont img").first().attr("src");
+    const imageRaw = upgradeStylelabsImage(
+      $el.find(".img-cont img").first().attr("src")
+    );
     const description = $el.find(".event-desc").first().text().trim() || undefined;
     const ticketUrl =
       $el.find("a.book-now").first().attr("href") ?? undefined;

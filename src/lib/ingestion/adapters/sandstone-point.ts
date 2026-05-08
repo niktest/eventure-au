@@ -7,6 +7,7 @@ import {
   extractBackgroundImage,
   parseHumanDate,
   resolveUrl,
+  upgradeWordpressThumbnail,
 } from "../utils/scrape-helpers";
 
 const SOURCE = "sandstonepoint";
@@ -80,7 +81,9 @@ function parseSandstoneCards(html: string, baseUrl: string): RawEvent[] {
     const startDate = parseHumanDate(dateText);
     if (!startDate) return;
 
-    const imageRaw = extractBackgroundImage($el.find(".post-thumb").attr("style"));
+    const imageRaw = upgradeWordpressThumbnail(
+      extractBackgroundImage($el.find(".post-thumb").attr("style"))
+    );
     const blurb = $el.find(".event-text .desc").first().text().replace(/\s+/g, " ").trim() || undefined;
 
     const ticket = $el.find(".event-ticket a").first();

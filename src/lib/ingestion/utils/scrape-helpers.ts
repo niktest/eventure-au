@@ -19,6 +19,49 @@ export function ensureHttps(url: string | undefined): string | undefined {
   return url.replace(/^http:\/\//i, "https://");
 }
 
+// Some venue sites only emit small thumbnail variants in their listing markup
+// even though their CDN serves much larger versions at predictable URLs. The
+// helpers below rewrite a known-small URL to its largest reliable variant.
+//
+// Each helper is conservative: if the URL doesn't match the expected pattern,
+// it is returned unchanged so existing adapters never regress.
+
+// Sitecore Stylelabs (destinationgoldcoast.stylelabs.cloud) accepts a `t=WxH`
+// thumbnail param. The listing markup hard-codes `t=300x300`; dropping the
+// param entirely returns the full-resolution asset.
+export function upgradeStylelabsImage(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (!/stylelabs\.cloud\/api\/public\/content\//i.test(url)) return url;
+  let next = url.replace(/&t=[^&]*/gi, "").replace(/\?t=[^&]*&/gi, "?");
+  next = next.replace(/\?t=[^&]*$/i, "");
+  return next;
+}
+
+// HOTA's CDN exposes pre-rendered crops at /generated/{width}w-{aspect}/...
+// The listing markup uses the 480w variant; 1280w is available for every
+// asset and is the largest size the site itself ever loads.
+export function upgradeHotaImage(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.replace(/\/generated\/(\d+)w-([0-9-]+)\//i, (match, width, aspect) => {
+    return Number(width) >= 1280 ? match : `/generated/1280w-${aspect}/`;
+  });
+}
+
+// WordPress sites (e.g. sandstonepointhotel.com.au) name resized assets
+// `name-WIDTHxHEIGHT.ext`. Stripping the `-WIDTHxHEIGHT` suffix returns the
+// original full-resolution upload.
+export function upgradeWordpressThumbnail(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.replace(/-(\d{2,4})x(\d{2,4})(\.[a-z]{3,4})(\?[^"]*)?$/i, "$3$4");
+}
+
+// Moshtix uploads expose only fixed thumbnail sizes via a suffix on the asset
+// id (`...x140x140`, `...x300x300`, `...x600x600`). 600 is the largest tier.
+export function upgradeMoshtixImage(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.replace(/(moshtix\.com\.au\/uploads\/[a-f0-9-]+)x\d+x\d+/i, "$1x600x600");
+}
+
 // Pull a `background-image: url(...)` value out of a style attribute.
 export function extractBackgroundImage(style: string | undefined): string | undefined {
   if (!style) return undefined;
