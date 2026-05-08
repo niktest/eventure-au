@@ -84,6 +84,8 @@ Listing markup almost always emits a small thumbnail (often 300–480 px) even w
 
 If a source legitimately only exposes thumbnails (no larger variant anywhere), say so explicitly in the adapter's file-level comment and link the source check that proved it. Don't ship a thumbnail silently.
 
+When you ship a new or updated `upgrade*` helper, also run `npm run backfill:image-upgrades` against production. The cron only re-scrapes events that still appear on the source listing; events that have already rotated off keep their stale `imageUrl` until something else triggers an upsert. The backfill script (`scripts/backfill-image-upgrades.ts`) is idempotent — re-applies every helper to every row and updates only the rows where the URL actually changes.
+
 ### 3. Skip recurring/undated cards rather than fabricating dates
 
 If a card has no anchor date (e.g. "Saturday (Weekly)"), `return` from the iterator and let dedup/normalisation pick up dated rows from other sources. Never default to `new Date()` for an undated event — it pollutes the calendar.
