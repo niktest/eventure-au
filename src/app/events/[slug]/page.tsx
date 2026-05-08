@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -8,9 +9,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { InterestedButton } from "@/components/InterestedButton";
-import { EventDiscussPanel } from "@/components/discussions/EventDiscussPanel";
-import { listLatestThreadsForEvent } from "@/lib/discussions/queries";
-import { auth } from "@/lib/auth";
+import { EventDiscussPanelLoader } from "@/components/discussions/EventDiscussPanelLoader";
 import {
   EVENT_CARD_SELECT,
   type EventCardData,
@@ -112,19 +111,6 @@ export default async function EventDetailPage({
       }
       if (similarEvents.length >= SIMILAR_TARGET) break;
     }
-  } catch {
-    // Non-critical
-  }
-
-  const session = await auth();
-  const viewerId = session?.user?.id ?? null;
-  let discussionThreads: Awaited<ReturnType<typeof listLatestThreadsForEvent>> = [];
-  try {
-    discussionThreads = await listLatestThreadsForEvent({
-      eventId: event.id,
-      limit: 3,
-      viewerId,
-    });
   } catch {
     // Non-critical
   }
@@ -404,14 +390,20 @@ export default async function EventDetailPage({
           </div>
         </div>
 
-        {/* Discuss this event */}
+        {/* Discuss this event — dynamic island so the parent stays SSG/ISR.
+            auth() reads cookies and would otherwise force the whole page dynamic. */}
         <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-10">
-          <EventDiscussPanel
-            eventSlug={event.slug}
-            eventName={event.name}
-            threads={discussionThreads}
-            isSignedIn={Boolean(viewerId)}
-          />
+          <Suspense
+            fallback={
+              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/40 p-5 md:p-6 h-32 animate-pulse" />
+            }
+          >
+            <EventDiscussPanelLoader
+              eventId={event.id}
+              eventSlug={event.slug}
+              eventName={event.name}
+            />
+          </Suspense>
         </section>
 
         {/* Similar Events */}
