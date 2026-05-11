@@ -37,7 +37,7 @@ interface MeetupNode {
     state: string;
     country: string;
     lat: number;
-    lng: number;
+    lon: number;
   } | null;
 }
 
@@ -89,7 +89,7 @@ const SEARCH_QUERY = `
             state
             country
             lat
-            lng
+            lon
           }
         }
       }
@@ -202,7 +202,7 @@ function mapEvent(node: MeetupNode, fallback: { name: string; state: string }): 
     city: node.venue?.city ?? node.group?.city ?? fallback.name,
     state: node.venue?.state ?? node.group?.state ?? fallback.state,
     latitude: node.venue?.lat ?? undefined,
-    longitude: node.venue?.lng ?? undefined,
+    longitude: node.venue?.lon ?? undefined,
     isFree: !isPaid,
     priceMin: isPaid ? (fee?.amount ?? undefined) : undefined,
     ticketUrl: node.eventUrl,
