@@ -63,12 +63,17 @@ export class EventbriteAdapter implements SourceAdapter {
     const allEvents: RawEvent[] = [];
     const seen = new Set<string>();
 
+    // Safety cap per city — Eventbrite Search API returns 50/page, so this
+    // covers up to 500 events per city. Anything beyond is a long tail.
+    const MAX_PAGES_PER_CITY = 10;
+
     for (const loc of AU_LOCATIONS) {
       console.log(`[eventbrite] Fetching ${loc.name} (${loc.state})...`);
       let page = 1;
       let hasMore = true;
+      let cityCount = 0;
 
-      while (hasMore && page <= 2) {
+      while (hasMore && page <= MAX_PAGES_PER_CITY) {
         const url = new URL(`${API_BASE}/events/search/`);
         url.searchParams.set("location.latitude", String(loc.lat));
         url.searchParams.set("location.longitude", String(loc.lon));
@@ -91,12 +96,14 @@ export class EventbriteAdapter implements SourceAdapter {
           if (!seen.has(eb.id)) {
             seen.add(eb.id);
             allEvents.push(mapEvent(eb, loc));
+            cityCount++;
           }
         }
 
         hasMore = data.pagination.has_more_items;
         page++;
       }
+      console.log(`[eventbrite]   -> ${loc.name}: +${cityCount} (total=${allEvents.length})`);
     }
 
     return allEvents;

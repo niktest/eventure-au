@@ -106,12 +106,17 @@ export class MeetupAdapter implements SourceAdapter {
     const allEvents: RawEvent[] = [];
     const seen = new Set<string>();
 
+    // Safety cap per city — Meetup returns 50/page, so this covers up to
+    // 1000 events per city before bailing.
+    const MAX_PAGES_PER_CITY = 20;
+
     for (const loc of AU_LOCATIONS) {
       console.log(`[meetup] Fetching ${loc.name} (${loc.state})...`);
       let after: string | null = null;
       let pages = 0;
+      let cityCount = 0;
 
-      while (pages < 2) {
+      while (pages < MAX_PAGES_PER_CITY) {
         try {
           const res = await fetch(GRAPHQL_URL, {
             method: "POST",
@@ -140,6 +145,7 @@ export class MeetupAdapter implements SourceAdapter {
             if (!seen.has(node.id)) {
               seen.add(node.id);
               allEvents.push(mapEvent(node, loc));
+              cityCount++;
             }
           }
 
@@ -151,6 +157,7 @@ export class MeetupAdapter implements SourceAdapter {
           break;
         }
       }
+      console.log(`[meetup]   -> ${loc.name}: +${cityCount} (total=${allEvents.length})`);
     }
 
     return allEvents;

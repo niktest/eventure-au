@@ -84,15 +84,21 @@ export class EventfindaAdapter implements SourceAdapter {
     const events: RawEvent[] = [];
     const seen = new Set<number>();
 
+    // Safety cap per city. With rows=100 this is up to 1000 events/city.
+    // Eventfinda rate-limit is 1 req/s so we stay under ~3 min worst case.
+    const MAX_PAGES_PER_CITY = 10;
+    const ROWS_PER_PAGE = 100;
+
     for (const loc of AU_LOCATIONS) {
       let page = 1;
       let hasMore = true;
+      let cityCount = 0;
 
-      while (hasMore && page <= 2) {
+      while (hasMore && page <= MAX_PAGES_PER_CITY) {
         const url = new URL(`${API_BASE}/events.json`);
         url.searchParams.set("point", `${loc.lat},${loc.lon}`);
         url.searchParams.set("radius", String(AU_SEARCH_RADIUS_KM));
-        url.searchParams.set("rows", "20");
+        url.searchParams.set("rows", String(ROWS_PER_PAGE));
         url.searchParams.set("page", String(page));
         url.searchParams.set("order", "date");
         url.searchParams.set("fields", "event:(id,name,description,url,url_slug,datetime_start,datetime_end,datetime_summary,is_free,is_cancelled,address,location_summary,point,location,category,images,ticket_types,restrictions,presented_by)");
@@ -120,6 +126,7 @@ export class EventfindaAdapter implements SourceAdapter {
             if (!seen.has(ef.id)) {
               seen.add(ef.id);
               events.push(mapEvent(ef, loc.name, loc.state));
+              cityCount++;
             }
           }
 
@@ -133,6 +140,7 @@ export class EventfindaAdapter implements SourceAdapter {
           break;
         }
       }
+      console.log(`[eventfinda]   -> ${loc.name}: +${cityCount} (total=${events.length})`);
     }
 
     return events;
