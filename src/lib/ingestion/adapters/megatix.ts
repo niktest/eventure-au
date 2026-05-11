@@ -1,147 +1,132 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
-/** AU state codes to search on Megatix */
-const MEGATIX_STATES = ["QLD", "NSW", "VIC", "WA", "SA", "TAS", "NT", "ACT"];
+// Megatix is a Nuxt SPA whose `/events` HTML embeds no JSON-LD — the
+// site hydrates from a Laravel-style JSON API at
+// `/api/v2/events/search?page=N`, paginated 8 per page with a `meta.last_page`
+// terminator. We walk pages until we reach `last_page`, then dedup by id.
+const LISTING_PAGE_DELAY_MS = 200;
+const MAX_PAGES = 200;
+
+interface MegatixListing {
+  id: number;
+  name: string;
+  slug: string;
+  venue_name?: string | null;
+  cover?: string | null;
+  start_datetime?: string | null;
+  end_datetime?: string | null;
+  is_published?: boolean;
+  is_on_sale?: boolean;
+  display_price?: string | null;
+  is_recurring?: boolean;
+}
+
+interface MegatixSearchResponse {
+  data: MegatixListing[];
+  meta?: {
+    current_page?: number;
+    last_page?: number;
+    total?: number;
+  };
+}
 
 /**
  * Megatix scraper adapter.
- * Scrapes megatix.com.au for event listings across all Australian states.
- * Uses JSON-LD extraction with fallback to embedded page data.
+ *
+ * Paginates the public JSON listing endpoint `/api/v2/events/search?page=N`.
+ * The endpoint ignores `state` and `per_page` query parameters — it just
+ * returns the global AU catalogue 8 events per page, terminating at
+ * `meta.last_page`. We walk until exhausted and rely on `(source, sourceId)`
+ * dedup since the listing has no overlap when walked sequentially.
  */
 export class MegatixAdapter implements SourceAdapter {
   readonly name = "megatix";
 
   async fetch(): Promise<RawEvent[]> {
     const baseUrl = process.env.MEGATIX_URL ?? "https://megatix.com.au";
-    const events: RawEvent[] = [];
+    const allEvents: RawEvent[] = [];
+    const seen = new Set<string>();
 
-    // Fetch all events + each state individually
-    const searchUrls = [
-      { url: `${baseUrl}/events`, label: "all" },
-      ...MEGATIX_STATES.map((state) => ({
-        url: `${baseUrl}/events?state=${state}`,
-        label: state,
-      })),
-    ];
+    let page = 1;
+    let lastPage: number | null = null;
+    let total: number | null = null;
 
-    for (const { url: searchUrl, label } of searchUrls) {
-      console.log(`[megatix] Scraping ${label}: ${searchUrl}`);
-
+    while (page <= MAX_PAGES) {
+      let data: MegatixSearchResponse;
       try {
-        const res = await fetch(searchUrl, {
+        const res = await fetch(`${baseUrl}/api/v2/events/search?page=${page}`, {
           headers: {
             "User-Agent": SCRAPER_USER_AGENT,
-            Accept: "text/html,application/xhtml+xml",
+            Accept: "application/json",
           },
         });
-
         if (!res.ok) {
-          console.error(`[megatix] HTTP ${res.status} for ${label}`);
-          continue;
+          console.error(`[megatix] page ${page}: HTTP ${res.status}`);
+          break;
         }
-
-        const html = await res.text();
-        const parsed = parseMegatixEvents(html, baseUrl);
-        events.push(...parsed);
+        data = (await res.json()) as MegatixSearchResponse;
       } catch (err) {
-        console.error(`[megatix] Fetch failed for ${label}:`, err);
+        console.error(`[megatix] page ${page} fetch failed:`, err);
+        break;
+      }
+
+      if (lastPage === null) {
+        lastPage = data.meta?.last_page ?? null;
+        total = data.meta?.total ?? null;
+        console.log(
+          `[megatix] Listing reports ${total ?? "?"} event(s) across ${lastPage ?? "?"} page(s)`
+        );
+      }
+
+      const items = data.data ?? [];
+      let newOnPage = 0;
+      for (const item of items) {
+        const ev = mapListing(item, baseUrl);
+        if (!ev) continue;
+        if (seen.has(ev.sourceId)) continue;
+        seen.add(ev.sourceId);
+        allEvents.push(ev);
+        newOnPage++;
+      }
+      console.log(
+        `[megatix] Page ${page}${lastPage ? `/${lastPage}` : ""}: parsed ${items.length}, ${newOnPage} new (total=${allEvents.length})`
+      );
+
+      if (items.length === 0) break;
+      if (lastPage !== null && page >= lastPage) break;
+
+      page++;
+      if (LISTING_PAGE_DELAY_MS > 0) {
+        await new Promise((r) => setTimeout(r, LISTING_PAGE_DELAY_MS));
       }
     }
 
-    // Deduplicate by sourceId within this adapter
-    const seen = new Set<string>();
-    return events.filter((e) => {
-      if (seen.has(e.sourceId)) return false;
-      seen.add(e.sourceId);
-      return true;
-    });
+    return allEvents;
   }
 }
 
-function parseMegatixEvents(html: string, baseUrl: string): RawEvent[] {
-  const events: RawEvent[] = [];
+function mapListing(item: MegatixListing, baseUrl: string): RawEvent | null {
+  if (!item.id || !item.name) return null;
+  if (item.is_published === false) return null;
+  if (item.is_recurring) return null;
 
-  // Strategy 1: JSON-LD structured data
-  const jsonLdMatches = html.matchAll(
-    /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
-  );
+  const start = item.start_datetime ? new Date(item.start_datetime) : null;
+  if (!start || Number.isNaN(start.getTime())) return null;
 
-  for (const match of jsonLdMatches) {
-    try {
-      const data = JSON.parse(match[1]);
-      const items = Array.isArray(data) ? data : [data];
+  const end = item.end_datetime ? new Date(item.end_datetime) : undefined;
+  const eventUrl = item.slug ? `${baseUrl}/events/${item.slug}` : undefined;
 
-      for (const item of items) {
-        if (item["@type"] !== "Event" && item["@type"] !== "MusicEvent") continue;
-        const eventUrl = item.url?.startsWith("http") ? item.url : `${baseUrl}${item.url ?? ""}`;
-        events.push({
-          sourceId: item.url ?? `megatix-${item.name?.replace(/\s+/g, "-").toLowerCase()}`,
-          name: item.name ?? "Unknown Event",
-          description: item.description ?? undefined,
-          startDate: item.startDate ? new Date(item.startDate) : new Date(),
-          endDate: item.endDate ? new Date(item.endDate) : undefined,
-          imageUrl: typeof item.image === "string" ? item.image : item.image?.[0] ?? undefined,
-          url: eventUrl,
-          venueName: item.location?.name ?? undefined,
-          venueAddress: item.location?.address?.streetAddress
-            ?? (typeof item.location?.address === "string" ? item.location.address : undefined),
-          city: item.location?.address?.addressLocality ?? undefined,
-          state: item.location?.address?.addressRegion ?? undefined,
-          latitude: item.location?.geo?.latitude ? parseFloat(item.location.geo.latitude) : undefined,
-          longitude: item.location?.geo?.longitude ? parseFloat(item.location.geo.longitude) : undefined,
-          isFree: item.isAccessibleForFree === true,
-          priceMin: item.offers?.lowPrice ? parseFloat(item.offers.lowPrice) : undefined,
-          priceMax: item.offers?.highPrice ? parseFloat(item.offers.highPrice) : undefined,
-          ticketUrl: item.offers?.url ?? eventUrl,
-          ticketProvider: "megatix",
-          rawData: item,
-        });
-      }
-    } catch {
-      // Ignore malformed JSON-LD
-    }
-  }
-
-  // Strategy 2: Extract from __NEXT_DATA__ or __NUXT__ embedded data
-  if (events.length === 0) {
-    const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
-    if (nextDataMatch) {
-      try {
-        const nextData = JSON.parse(nextDataMatch[1]);
-        const pageProps = nextData?.props?.pageProps;
-        const eventList = pageProps?.events ?? pageProps?.results ?? pageProps?.items ?? [];
-        for (const item of eventList) {
-          if (!item.name && !item.title) continue;
-          events.push({
-            sourceId: String(item.id ?? item.slug ?? `megatix-${(item.name ?? item.title)?.replace(/\s+/g, "-").toLowerCase()}`),
-            name: item.name ?? item.title ?? "Unknown Event",
-            description: item.description ?? item.summary ?? undefined,
-            startDate: item.startDate ?? item.start_date ?? item.date ?? new Date().toISOString(),
-            endDate: item.endDate ?? item.end_date ?? undefined,
-            imageUrl: item.imageUrl ?? item.image ?? item.thumbnail ?? item.cover_image ?? undefined,
-            url: item.url ? (item.url.startsWith("http") ? item.url : `${baseUrl}${item.url}`) : `${baseUrl}/events/${item.slug ?? item.id}`,
-            venueName: item.venue?.name ?? item.venueName ?? undefined,
-            venueAddress: item.venue?.address ?? item.venueAddress ?? undefined,
-            city: item.venue?.city ?? item.city ?? undefined,
-            state: item.venue?.state ?? item.state ?? undefined,
-            isFree: item.isFree ?? false,
-            priceMin: item.priceMin ?? item.price_min ?? undefined,
-            priceMax: item.priceMax ?? item.price_max ?? undefined,
-            ticketUrl: item.ticketUrl ?? item.url ?? undefined,
-            ticketProvider: "megatix",
-            rawData: item,
-          });
-        }
-      } catch {
-        // Ignore malformed __NEXT_DATA__
-      }
-    }
-  }
-
-  if (events.length === 0) {
-    console.log("[megatix] No structured events found; full HTML parser needed (add cheerio)");
-  }
-
-  return events;
+  return {
+    sourceId: `megatix-${item.id}`,
+    name: item.name,
+    startDate: start,
+    endDate: end && !Number.isNaN(end.getTime()) ? end : undefined,
+    imageUrl: item.cover ?? undefined,
+    url: eventUrl,
+    venueName: item.venue_name ?? undefined,
+    ticketUrl: eventUrl,
+    ticketProvider: "megatix",
+    rawData: item,
+  };
 }

@@ -1,154 +1,165 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
 
-/** AU cities to search on Oztix */
-const OZTIX_SEARCHES = [
-  { query: "gold+coast", city: "Gold Coast", state: "QLD" },
-  { query: "brisbane", city: "Brisbane", state: "QLD" },
-  { query: "sydney", city: "Sydney", state: "NSW" },
-  { query: "melbourne", city: "Melbourne", state: "VIC" },
-  { query: "perth", city: "Perth", state: "WA" },
-  { query: "adelaide", city: "Adelaide", state: "SA" },
-  { query: "hobart", city: "Hobart", state: "TAS" },
-  { query: "darwin", city: "Darwin", state: "NT" },
-  { query: "canberra", city: "Canberra", state: "ACT" },
-  { query: "newcastle", city: "Newcastle", state: "NSW" },
-  { query: "sunshine+coast", city: "Sunshine Coast", state: "QLD" },
-  { query: "cairns", city: "Cairns", state: "QLD" },
-  { query: "townsville", city: "Townsville", state: "QLD" },
-  { query: "geelong", city: "Geelong", state: "VIC" },
-  { query: "wollongong", city: "Wollongong", state: "NSW" },
-];
+// Oztix's public site (oztix.com.au) is a Vue.js SPA — the `/search` HTML
+// shell never embeds any event data, so HTML/JSON-LD scraping yields zero
+// results. The site itself queries Algolia directly with a public
+// search-only API key extracted from its bundled JS. We hit the same index
+// and paginate per AU state (Algolia caps a single result set at 1000 hits
+// via `paginationLimitedTo`, so slicing by state is necessary to reach the
+// full ~3.5k AU catalogue).
+const ALGOLIA_APP_ID = "ICGFYQWGTD";
+const ALGOLIA_API_KEY = "bc11adffff267d354ad0a04aedebb5b5";
+const ALGOLIA_INDEX = "prod_oztix_eventguide";
+const HITS_PER_PAGE = 1000;
+const MAX_PAGES_PER_STATE = 5;
+const PAGE_DELAY_MS = 150;
+
+// AU states + ACT/NT. Filtering by `Venue.State` is the natural axis the
+// site exposes and matches the available facets in the index.
+const AU_STATES = ["QLD", "NSW", "VIC", "WA", "SA", "TAS", "ACT", "NT"];
+
+interface OztixHit {
+  EventId?: number;
+  EventGuid?: string;
+  EventName?: string;
+  EventDescription?: string;
+  EventImage1?: string;
+  HomepageImage?: string;
+  EventUrl?: string;
+  DateStart?: string;
+  DateEnd?: string;
+  MinPrice?: number;
+  Categories?: string[];
+  Venue?: {
+    Name?: string;
+    Address?: string;
+    Locality?: string;
+    State?: string;
+    Postcode?: string;
+    Country?: string;
+    Timezone?: string;
+  };
+  _geoloc?: { lat?: number; lng?: number };
+  IsCancelled?: boolean;
+}
+
+interface AlgoliaResponse {
+  hits: OztixHit[];
+  nbHits: number;
+  page: number;
+  nbPages: number;
+  hitsPerPage: number;
+}
 
 /**
  * Oztix scraper adapter.
- * Scrapes oztix.com.au event listings for all major Australian cities.
- * Falls back to JSON-LD parsing from search results pages.
+ *
+ * Fully client-side rendered Vue.js SPA — there is no HTML to scrape. We
+ * paginate the Algolia index (`prod_oztix_eventguide`) that the site uses
+ * itself, sliced by `Venue.State` so we can walk past Algolia's per-query
+ * 1000-hit cap and cover the entire AU catalogue.
  */
 export class OztixAdapter implements SourceAdapter {
   readonly name = "oztix";
 
   async fetch(): Promise<RawEvent[]> {
-    const baseUrl = process.env.OZTIX_URL ?? "https://www.oztix.com.au";
+    const algoliaUrl = `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${ALGOLIA_INDEX}/query`;
     const allEvents: RawEvent[] = [];
     const seen = new Set<string>();
 
-    for (const search of OZTIX_SEARCHES) {
-      const searchUrl = `${baseUrl}/search?q=${search.query}`;
-      console.log(`[oztix] Scraping ${search.city} (${search.state})`);
+    for (const state of AU_STATES) {
+      let page = 0;
+      let stateTotal: number | null = null;
+      let stateAdded = 0;
 
-      try {
-        const res = await fetch(searchUrl, {
-          headers: {
-            "User-Agent": SCRAPER_USER_AGENT,
-            Accept: "text/html,application/xhtml+xml",
-          },
-        });
-
-        if (!res.ok) {
-          console.error(`[oztix] HTTP ${res.status} for ${search.city}`);
-          continue;
-        }
-
-        const html = await res.text();
-        const parsed = parseOztixEvents(html, baseUrl, search.city, search.state);
-        for (const evt of parsed) {
-          if (!seen.has(evt.sourceId)) {
-            seen.add(evt.sourceId);
-            allEvents.push(evt);
+      while (page < MAX_PAGES_PER_STATE) {
+        let data: AlgoliaResponse;
+        try {
+          const res = await fetch(algoliaUrl, {
+            method: "POST",
+            headers: {
+              "User-Agent": SCRAPER_USER_AGENT,
+              "X-Algolia-API-Key": ALGOLIA_API_KEY,
+              "X-Algolia-Application-Id": ALGOLIA_APP_ID,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: "",
+              page,
+              hitsPerPage: HITS_PER_PAGE,
+              facetFilters: [[`Venue.State:${state}`]],
+            }),
+          });
+          if (!res.ok) {
+            console.error(`[oztix] ${state} page ${page}: HTTP ${res.status}`);
+            break;
           }
+          data = (await res.json()) as AlgoliaResponse;
+        } catch (err) {
+          console.error(`[oztix] ${state} page ${page} fetch failed:`, err);
+          break;
         }
-      } catch (err) {
-        console.error(`[oztix] Fetch failed for ${search.city}:`, err);
+
+        if (stateTotal === null) stateTotal = data.nbHits;
+
+        const hits = data.hits ?? [];
+        if (hits.length === 0) break;
+
+        for (const hit of hits) {
+          const ev = mapHit(hit, state);
+          if (!ev) continue;
+          if (seen.has(ev.sourceId)) continue;
+          seen.add(ev.sourceId);
+          allEvents.push(ev);
+          stateAdded++;
+        }
+
+        // Algolia returns the resolved page count after the first request.
+        if (page + 1 >= data.nbPages) break;
+
+        page++;
+        if (PAGE_DELAY_MS > 0) await new Promise((r) => setTimeout(r, PAGE_DELAY_MS));
       }
+
+      console.log(
+        `[oztix]   -> ${state}: +${stateAdded}/${stateTotal ?? "?"} (total=${allEvents.length})`
+      );
     }
 
     return allEvents;
   }
 }
 
-function parseOztixEvents(html: string, baseUrl: string, fallbackCity: string, fallbackState: string): RawEvent[] {
-  const events: RawEvent[] = [];
+function mapHit(hit: OztixHit, fallbackState: string): RawEvent | null {
+  if (!hit.EventId || !hit.EventName) return null;
+  if (hit.IsCancelled) return null;
 
-  // Strategy 1: Extract JSON-LD structured data
-  const jsonLdMatches = html.matchAll(
-    /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
-  );
+  const start = hit.DateStart ? new Date(hit.DateStart) : null;
+  if (!start || Number.isNaN(start.getTime())) return null;
 
-  for (const match of jsonLdMatches) {
-    try {
-      const data = JSON.parse(match[1]);
-      const items = Array.isArray(data) ? data : [data];
+  const end = hit.DateEnd ? new Date(hit.DateEnd) : undefined;
 
-      for (const item of items) {
-        if (item["@type"] !== "Event" && item["@type"] !== "MusicEvent") continue;
-        const eventUrl = item.url?.startsWith("http") ? item.url : `${baseUrl}${item.url ?? ""}`;
-        events.push({
-          sourceId: item.url ?? `oztix-${item.name?.replace(/\s+/g, "-").toLowerCase()}`,
-          name: item.name ?? "Unknown Event",
-          description: item.description ?? undefined,
-          startDate: item.startDate ? new Date(item.startDate) : new Date(),
-          endDate: item.endDate ? new Date(item.endDate) : undefined,
-          imageUrl: typeof item.image === "string" ? item.image : item.image?.[0] ?? undefined,
-          url: eventUrl,
-          venueName: item.location?.name ?? undefined,
-          venueAddress: item.location?.address?.streetAddress
-            ?? (typeof item.location?.address === "string" ? item.location.address : undefined),
-          city: item.location?.address?.addressLocality ?? fallbackCity,
-          state: item.location?.address?.addressRegion ?? fallbackState,
-          latitude: item.location?.geo?.latitude ? parseFloat(item.location.geo.latitude) : undefined,
-          longitude: item.location?.geo?.longitude ? parseFloat(item.location.geo.longitude) : undefined,
-          category: "MUSIC",
-          isFree: item.isAccessibleForFree === true,
-          priceMin: item.offers?.lowPrice ? parseFloat(item.offers.lowPrice) : undefined,
-          priceMax: item.offers?.highPrice ? parseFloat(item.offers.highPrice) : undefined,
-          ticketUrl: item.offers?.url ?? eventUrl,
-          ticketProvider: "oztix",
-          rawData: item,
-        });
-      }
-    } catch {
-      // Ignore malformed JSON-LD
-    }
-  }
-
-  // Strategy 2: Extract from embedded Next.js / Nuxt data or inline JSON
-  if (events.length === 0) {
-    const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
-    if (nextDataMatch) {
-      try {
-        const nextData = JSON.parse(nextDataMatch[1]);
-        const pageProps = nextData?.props?.pageProps;
-        const eventList = pageProps?.events ?? pageProps?.results ?? [];
-        for (const item of eventList) {
-          if (!item.name && !item.title) continue;
-          events.push({
-            sourceId: String(item.id ?? item.slug ?? `oztix-${(item.name ?? item.title)?.replace(/\s+/g, "-").toLowerCase()}`),
-            name: item.name ?? item.title ?? "Unknown Event",
-            description: item.description ?? item.summary ?? undefined,
-            startDate: item.startDate ?? item.start_date ?? item.date ?? new Date().toISOString(),
-            endDate: item.endDate ?? item.end_date ?? undefined,
-            imageUrl: item.imageUrl ?? item.image ?? item.thumbnail ?? undefined,
-            url: item.url ? (item.url.startsWith("http") ? item.url : `${baseUrl}${item.url}`) : undefined,
-            venueName: item.venue?.name ?? item.venueName ?? undefined,
-            venueAddress: item.venue?.address ?? item.venueAddress ?? undefined,
-            city: item.venue?.city ?? fallbackCity,
-            state: item.venue?.state ?? fallbackState,
-            category: "MUSIC",
-            ticketUrl: item.ticketUrl ?? item.url ?? undefined,
-            ticketProvider: "oztix",
-            rawData: item,
-          });
-        }
-      } catch {
-        // Ignore malformed __NEXT_DATA__
-      }
-    }
-  }
-
-  if (events.length === 0) {
-    console.log(`[oztix] No structured events found for ${fallbackCity}; full HTML parser needed (add cheerio)`);
-  }
-
-  return events;
+  return {
+    sourceId: `oztix-${hit.EventId}`,
+    name: hit.EventName,
+    description: hit.EventDescription ?? undefined,
+    startDate: start,
+    endDate: end && !Number.isNaN(end.getTime()) ? end : undefined,
+    imageUrl: hit.EventImage1 ?? hit.HomepageImage ?? undefined,
+    url: hit.EventUrl ?? undefined,
+    venueName: hit.Venue?.Name ?? undefined,
+    venueAddress: hit.Venue?.Address ?? undefined,
+    city: hit.Venue?.Locality ?? undefined,
+    state: hit.Venue?.State ?? fallbackState,
+    latitude:
+      typeof hit._geoloc?.lat === "number" ? hit._geoloc.lat : undefined,
+    longitude:
+      typeof hit._geoloc?.lng === "number" ? hit._geoloc.lng : undefined,
+    category: "MUSIC",
+    priceMin: typeof hit.MinPrice === "number" ? hit.MinPrice : undefined,
+    ticketUrl: hit.EventUrl ?? undefined,
+    ticketProvider: "oztix",
+    rawData: hit,
+  };
 }
