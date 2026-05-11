@@ -2,11 +2,19 @@ import type { SourceAdapter, RawEvent } from "@/types/event";
 import { AU_LOCATIONS } from "../au-locations";
 
 const API_BASE = "https://rest.bandsintown.com";
-const APP_ID = "eventure"; // Public app_id for Bandsintown API v3
 
 /**
  * Bandsintown adapter for Australian music events.
- * Searches all major AU cities using the public events API — no API key needed.
+ *
+ * Bandsintown's REST API is no longer "public" — the unauthenticated
+ * `app_id` path now returns `403 — User is not authorized to access this
+ * resource with an explicit deny in an identity-based policy`. To produce
+ * events we need a partner-issued app_id set as `BANDSINTOWN_APP_ID`.
+ * Apply at https://artists.bandsintown.com/support/api-installation
+ * (partner inquiries: api@bandsintown.com).
+ *
+ * Until that's configured the adapter is a no-op so it doesn't burn an
+ * HTTP request per AU city on every nightly run.
  */
 
 interface BitEvent {
@@ -46,6 +54,12 @@ export class BandsintownAdapter implements SourceAdapter {
   readonly name = "bandsintown";
 
   async fetch(): Promise<RawEvent[]> {
+    const appId = process.env.BANDSINTOWN_APP_ID;
+    if (!appId) {
+      console.warn("[bandsintown] BANDSINTOWN_APP_ID not set, skipping");
+      return [];
+    }
+
     const events: RawEvent[] = [];
     const seen = new Set<string>();
 
@@ -53,7 +67,7 @@ export class BandsintownAdapter implements SourceAdapter {
       console.log(`[bandsintown] Fetching ${loc.name} (${loc.state})...`);
       try {
         const res = await fetch(
-          `${API_BASE}/v4/events?location=${encodeURIComponent(loc.name)}, AU&radius=50&app_id=${APP_ID}`,
+          `${API_BASE}/v4/events?location=${encodeURIComponent(loc.name)}, AU&radius=50&app_id=${encodeURIComponent(appId)}`,
           { headers: { Accept: "application/json" } }
         );
 

@@ -1,7 +1,12 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 import { AU_LOCATIONS, AU_SEARCH_RADIUS_KM } from "../au-locations";
 
-const GRAPHQL_URL = "https://www.meetup.com/gql";
+const GRAPHQL_URL = "https://api.meetup.com/gql-ext";
+
+interface MeetupPhoto {
+  highResUrl?: string | null;
+  baseUrl?: string | null;
+}
 
 interface MeetupNode {
   id: string;
@@ -10,47 +15,50 @@ interface MeetupNode {
   dateTime: string;
   endTime: string | null;
   eventUrl: string;
-  imageUrl: string | null;
-  going: number;
+  eventType: string | null;
+  displayPhoto: MeetupPhoto | null;
+  featuredEventPhoto: MeetupPhoto | null;
+  feeSettings: {
+    accepts: string | null;
+    amount: number | null;
+    currency: string | null;
+  } | null;
   group: {
     name: string;
     urlname: string;
     city: string;
     state: string;
     country: string;
-  };
+  } | null;
   venue: {
     name: string;
     address: string;
     city: string;
     state: string;
+    country: string;
     lat: number;
     lng: number;
-  } | null;
-  isFree: boolean;
-  feeSettings: {
-    amount: number;
-    currency: string;
   } | null;
 }
 
 interface MeetupResponse {
   data?: {
-    rankedEvents?: {
+    recommendedEvents?: {
       edges: Array<{ node: MeetupNode }>;
-      pageInfo: { hasNextPage: boolean; endCursor: string };
+      pageInfo: { hasNextPage: boolean; endCursor: string | null };
     };
   };
+  errors?: Array<{ message: string }>;
 }
 
 const SEARCH_QUERY = `
-  query ($lat: Float!, $lon: Float!, $radius: Int!, $after: String) {
-    rankedEvents(
+  query ($lat: Float!, $lon: Float!, $radius: Float!, $after: String) {
+    recommendedEvents(
       filter: {
         lat: $lat
         lon: $lon
         radius: $radius
-        startDateRange: { start: "now" }
+        eventType: PHYSICAL
       }
       first: 50
       after: $after
@@ -63,8 +71,10 @@ const SEARCH_QUERY = `
           dateTime
           endTime
           eventUrl
-          imageUrl
-          going
+          eventType
+          displayPhoto { highResUrl baseUrl }
+          featuredEventPhoto { highResUrl baseUrl }
+          feeSettings { accepts amount currency }
           group {
             name
             urlname
@@ -77,13 +87,9 @@ const SEARCH_QUERY = `
             address
             city
             state
+            country
             lat
             lng
-          }
-          isFree
-          feeSettings {
-            amount
-            currency
           }
         }
       }
@@ -96,7 +102,9 @@ const SEARCH_QUERY = `
 `;
 
 /**
- * Meetup adapter using the public GraphQL API.
+ * Meetup adapter using the public Meetup GraphQL API (api.meetup.com/gql-ext).
+ * Uses `recommendedEvents` — Meetup retired `rankedEvents` and the
+ * www.meetup.com/gql endpoint, so the old query 404s.
  * Searches all major AU cities. No API key required.
  */
 export class MeetupAdapter implements SourceAdapter {
@@ -106,8 +114,7 @@ export class MeetupAdapter implements SourceAdapter {
     const allEvents: RawEvent[] = [];
     const seen = new Set<string>();
 
-    // Safety cap per city — Meetup returns 50/page, so this covers up to
-    // 1000 events per city before bailing.
+    // 50/page; cap protects against runaway pagination loops.
     const MAX_PAGES_PER_CITY = 20;
 
     for (const loc of AU_LOCATIONS) {
@@ -138,10 +145,14 @@ export class MeetupAdapter implements SourceAdapter {
           }
 
           const data: MeetupResponse = await res.json();
-          const ranked = data.data?.rankedEvents;
-          if (!ranked || ranked.edges.length === 0) break;
+          if (data.errors?.length) {
+            console.error(`[meetup] GraphQL errors for ${loc.name}:`, data.errors);
+            break;
+          }
+          const conn = data.data?.recommendedEvents;
+          if (!conn || conn.edges.length === 0) break;
 
-          for (const { node } of ranked.edges) {
+          for (const { node } of conn.edges) {
             if (!seen.has(node.id)) {
               seen.add(node.id);
               allEvents.push(mapEvent(node, loc));
@@ -149,8 +160,8 @@ export class MeetupAdapter implements SourceAdapter {
             }
           }
 
-          if (!ranked.pageInfo.hasNextPage) break;
-          after = ranked.pageInfo.endCursor;
+          if (!conn.pageInfo.hasNextPage || !conn.pageInfo.endCursor) break;
+          after = conn.pageInfo.endCursor;
           pages++;
         } catch (err) {
           console.error(`[meetup] Fetch error for ${loc.name}:`, err);
@@ -164,23 +175,36 @@ export class MeetupAdapter implements SourceAdapter {
   }
 }
 
+function pickPhoto(node: MeetupNode): string | undefined {
+  return (
+    node.featuredEventPhoto?.highResUrl ??
+    node.featuredEventPhoto?.baseUrl ??
+    node.displayPhoto?.highResUrl ??
+    node.displayPhoto?.baseUrl ??
+    undefined
+  );
+}
+
 function mapEvent(node: MeetupNode, fallback: { name: string; state: string }): RawEvent {
+  const fee = node.feeSettings;
+  const isPaid = fee != null && fee.amount != null && fee.amount > 0;
+
   return {
     sourceId: node.id,
     name: node.title,
     description: node.description ?? undefined,
     startDate: new Date(node.dateTime),
     endDate: node.endTime ? new Date(node.endTime) : undefined,
-    imageUrl: node.imageUrl ?? undefined,
+    imageUrl: pickPhoto(node),
     url: node.eventUrl,
-    venueName: node.venue?.name ?? node.group.name,
+    venueName: node.venue?.name ?? node.group?.name,
     venueAddress: node.venue?.address ?? undefined,
-    city: node.venue?.city ?? node.group.city ?? fallback.name,
-    state: node.venue?.state ?? node.group.state ?? fallback.state,
+    city: node.venue?.city ?? node.group?.city ?? fallback.name,
+    state: node.venue?.state ?? node.group?.state ?? fallback.state,
     latitude: node.venue?.lat ?? undefined,
     longitude: node.venue?.lng ?? undefined,
-    isFree: node.isFree,
-    priceMin: node.feeSettings?.amount ?? undefined,
+    isFree: !isPaid,
+    priceMin: isPaid ? (fee?.amount ?? undefined) : undefined,
     ticketUrl: node.eventUrl,
     ticketProvider: "meetup",
     rawData: node,
