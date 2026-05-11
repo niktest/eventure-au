@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import type { SourceAdapter } from "@/types/event";
 import { normalise } from "@/lib/ingestion/normaliser";
 import { upsertEvents } from "@/lib/ingestion/dedup";
@@ -114,11 +115,36 @@ export async function GET(request: NextRequest) {
     adapterResults.push(r);
   }
 
+  // Bust the ISR cache on event-data pages so the homepage/listing counts and
+  // grids reflect tonight's ingest. Without this, the 1h `revalidate` on the
+  // listing pages can serve stale counts for up to an hour after the cron
+  // commits new/changed rows.
+  const revalidated: string[] = [];
+  if (totalCreated > 0 || totalUpdated > 0) {
+    const paths: Array<[string, "page" | "layout"]> = [
+      ["/", "page"],
+      ["/events", "page"],
+      ["/today", "page"],
+      ["/events/[slug]", "page"],
+      ["/city/[slug]", "page"],
+      ["/api/events/calendar-counts", "page"],
+    ];
+    for (const [path, type] of paths) {
+      try {
+        revalidatePath(path, type);
+        revalidated.push(path);
+      } catch (err) {
+        console.error(`[cron/ingest] revalidatePath("${path}") failed:`, err);
+      }
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     startedAt,
     finishedAt: new Date().toISOString(),
     totals: { created: totalCreated, updated: totalUpdated, errors: totalErrors },
     adapters: adapterResults,
+    revalidated,
   });
 }
