@@ -4,8 +4,20 @@
   "regions": ["syd1"],
   "crons": [
     {
-      "path": "/api/cron/ingest",
+      "path": "/api/cron/ingest/api",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/ingest/scrapers-venue",
+      "schedule": "15 2 * * *"
+    },
+    {
+      "path": "/api/cron/ingest/scrapers-platform",
+      "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/ingest/moshtix",
+      "schedule": "45 2 * * *"
     }
   ],
   "headers": [
