@@ -113,13 +113,25 @@ export default async function EventsPage({
   let events: Array<
     Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
   > = [];
+  let availableCategories: string[] = [];
   try {
-    events = await prisma.event.findMany({
-      where: { AND: conditions },
-      select: EVENT_CARD_SELECT,
-      orderBy: { startDate: "asc" },
-      take: 60,
-    });
+    const [eventRows, categoryRows] = await Promise.all([
+      prisma.event.findMany({
+        where: { AND: conditions },
+        select: EVENT_CARD_SELECT,
+        orderBy: { startDate: "asc" },
+        take: 60,
+      }),
+      // EVE-183: only surface category pills that have at least one upcoming
+      // published event. Independent of the user's current filters so the
+      // pill set doesn't collapse to one as filters narrow.
+      prisma.event.groupBy({
+        by: ["category"],
+        where: { status: "published", startDate: { gte: new Date() } },
+      }),
+    ]);
+    events = eventRows;
+    availableCategories = categoryRows.map((r) => r.category);
   } catch {
     // DB unavailable — render empty state, ISR will retry
   }
@@ -137,7 +149,7 @@ export default async function EventsPage({
         </div>
 
         <Suspense fallback={null}>
-          <SearchFilters />
+          <SearchFilters availableCategories={availableCategories} />
         </Suspense>
 
         {events.length === 0 ? (

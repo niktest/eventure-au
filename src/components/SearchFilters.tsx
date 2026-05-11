@@ -26,7 +26,11 @@ function formatCategory(cat: string): string {
     .replace(/\bAnd\b/, "&");
 }
 
-export function SearchFilters() {
+export function SearchFilters({
+  availableCategories,
+}: {
+  availableCategories: readonly string[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // `loading.tsx` doesn't fire on same-segment search-param changes, so we
@@ -133,7 +137,11 @@ export function SearchFilters() {
         >
           All
         </button>
-        {CATEGORIES.map((cat) => {
+        {CATEGORIES.filter(
+          (cat) =>
+            availableCategories.includes(cat) ||
+            currentCategory.toUpperCase() === cat
+        ).map((cat) => {
           const isSelected = currentCategory.toUpperCase() === cat;
           return (
             <button
