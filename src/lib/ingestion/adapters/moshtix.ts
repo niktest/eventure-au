@@ -2,66 +2,83 @@ import type { SourceAdapter, RawEvent } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
 import { upgradeMoshtixImage } from "../utils/scrape-helpers";
 
-/** Moshtix location slugs mapped from city names */
-const MOSHTIX_LOCATIONS = [
-  { slug: "gold-coast", city: "Gold Coast", state: "QLD" },
-  { slug: "brisbane", city: "Brisbane", state: "QLD" },
-  { slug: "sydney", city: "Sydney", state: "NSW" },
-  { slug: "melbourne", city: "Melbourne", state: "VIC" },
-  { slug: "perth", city: "Perth", state: "WA" },
-  { slug: "adelaide", city: "Adelaide", state: "SA" },
-  { slug: "hobart", city: "Hobart", state: "TAS" },
-  { slug: "darwin", city: "Darwin", state: "NT" },
-  { slug: "canberra", city: "Canberra", state: "ACT" },
-  { slug: "newcastle", city: "Newcastle", state: "NSW" },
-  { slug: "sunshine-coast", city: "Sunshine Coast", state: "QLD" },
-  { slug: "cairns", city: "Cairns", state: "QLD" },
-  { slug: "wollongong", city: "Wollongong", state: "NSW" },
-  { slug: "geelong", city: "Geelong", state: "VIC" },
-  { slug: "townsville", city: "Townsville", state: "QLD" },
-];
+const MAX_PAGES = 200;
+const PAGE_DELAY_MS = 250;
 
 /**
  * Moshtix scraper adapter.
- * Scrapes moshtix.com.au for Australian live music/event listings.
- * Searches all major AU cities.
+ * Paginates through the full moshtix.com.au search results.
+ *
+ * Note: the `location=<slug>` URL parameter accepted by the site does NOT
+ * actually filter — every slug returns the same global list. We therefore
+ * walk the unfiltered search and rely on the JSON-LD `addressRegion` /
+ * `addressLocality` fields for per-event city/state.
  */
 export class MoshtixAdapter implements SourceAdapter {
   readonly name = "moshtix";
 
   async fetch(): Promise<RawEvent[]> {
     const baseUrl = process.env.MOSHTIX_URL ?? "https://www.moshtix.com.au";
+    const seen = new Set<string>();
     const allEvents: RawEvent[] = [];
 
-    for (const loc of MOSHTIX_LOCATIONS) {
-      const searchUrl = `${baseUrl}/v2/search?location=${loc.slug}`;
-      console.log(`[moshtix] Scraping ${loc.city} (${loc.state})`);
+    let page = 1;
+    let totalPages: number | null = null;
 
+    while (page <= MAX_PAGES) {
+      const url = `${baseUrl}/v2/search?Page=${page}`;
+
+      let html: string;
       try {
-        const res = await fetch(searchUrl, {
-          headers: {
-            "User-Agent": SCRAPER_USER_AGENT,
-          },
+        const res = await fetch(url, {
+          headers: { "User-Agent": SCRAPER_USER_AGENT },
         });
-
         if (!res.ok) {
-          console.error(`[moshtix] HTTP ${res.status} for ${loc.city}`);
-          continue;
+          console.error(`[moshtix] HTTP ${res.status} on page ${page}`);
+          break;
         }
-
-        const html = await res.text();
-        const events = parseMoshtixEvents(html, baseUrl, loc.city, loc.state);
-        allEvents.push(...events);
+        html = await res.text();
       } catch (err) {
-        console.error(`[moshtix] Fetch failed for ${loc.city}:`, err);
+        console.error(`[moshtix] Fetch failed on page ${page}:`, err);
+        break;
       }
+
+      if (totalPages === null) {
+        totalPages = parsePageCount(html);
+        console.log(
+          `[moshtix] Search reports ${totalPages ?? "unknown"} page(s) of results`
+        );
+      }
+
+      const pageEvents = parseMoshtixEvents(html, baseUrl);
+      let newOnThisPage = 0;
+      for (const ev of pageEvents) {
+        if (seen.has(ev.sourceId)) continue;
+        seen.add(ev.sourceId);
+        allEvents.push(ev);
+        newOnThisPage++;
+      }
+      console.log(
+        `[moshtix] Page ${page}${totalPages ? `/${totalPages}` : ""}: parsed ${pageEvents.length}, ${newOnThisPage} new (total=${allEvents.length})`
+      );
+
+      if (pageEvents.length === 0) break;
+      if (totalPages !== null && page >= totalPages) break;
+
+      page++;
+      if (PAGE_DELAY_MS > 0) await new Promise((r) => setTimeout(r, PAGE_DELAY_MS));
     }
 
     return allEvents;
   }
 }
 
-function parseMoshtixEvents(html: string, baseUrl: string, fallbackCity: string, fallbackState: string): RawEvent[] {
+function parsePageCount(html: string): number | null {
+  const match = html.match(/Page\s+\d+\s+of\s+(\d+)/i);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
   const events: RawEvent[] = [];
   const jsonLdMatches = html.matchAll(
     /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
@@ -87,8 +104,8 @@ function parseMoshtixEvents(html: string, baseUrl: string, fallbackCity: string,
           url: eventUrl,
           venueName: item.location?.name ?? undefined,
           venueAddress: item.location?.address?.streetAddress ?? undefined,
-          city: item.location?.address?.addressLocality ?? fallbackCity,
-          state: item.location?.address?.addressRegion ?? fallbackState,
+          city: item.location?.address?.addressLocality ?? undefined,
+          state: item.location?.address?.addressRegion ?? undefined,
           category: "MUSIC",
           rawData: item,
         });
@@ -96,10 +113,6 @@ function parseMoshtixEvents(html: string, baseUrl: string, fallbackCity: string,
     } catch {
       // Ignore malformed JSON-LD
     }
-  }
-
-  if (events.length === 0) {
-    console.log(`[moshtix] No JSON-LD events found for ${fallbackCity}; full HTML parser needed (add cheerio)`);
   }
 
   return events;
