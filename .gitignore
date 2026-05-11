@@ -37,6 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# one-off DB backups (e.g. seed-event cleanup) — don't commit prod data
+/backups/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
