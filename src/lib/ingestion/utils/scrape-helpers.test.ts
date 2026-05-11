@@ -4,6 +4,7 @@ import {
   extractBackgroundImage,
   parseHumanDate,
   resolveUrl,
+  upgradeEventbriteImage,
   upgradeHotaImage,
   upgradeMoshtixImage,
   upgradeStylelabsImage,
@@ -202,5 +203,37 @@ describe("upgradeMoshtixImage", () => {
     expect(upgradeMoshtixImage("https://other.com/foo")).toBe(
       "https://other.com/foo"
     );
+  });
+});
+
+describe("upgradeEventbriteImage", () => {
+  it("extracts the cdn.evbuc.com original from the img.evbuc.com wrapper", () => {
+    expect(
+      upgradeEventbriteImage(
+        "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F722508859%2F90491413639%2F1%2Foriginal.20240318-202454?h=200&w=430&auto=format%2Ccompress&q=75&sharp=10&s=54fe1dd040ee7d61593b399227f411ef"
+      )
+    ).toBe(
+      "https://cdn.evbuc.com/images/722508859/90491413639/1/original.20240318-202454"
+    );
+  });
+
+  it("handles wrappers with crop/focalpoint params", () => {
+    expect(
+      upgradeEventbriteImage(
+        "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1155614703%2F211395797191%2F1%2Foriginal.20251017-041149?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C0%2C2160%2C1080&s=15a6038b4bd946a7c661a2cd2199c66d"
+      )
+    ).toBe(
+      "https://cdn.evbuc.com/images/1155614703/211395797191/1/original.20251017-041149"
+    );
+  });
+
+  it("leaves non-evbuc URLs alone", () => {
+    expect(upgradeEventbriteImage("https://cdn.example.com/foo.jpg")).toBe(
+      "https://cdn.example.com/foo.jpg"
+    );
+  });
+
+  it("returns undefined for empty input", () => {
+    expect(upgradeEventbriteImage(undefined)).toBeUndefined();
   });
 });

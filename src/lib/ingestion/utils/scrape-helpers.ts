@@ -62,6 +62,23 @@ export function upgradeMoshtixImage(url: string | undefined): string | undefined
   return url.replace(/(moshtix\.com\.au\/uploads\/[a-f0-9-]+)x\d+x\d+/i, "$1x600x600");
 }
 
+// Eventbrite listing JSON-LD emits an `img.evbuc.com` wrapper URL with a signed
+// thumbnail (typically `h=200&w=430` or `w=512`). The wrapper encodes the
+// upstream `cdn.evbuc.com` original asset URL as its path component; decoding
+// that segment yields the full-resolution original (no signature required).
+// Bumping `h=`/`w=` on the wrapper fails because the `s=` signature is bound
+// to the requested dimensions.
+export function upgradeEventbriteImage(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  const match = url.match(/^https?:\/\/img\.evbuc\.com\/(https?%3A[^?]+)/i);
+  if (!match) return url;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return url;
+  }
+}
+
 // Pull a `background-image: url(...)` value out of a style attribute.
 export function extractBackgroundImage(style: string | undefined): string | undefined {
   if (!style) return undefined;
