@@ -78,6 +78,39 @@ function parsePageCount(html: string): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
+// Moshtix uses several Schema.org Event subtypes in its JSON-LD: Event,
+// MusicEvent, ComedyEvent, TheaterEvent, SportsEvent. Accept all of them.
+const EVENT_TYPES = new Set([
+  "Event",
+  "MusicEvent",
+  "ComedyEvent",
+  "TheaterEvent",
+  "TheatreEvent",
+  "SportsEvent",
+  "DanceEvent",
+  "FoodEvent",
+  "Festival",
+  "ScreeningEvent",
+  "SocialEvent",
+  "BusinessEvent",
+  "EducationEvent",
+  "ChildrensEvent",
+]);
+
+const TYPE_TO_CATEGORY: Record<string, RawEvent["category"]> = {
+  MusicEvent: "MUSIC",
+  ComedyEvent: "COMEDY",
+  TheaterEvent: "THEATRE",
+  TheatreEvent: "THEATRE",
+  SportsEvent: "SPORTS",
+  DanceEvent: "ARTS",
+  FoodEvent: "FOOD_DRINK",
+  Festival: "FESTIVAL",
+  ScreeningEvent: "ARTS",
+  SocialEvent: "COMMUNITY",
+  ChildrensEvent: "FAMILY",
+};
+
 function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
   const events: RawEvent[] = [];
   const jsonLdMatches = html.matchAll(
@@ -90,7 +123,8 @@ function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
       const items = Array.isArray(data) ? data : [data];
 
       for (const item of items) {
-        if (item["@type"] !== "Event") continue;
+        const type = item["@type"];
+        if (typeof type !== "string" || !EVENT_TYPES.has(type)) continue;
         const eventUrl = item.url?.startsWith("http") ? item.url : `${baseUrl}${item.url}`;
         events.push({
           sourceId: item.url ?? `moshtix-${item.name?.replace(/\s+/g, "-").toLowerCase()}`,
@@ -106,7 +140,7 @@ function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
           venueAddress: item.location?.address?.streetAddress ?? undefined,
           city: item.location?.address?.addressLocality ?? undefined,
           state: item.location?.address?.addressRegion ?? undefined,
-          category: "MUSIC",
+          category: TYPE_TO_CATEGORY[type] ?? "MUSIC",
           rawData: item,
         });
       }
