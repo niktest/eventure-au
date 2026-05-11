@@ -122,12 +122,16 @@ export default async function EventsPage({
         orderBy: { startDate: "asc" },
         take: 60,
       }),
-      // EVE-183: only surface category pills that have at least one upcoming
-      // published event. Independent of the user's current filters so the
-      // pill set doesn't collapse to one as filters narrow.
+      // EVE-183: drive category pills from the DB — only categories with at
+      // least one upcoming published event, ordered by popularity desc and
+      // capped at 12. Independent of the user's current filters so the pill
+      // set doesn't collapse as they narrow other filters.
       prisma.event.groupBy({
         by: ["category"],
         where: { status: "published", startDate: { gte: new Date() } },
+        _count: { _all: true },
+        orderBy: { _count: { category: "desc" } },
+        take: 12,
       }),
     ]);
     events = eventRows;

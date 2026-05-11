@@ -4,23 +4,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition } from "react";
 import { EventSearchAutocomplete } from "./EventSearchAutocomplete";
 
-const CATEGORIES = [
-  "MUSIC",
-  "FESTIVAL",
-  "MARKETS",
-  "SPORTS",
-  "FAMILY",
-  "NIGHTLIFE",
-  "FOOD_DRINK",
-  "ARTS",
-  "COMEDY",
-  "THEATRE",
-  "OUTDOOR",
-  "COMMUNITY",
-] as const;
-
 function formatCategory(cat: string): string {
   return cat
+    .toLowerCase()
     .replace("_", " & ")
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .replace(/\bAnd\b/, "&");
@@ -29,6 +15,7 @@ function formatCategory(cat: string): string {
 export function SearchFilters({
   availableCategories,
 }: {
+  /** Uppercase EventCategory enums, pre-ordered by popularity desc (EVE-183). */
   availableCategories: readonly string[];
 }) {
   const router = useRouter();
@@ -43,6 +30,14 @@ export function SearchFilters({
   const currentDateFrom = searchParams?.get("dateFrom") ?? "";
   const currentDateTo = searchParams?.get("dateTo") ?? "";
   const currentFreeOnly = searchParams?.get("free") === "1";
+
+  // Keep the active pill visible even if it's not in the top-N popular set,
+  // so users can always deselect a category they navigated to (e.g. via deep link).
+  const currentCategoryUpper = currentCategory.toUpperCase();
+  const categoryPills =
+    currentCategoryUpper && !availableCategories.includes(currentCategoryUpper)
+      ? [...availableCategories, currentCategoryUpper]
+      : availableCategories;
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -137,12 +132,8 @@ export function SearchFilters({
         >
           All
         </button>
-        {CATEGORIES.filter(
-          (cat) =>
-            availableCategories.includes(cat) ||
-            currentCategory.toUpperCase() === cat
-        ).map((cat) => {
-          const isSelected = currentCategory.toUpperCase() === cat;
+        {categoryPills.map((cat) => {
+          const isSelected = currentCategoryUpper === cat;
           return (
             <button
               key={cat}
