@@ -19,7 +19,7 @@ const VENUE_SIM = 0.78;
 // pays ~200ms RTT. With ~3500 TM events doing two sequential queries each, the
 // 300s function cap is hit before the loop finishes. Bounded concurrency keeps
 // us inside Neon's pgBouncer pool while amortising the latency.
-const UPSERT_CONCURRENCY = 16;
+const UPSERT_CONCURRENCY = 32;
 
 interface DedupCandidate {
   id: string;

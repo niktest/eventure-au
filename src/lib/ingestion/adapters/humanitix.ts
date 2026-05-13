@@ -4,6 +4,10 @@ import { AU_LOCATIONS } from "../au-locations";
 
 const MAX_PAGES_PER_CITY = 80;
 const PAGE_DELAY_MS = 200;
+// Walk multiple cities in parallel — sequentially the per-city HTTP latency
+// (20 cities × ~5 pages × ~500ms) was burning ~50s of fetch wall-time before
+// upserts even started, pushing the cron past the 300s function cap (EVE-194).
+const CITY_CONCURRENCY = 4;
 // `/api/carousels` returns events whose location falls inside the
 // `northeast`/`southwest` box. A degree of latitude is ~111 km, so 1.0
 // gives a ~100 km radius around each city centroid — wide enough that
@@ -50,7 +54,7 @@ export class HumanitixAdapter implements SourceAdapter {
     const allEvents: RawEvent[] = [];
     const seen = new Set<string>();
 
-    for (const loc of AU_LOCATIONS) {
+    const fetchCity = async (loc: (typeof AU_LOCATIONS)[number]): Promise<RawEvent[]> => {
       const slug = locationSlug(loc.name, loc.state);
       const stateKey = slug;
       const geocode = {
@@ -62,8 +66,8 @@ export class HumanitixAdapter implements SourceAdapter {
         southwest: { lat: loc.lat - BBOX_DEGREES, lng: loc.lon - BBOX_DEGREES },
       };
 
+      const cityEvents: RawEvent[] = [];
       let page = 1;
-      let cityAdded = 0;
       let cityRepeatPages = 0;
 
       while (page <= MAX_PAGES_PER_CITY) {
@@ -102,10 +106,7 @@ export class HumanitixAdapter implements SourceAdapter {
         for (const it of items) {
           const ev = mapEvent(it, loc.name, loc.state);
           if (!ev) continue;
-          if (seen.has(ev.sourceId)) continue;
-          seen.add(ev.sourceId);
-          allEvents.push(ev);
-          cityAdded++;
+          cityEvents.push(ev);
           newOnPage++;
         }
 
@@ -122,9 +123,25 @@ export class HumanitixAdapter implements SourceAdapter {
         if (PAGE_DELAY_MS > 0) await new Promise((r) => setTimeout(r, PAGE_DELAY_MS));
       }
 
-      console.log(
-        `[humanitix]   -> ${loc.name} (${loc.state}): +${cityAdded} (total=${allEvents.length})`
-      );
+      return cityEvents;
+    };
+
+    for (let i = 0; i < AU_LOCATIONS.length; i += CITY_CONCURRENCY) {
+      const chunk = AU_LOCATIONS.slice(i, i + CITY_CONCURRENCY);
+      const cityResults = await Promise.all(chunk.map(fetchCity));
+      for (let j = 0; j < cityResults.length; j++) {
+        const loc = chunk[j];
+        let cityAdded = 0;
+        for (const ev of cityResults[j]) {
+          if (seen.has(ev.sourceId)) continue;
+          seen.add(ev.sourceId);
+          allEvents.push(ev);
+          cityAdded++;
+        }
+        console.log(
+          `[humanitix]   -> ${loc.name} (${loc.state}): +${cityAdded} (total=${allEvents.length})`
+        );
+      }
     }
 
     return allEvents;
