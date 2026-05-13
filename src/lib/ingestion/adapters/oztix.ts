@@ -1,5 +1,6 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
+import { stripHtmlDescription } from "../utils/scrape-helpers";
 
 // Oztix's public site (oztix.com.au) is a Vue.js SPA — the `/search` HTML
 // shell never embeds any event data, so HTML/JSON-LD scraping yields zero
@@ -143,7 +144,7 @@ function mapHit(hit: OztixHit, fallbackState: string): RawEvent | null {
   return {
     sourceId: `oztix-${hit.EventId}`,
     name: hit.EventName,
-    description: hit.EventDescription ?? undefined,
+    description: stripHtmlDescription(hit.EventDescription),
     startDate: start,
     endDate: end && !Number.isNaN(end.getTime()) ? end : undefined,
     imageUrl: hit.EventImage1 ?? hit.HomepageImage ?? undefined,

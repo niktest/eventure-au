@@ -34,6 +34,18 @@ describe("OztixAdapter", () => {
     });
   });
 
+  it("strips raw HTML from EventDescription before returning", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(FIXTURE, { status: 200 }));
+    const events = await new OztixAdapter().fetch();
+    const powderfinger = events.find((e) => e.name?.startsWith("Powderfinger"));
+    expect(powderfinger?.description).toBeDefined();
+    // No raw tags survive.
+    expect(powderfinger!.description).not.toMatch(/<[^>]+>/);
+    // List items become bullet lines, entities decode.
+    expect(powderfinger!.description).toContain("• Doors 6pm");
+    expect(powderfinger!.description).toContain("Don't miss it!");
+  });
+
   it("returns no events when Algolia errors", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 500 }));
     const events = await new OztixAdapter().fetch();
