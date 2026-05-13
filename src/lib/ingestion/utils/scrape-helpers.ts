@@ -85,6 +85,26 @@ export function upgradeMoshtixImage(url: string | undefined): string | undefined
   return url.replace(/(moshtix\.com\.au\/uploads\/[a-f0-9-]+)x\d+x\d+/i, "$1x600x600");
 }
 
+// ATDW (Australian Tourism Data Warehouse) image CDN at
+// `assets.atdw-online.com.au` resizes via a `w=<px>` (and optionally `h=<px>`)
+// query param. Visit Brisbane (and other ATDW-backed sites) emit the listing
+// URL with `w=800&h=450`; `w=1920` reliably returns the full-res render. The
+// `q=` token next to the size params is a metadata blob, not an HMAC, so
+// bumping `w` keeps working.
+//
+// Probe (Visit Brisbane "Devonshire Tea" hero asset):
+//   w=800&h=450  -> 114,728 bytes
+//   w=1920       -> 582,092 bytes
+export function upgradeAtdwImage(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (!/^https?:\/\/assets\.atdw-online\.com\.au\//i.test(url)) return url;
+  let next = url.replace(/([?&])w=(\d+)/i, (_, sep, w) =>
+    Number(w) >= 1920 ? `${sep}w=${w}` : `${sep}w=1920`
+  );
+  next = next.replace(/&h=\d+/i, "").replace(/\?h=\d+&/i, "?").replace(/\?h=\d+$/i, "");
+  return next;
+}
+
 // Eventbrite listing JSON-LD emits an `img.evbuc.com` wrapper URL with a signed
 // thumbnail (typically `h=200&w=430` or `w=512`). The wrapper encodes the
 // upstream `cdn.evbuc.com` original asset URL as its path component; decoding

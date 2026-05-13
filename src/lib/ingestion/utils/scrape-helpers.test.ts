@@ -4,6 +4,7 @@ import {
   extractBackgroundImage,
   parseHumanDate,
   resolveUrl,
+  upgradeAtdwImage,
   upgradeEventbriteImage,
   upgradeHotaImage,
   upgradeMoshtixImage,
@@ -204,6 +205,37 @@ describe("upgradeMoshtixImage", () => {
     expect(upgradeMoshtixImage("https://other.com/foo")).toBe(
       "https://other.com/foo"
     );
+  });
+});
+
+describe("upgradeAtdwImage", () => {
+  const Q =
+    "q=eyJ0eXBlIjoibGlzdGluZyIsImxpc3RpbmdJZCI6IjVmMzM1MGE2ZGViNjgxY2Q0YmIyMjA1OCJ9";
+
+  it("bumps w=800 to w=1920 and drops h=", () => {
+    expect(
+      upgradeAtdwImage(
+        `https://assets.atdw-online.com.au/images/abc.jpeg?rect=0%2C150%2C1600%2C900&w=800&h=450&rot=360&${Q}`
+      )
+    ).toBe(
+      `https://assets.atdw-online.com.au/images/abc.jpeg?rect=0%2C150%2C1600%2C900&w=1920&rot=360&${Q}`
+    );
+  });
+
+  it("leaves w=1920+ alone", () => {
+    expect(
+      upgradeAtdwImage("https://assets.atdw-online.com.au/images/abc.jpeg?w=2400")
+    ).toBe("https://assets.atdw-online.com.au/images/abc.jpeg?w=2400");
+  });
+
+  it("leaves non-ATDW URLs alone", () => {
+    expect(upgradeAtdwImage("https://cdn.example.com/foo.jpg?w=800&h=450")).toBe(
+      "https://cdn.example.com/foo.jpg?w=800&h=450"
+    );
+  });
+
+  it("returns undefined for empty input", () => {
+    expect(upgradeAtdwImage(undefined)).toBeUndefined();
   });
 });
 
