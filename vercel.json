@@ -12,20 +12,24 @@
       "schedule": "15 2 * * *"
     },
     {
-      "path": "/api/cron/ingest/scrapers-platform-large",
+      "path": "/api/cron/ingest/humanitix",
       "schedule": "30 2 * * *"
     },
     {
-      "path": "/api/cron/ingest/scrapers-platform-small",
+      "path": "/api/cron/ingest/oztix",
       "schedule": "45 2 * * *"
     },
     {
-      "path": "/api/cron/ingest/ticketmaster",
+      "path": "/api/cron/ingest/scrapers-platform-small",
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/ingest/moshtix",
+      "path": "/api/cron/ingest/ticketmaster",
       "schedule": "15 3 * * *"
+    },
+    {
+      "path": "/api/cron/ingest/moshtix",
+      "schedule": "30 3 * * *"
     }
   ],
   "headers": [

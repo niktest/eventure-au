@@ -29,7 +29,8 @@ import { MoshtixAdapter } from "./adapters/moshtix";
  * - `ticketmaster`: isolated because a full paginated run plus dedup dominates
  *   wall-clock (~3500 events).
  * - `scrapers-venue`: light venue/destination scrapers (Gold Coast + Brisbane).
- * - `scrapers-platform-large`: the two heaviest platform scrapers (~2.7k each).
+ * - `humanitix` / `oztix`: each ~2.7k events; isolated for the same reason as
+ *   `ticketmaster` and `moshtix`.
  * - `scrapers-platform-small`: the remaining smaller platform scrapers.
  * - `moshtix`: isolated because a full paginated run dominates wall-clock
  *   (~1700 events, ~80s of fetches before dedup).
@@ -52,10 +53,8 @@ export const ADAPTER_GROUPS = {
     new SandstonePointAdapter(),
     new VisitBrisbaneAdapter(),
   ],
-  "scrapers-platform-large": (): SourceAdapter[] => [
-    new HumanitixAdapter(),
-    new OztixAdapter(),
-  ],
+  humanitix: (): SourceAdapter[] => [new HumanitixAdapter()],
+  oztix: (): SourceAdapter[] => [new OztixAdapter()],
   "scrapers-platform-small": (): SourceAdapter[] => [
     new TryBookingAdapter(),
     new MegatixAdapter(),
