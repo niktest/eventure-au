@@ -52,16 +52,22 @@ function slugify(text: string): string {
 // sourceIds like `https://www.moshtix.com.au/v2/event/foo/149068` would
 // otherwise serialise to `https` (the leading 8 chars), which is what
 // produced the `-https` slug residue cleaned up in EVE-155.
+//
+// The suffix must be unique enough to make the resulting slug unique across
+// the entire `Event` table (slug has a global UNIQUE constraint). Truncating
+// too aggressively caused P2002 collisions on Ticketmaster (EVE-184), whose
+// IDs are 15-16 char random tokens that share leading prefixes —
+// `1AefZbMGkVeq10i` and `1AefZbMGkVeq11x` both became `1aefzbmgkveq`.
 export function suffixFromSourceId(sourceId: string): string {
   const segments = sourceId.split(/[^a-z0-9]+/i).filter(Boolean);
   const last = segments[segments.length - 1] ?? "";
   if (last && !/^https?$/i.test(last)) {
-    return last.slice(0, 12).toLowerCase();
+    return last.slice(0, 32).toLowerCase();
   }
   return sourceId
     .replace(/[^a-z0-9]/gi, "")
     .replace(/^https?/i, "")
-    .slice(0, 8)
+    .slice(0, 32)
     .toLowerCase();
 }
 
