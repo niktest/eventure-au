@@ -38,6 +38,43 @@ function cleanShortText(raw: string | null | undefined): string | null {
   return out.length ? out : null;
 }
 
+// Map any common spelling/case/truncation of an Australian state or territory
+// to its canonical 3-letter code, or "Unknown" if we can't recognise it.
+//
+// Adapters draw from a mix of sources (schema.org `addressRegion`, Ticketmaster
+// `stateCode`, Bandsintown `region`, Google Maps `short_name`, free-text address
+// tails) so input shape varies wildly. Centralising here avoids per-adapter
+// guesswork and the EVE-195 truncations (`QL`/`NS`/`VI`) that snuck in when a
+// source returned `QLD`/`NSW`/`VIC` already sliced to 2 chars.
+const STATE_LOOKUP: Record<string, string> = {
+  // Canonical codes
+  qld: "QLD", nsw: "NSW", vic: "VIC", wa: "WA",
+  sa: "SA", tas: "TAS", nt: "NT", act: "ACT",
+  // 2-letter truncations of the 3-letter codes
+  ql: "QLD", ns: "NSW", vi: "VIC", ta: "TAS", ac: "ACT",
+  // Full names
+  queensland: "QLD",
+  "new south wales": "NSW",
+  victoria: "VIC",
+  "western australia": "WA",
+  "south australia": "SA",
+  tasmania: "TAS",
+  "northern territory": "NT",
+  "australian capital territory": "ACT",
+};
+
+export function normaliseState(raw: string | null | undefined): string {
+  const cleaned = cleanShortText(raw);
+  if (!cleaned) return "Unknown";
+  // Strip ISO 3166-2 prefix ("AU-QLD" → "QLD") and trailing punctuation.
+  const key = cleaned
+    .toLowerCase()
+    .replace(/^au[-_\s]/, "")
+    .replace(/[.,]+$/, "")
+    .trim();
+  return STATE_LOOKUP[key] ?? "Unknown";
+}
+
 function slugify(text: string): string {
   return cleanTitle(text)
     .toLowerCase()
@@ -123,7 +160,7 @@ export function normalise(source: string, raw: RawEvent): NormalisedEvent {
     venueName: cleanShortText(raw.venueName),
     venueAddress: cleanShortText(raw.venueAddress),
     city: cleanShortText(raw.city) ?? "Unknown",
-    state: cleanShortText(raw.state) ?? "Unknown",
+    state: normaliseState(raw.state),
     country: "AU",
     latitude: raw.latitude ?? null,
     longitude: raw.longitude ?? null,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalise, decodeHtmlEntities, cleanTitle } from "./index";
+import { normalise, normaliseState, decodeHtmlEntities, cleanTitle } from "./index";
 import type { RawEvent } from "@/types/event";
 
 function makeRawEvent(overrides: Partial<RawEvent> = {}): RawEvent {
@@ -317,14 +317,16 @@ describe("normalise — entity-encoded venue fields (EVE-144 regression)", () =>
     expect(normalise("test", raw).venueAddress).toBe("Smith & Jones St, BRUNSWICK");
   });
 
-  it("decodes entities in city/state", () => {
+  it("decodes entities in city and normalises state", () => {
     const raw = makeRawEvent({
       city: "St&#39;Kilda",
       state: "VIC&amp;",
     });
     const result = normalise("test", raw);
     expect(result.city).toBe("St'Kilda");
-    expect(result.state).toBe("VIC&");
+    // After decoding, "VIC&" doesn't match any known form so it falls back to
+    // Unknown rather than being stored verbatim — see normaliseState tests.
+    expect(result.state).toBe("Unknown");
   });
 
   it("returns null for venue fields that decode to whitespace", () => {
@@ -338,5 +340,52 @@ describe("normalise — entity-encoded venue fields (EVE-144 regression)", () =>
     const raw = makeRawEvent({ city: "   " });
     const result = normalise("test", raw);
     expect(result.city).toBe("Unknown");
+  });
+});
+
+describe("normaliseState (EVE-195)", () => {
+  it("passes through canonical 3-letter codes", () => {
+    for (const code of ["QLD", "NSW", "VIC", "WA", "SA", "TAS", "NT", "ACT"]) {
+      expect(normaliseState(code)).toBe(code);
+    }
+  });
+
+  it("expands 2-letter truncations (QL/NS/VI/TA/AC) to canonical codes", () => {
+    expect(normaliseState("QL")).toBe("QLD");
+    expect(normaliseState("NS")).toBe("NSW");
+    expect(normaliseState("VI")).toBe("VIC");
+    expect(normaliseState("TA")).toBe("TAS");
+    expect(normaliseState("AC")).toBe("ACT");
+  });
+
+  it("expands full state names (any case) to canonical codes", () => {
+    expect(normaliseState("Queensland")).toBe("QLD");
+    expect(normaliseState("new south wales")).toBe("NSW");
+    expect(normaliseState("VICTORIA")).toBe("VIC");
+    expect(normaliseState("Western Australia")).toBe("WA");
+    expect(normaliseState("South Australia")).toBe("SA");
+    expect(normaliseState("Tasmania")).toBe("TAS");
+    expect(normaliseState("Northern Territory")).toBe("NT");
+    expect(normaliseState("Australian Capital Territory")).toBe("ACT");
+  });
+
+  it("strips ISO 3166-2 AU- prefix", () => {
+    expect(normaliseState("AU-QLD")).toBe("QLD");
+    expect(normaliseState("au-nsw")).toBe("NSW");
+  });
+
+  it("tolerates trailing punctuation and whitespace", () => {
+    expect(normaliseState(" QLD ")).toBe("QLD");
+    expect(normaliseState("VIC,")).toBe("VIC");
+    expect(normaliseState("NSW.")).toBe("NSW");
+  });
+
+  it("returns Unknown for null, empty, or unrecognised input", () => {
+    expect(normaliseState(null)).toBe("Unknown");
+    expect(normaliseState(undefined)).toBe("Unknown");
+    expect(normaliseState("")).toBe("Unknown");
+    expect(normaliseState("   ")).toBe("Unknown");
+    expect(normaliseState("California")).toBe("Unknown");
+    expect(normaliseState("XYZ")).toBe("Unknown");
   });
 });
