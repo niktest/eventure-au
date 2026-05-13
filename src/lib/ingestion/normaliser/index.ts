@@ -1,23 +1,7 @@
 import type { RawEvent, NormalisedEvent, EventCategory } from "@/types/event";
+import { decodeHtmlEntities } from "../utils/scrape-helpers";
 
-const NAMED_ENTITIES: Record<string, string> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-};
-
-export function decodeHtmlEntities(text: string): string {
-  // Run twice so double-encoded sources (e.g. `&amp;#39;`) collapse fully.
-  const decode = (s: string) =>
-    s
-      .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(parseInt(code, 10)))
-      .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCodePoint(parseInt(code, 16)))
-      .replace(/&([a-zA-Z]+);/g, (match, name) => NAMED_ENTITIES[name.toLowerCase()] ?? match);
-  return decode(decode(text));
-}
+export { decodeHtmlEntities };
 
 export function cleanTitle(raw: string): string {
   return decodeHtmlEntities(raw)

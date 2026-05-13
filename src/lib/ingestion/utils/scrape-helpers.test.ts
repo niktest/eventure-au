@@ -9,6 +9,7 @@ import {
   upgradeMoshtixImage,
   upgradeStylelabsImage,
   upgradeWordpressThumbnail,
+  stripHtmlDescription,
 } from "./scrape-helpers";
 
 describe("resolveUrl", () => {
@@ -235,5 +236,30 @@ describe("upgradeEventbriteImage", () => {
 
   it("returns undefined for empty input", () => {
     expect(upgradeEventbriteImage(undefined)).toBeUndefined();
+  });
+});
+
+describe("stripHtmlDescription", () => {
+  it("strips block/inline tags, converts <br> and list items, decodes entities", () => {
+    const raw =
+      "<p><strong>Powderfinger</strong> reunite for a 25th anniversary set.<br>Doors 6pm</p><ul><li>Drink specials</li><li>Support TBA</li></ul><p>Don&#39;t miss it!</p>";
+    const out = stripHtmlDescription(raw);
+    expect(out).not.toMatch(/<[^>]+>/);
+    expect(out).toContain("Powderfinger reunite for a 25th anniversary set.");
+    expect(out).toContain("Doors 6pm");
+    expect(out).toContain("• Drink specials");
+    expect(out).toContain("• Support TBA");
+    expect(out).toContain("Don't miss it!");
+  });
+
+  it("leaves plain text unchanged (no-op)", () => {
+    expect(stripHtmlDescription("Three-day blues festival at Bowen Hills.")).toBe(
+      "Three-day blues festival at Bowen Hills."
+    );
+  });
+
+  it("returns undefined for undefined/null input", () => {
+    expect(stripHtmlDescription(undefined)).toBeUndefined();
+    expect(stripHtmlDescription(null)).toBeUndefined();
   });
 });
