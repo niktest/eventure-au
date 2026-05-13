@@ -63,7 +63,12 @@ export async function upsertEvents(
         },
         update: {
           name: event.name,
-          description: event.description,
+          // Preserve an existing description when the listing payload doesn't
+          // carry one — Humanitix/Moshtix/Megatix listings ship without
+          // descriptions and the EVE-200 detail-page backfill fills them in
+          // later. Without this guard, every nightly cron would null them
+          // back out.
+          description: event.description ?? undefined,
           startDate: event.startDate,
           endDate: event.endDate,
           imageUrl: event.imageUrl,

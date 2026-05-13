@@ -41,7 +41,7 @@ export function cleanTitle(raw: string): string {
  * inline tags drop to their text content. HTML entities are decoded after
  * tag removal so escaped angle brackets in actual prose are preserved.
  */
-function cleanDescription(raw: string): string {
+export function cleanDescription(raw: string): string {
   const blockBreak = raw
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
