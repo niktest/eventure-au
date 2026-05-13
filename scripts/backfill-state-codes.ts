@@ -1,22 +1,23 @@
 /**
- * Backfill `Event.state` rows by reapplying `normaliseState` from the
- * normaliser. Idempotent — safe to re-run.
+ * Backfill `Event.state` rows by reapplying `deriveState` from the normaliser.
+ * Idempotent — safe to re-run.
  *
- * Background: EVE-195 — a snapshot of the events table showed 1,671 rows with
- * `state="Unknown"` and ~350 rows truncated to 2-letter codes (`QL`/`NS`/`VI`).
- * The fix in the normaliser handles all known shapes (full names, ISO prefix,
- * truncations) for new ingests, but existing rows stay wrong until each event
- * is rescraped. This walks the table and rewrites every value once.
+ * Background: EVE-195 added `normaliseState` to centralise state-code mapping;
+ * a one-shot backfill rewrote ~350 truncated codes. EVE-220 extended the
+ * normaliser with venue-address postcode and city fallbacks (the 1,995 prod
+ * rows with state="Unknown" almost all had recoverable signals in `city` or
+ * `venueAddress`). This rerun picks up the EVE-220 fallback for those rows
+ * plus any EVE-195 truncations that snuck back in (`al`/`QL`/`NS`/`VI`/`AC`).
  *
  * Run via: `npx tsx scripts/backfill-state-codes.ts` against production
- * (with `DATABASE_URL` set).
+ * (with `DATABASE_URL` set). Set `DRY_RUN=1` to print the diff without writing.
  */
 import { prisma } from "@/lib/prisma";
-import { normaliseState } from "@/lib/ingestion/normaliser";
+import { deriveState } from "@/lib/ingestion/normaliser";
 
 async function main() {
   const rows = await prisma.event.findMany({
-    select: { id: true, state: true, source: true },
+    select: { id: true, state: true, city: true, venueAddress: true, venueName: true, source: true },
   });
   console.log(`[backfill-state] scanning ${rows.length} events`);
 
@@ -27,7 +28,12 @@ async function main() {
 
   for (const row of rows) {
     before.set(row.state, (before.get(row.state) ?? 0) + 1);
-    const normalised = normaliseState(row.state);
+    const normalised = deriveState({
+      state: row.state,
+      city: row.city,
+      venueAddress: row.venueAddress,
+      venueName: row.venueName,
+    });
     after.set(normalised, (after.get(normalised) ?? 0) + 1);
     if (normalised !== row.state) {
       updates.push({ id: row.id, state: normalised });

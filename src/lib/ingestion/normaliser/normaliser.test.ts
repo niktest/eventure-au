@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalise, normaliseState, decodeHtmlEntities, cleanTitle } from "./index";
+import { normalise, normaliseState, deriveState, CANONICAL_STATES, decodeHtmlEntities, cleanTitle } from "./index";
 import type { RawEvent } from "@/types/event";
 
 function makeRawEvent(overrides: Partial<RawEvent> = {}): RawEvent {
@@ -414,5 +414,105 @@ describe("normaliseState (EVE-195)", () => {
     expect(normaliseState("   ")).toBe("Unknown");
     expect(normaliseState("California")).toBe("Unknown");
     expect(normaliseState("XYZ")).toBe("Unknown");
+  });
+});
+
+describe("deriveState (EVE-220)", () => {
+  it("returns the explicit state when present and valid", () => {
+    expect(deriveState({ state: "QLD" })).toBe("QLD");
+    expect(deriveState({ state: "Victoria", city: "Sydney" })).toBe("VIC");
+  });
+
+  it("falls back to postcode in venueAddress when state is missing", () => {
+    expect(deriveState({ venueAddress: "135 Bundall Rd, Surfers Paradise 4217" })).toBe("QLD");
+    expect(deriveState({ venueAddress: "10 George St, Sydney NSW 2000" })).toBe("NSW");
+    expect(deriveState({ venueAddress: "1 Spring St, Melbourne 3000" })).toBe("VIC");
+    expect(deriveState({ venueAddress: "1 King William St, Adelaide 5000" })).toBe("SA");
+    expect(deriveState({ venueAddress: "1 St Georges Tce, Perth 6000" })).toBe("WA");
+    expect(deriveState({ venueAddress: "1 Davey St, Hobart 7000" })).toBe("TAS");
+    expect(deriveState({ venueAddress: "1 Northbourne Ave, Canberra 2600" })).toBe("ACT");
+    expect(deriveState({ venueAddress: "1 Mitchell St, Darwin 0800" })).toBe("NT");
+  });
+
+  it("treats the explicit state as the source of truth when both are present", () => {
+    // Adapter-provided state wins; the address postcode is only a fallback.
+    expect(deriveState({ state: "NSW", venueAddress: "1 Spring St, Melbourne 3000" })).toBe("NSW");
+  });
+
+  it("mines the venue address for embedded state codes when no postcode", () => {
+    expect(deriveState({ venueAddress: "Cnr Markeri St & Sunshine Blvd, QLD" })).toBe("QLD");
+    expect(deriveState({ venueAddress: "Some Big Hall, Victoria" })).toBe("VIC");
+  });
+
+  it("falls back to known capital/regional cities when no address signal", () => {
+    expect(deriveState({ city: "Gold Coast" })).toBe("QLD");
+    expect(deriveState({ city: "SURFERS PARADISE" })).toBe("QLD");
+    expect(deriveState({ city: "Sydney" })).toBe("NSW");
+    expect(deriveState({ city: "Melbourne" })).toBe("VIC");
+    expect(deriveState({ city: "Perth" })).toBe("WA");
+    expect(deriveState({ city: "Adelaide" })).toBe("SA");
+    expect(deriveState({ city: "Hobart" })).toBe("TAS");
+    expect(deriveState({ city: "Canberra" })).toBe("ACT");
+    expect(deriveState({ city: "Darwin" })).toBe("NT");
+  });
+
+  it("mines embedded state codes from the city field", () => {
+    // Shapes seen in EVE-220 meetup data.
+    expect(deriveState({ city: "Mermaid Waters, QLD" })).toBe("QLD");
+    expect(deriveState({ city: "Gold Coast, 4216, QLD" })).toBe("QLD");
+    expect(deriveState({ city: "Varsity Lakes, Gold Coast" })).toBe("QLD");
+  });
+
+  it("returns Unknown for unrecognised city with no address", () => {
+    expect(deriveState({ city: "Atlantis" })).toBe("Unknown");
+    expect(deriveState({})).toBe("Unknown");
+  });
+
+  it("rejects garbage state values like 'Casual' and the `al` fragment", () => {
+    // The EVE-220 prod data had 7 rows with state="al" — likely a slice of
+    // "Casual" from some upstream tagging mistake. These must land at Unknown
+    // or, if there's a valid city/address signal, the canonical state.
+    expect(deriveState({ state: "Casual" })).toBe("Unknown");
+    expect(deriveState({ state: "al" })).toBe("Unknown");
+    expect(deriveState({ state: "Casual", city: "Brisbane" })).toBe("QLD");
+  });
+
+  it("only ever returns canonical codes or 'Unknown'", () => {
+    const valid = new Set<string>([...CANONICAL_STATES, "Unknown"]);
+    const inputs: Array<Parameters<typeof deriveState>[0]> = [
+      { state: "QLD" },
+      { state: null },
+      { state: "garbage" },
+      { city: "Brisbane" },
+      { city: "garbage" },
+      { venueAddress: "1 Bourke St, Melbourne 3000" },
+      { venueAddress: "no postcode here" },
+    ];
+    for (const input of inputs) {
+      expect(valid.has(deriveState(input))).toBe(true);
+    }
+  });
+});
+
+describe("normalise — state derivation (EVE-220)", () => {
+  it("infers state from venue address when adapter omits state", () => {
+    const raw = makeRawEvent({
+      city: "Surfers Paradise",
+      venueAddress: "40 Cavill Avenue, Surfers Paradise QLD 4217",
+    });
+    expect(normalise("meetup", raw).state).toBe("QLD");
+  });
+
+  it("infers state from city when address has no postcode or state name", () => {
+    const raw = makeRawEvent({ city: "Gold Coast", venueAddress: "On Your Computer" });
+    expect(normalise("meetup", raw).state).toBe("QLD");
+  });
+
+  it("prefers adapter-supplied state over postcode fallback", () => {
+    const raw = makeRawEvent({
+      state: "QLD",
+      venueAddress: "1 Spring St, Melbourne 3000",
+    });
+    expect(normalise("test", raw).state).toBe("QLD");
   });
 });
