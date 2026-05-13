@@ -67,6 +67,7 @@ export function NearMeSortToggle() {
         onClick={onClick}
         aria-pressed={active}
         disabled={status === "locating"}
+        title="Uses your device location to sort events by distance. Not stored on our servers."
         className={
           "inline-flex items-center gap-2 rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors " +
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 " +
@@ -93,7 +94,14 @@ export function NearMeSortToggle() {
       </button>
       {status === "denied" && (
         <span className="text-xs font-body text-secondary" role="status">
-          Allow location to sort by distance.
+          Allow location to sort by distance.{" "}
+          <a
+            href="/privacy#location"
+            className="underline hover:text-primary"
+          >
+            Why we ask
+          </a>
+          .
         </span>
       )}
       {status === "error" && (

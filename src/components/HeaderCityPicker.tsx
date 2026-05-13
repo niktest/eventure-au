@@ -79,6 +79,7 @@ export function HeaderCityPicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Change city — currently ${currentLabel}`}
+        aria-describedby={open ? "header-city-picker-disclosure" : undefined}
         className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-body text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         data-testid="header-city-picker-trigger"
       >
@@ -149,10 +150,18 @@ export function HeaderCityPicker({
               );
             })}
           </ul>
-          <p className="border-t border-surface-container-high mt-2 px-4 pt-2 text-[11px] font-body text-secondary">
-            We use your IP to suggest a city — never to track you.{" "}
-            <a href="/privacy" className="underline hover:text-primary">
-              Privacy
+          <p
+            id="header-city-picker-disclosure"
+            className="border-t border-surface-container-high mt-2 px-4 pt-2 text-[11px] font-body text-secondary"
+          >
+            We use your approximate location (from your IP) only to suggest a
+            nearby city. We don&rsquo;t use it for advertising or cross-site
+            tracking. You can change or clear this any time.{" "}
+            <a
+              href="/privacy#location"
+              className="underline hover:text-primary"
+            >
+              Learn more
             </a>
           </p>
         </div>

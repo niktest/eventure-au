@@ -76,6 +76,7 @@ export function NearMeButton() {
         aria-busy={status === "locating"}
         onClick={onClick}
         disabled={status === "locating"}
+        title="Uses your device location to find events near you. Not stored on our servers."
         className={buttonClasses(status)}
         style={status === "idle" ? { background: "var(--gradient-neon-cta)" } : undefined}
       >

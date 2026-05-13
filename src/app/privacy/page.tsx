@@ -73,8 +73,15 @@ export default function PrivacyPolicyPage() {
               referring URL, click patterns
             </li>
             <li>
-              <strong>Location data:</strong> Approximate geographic location
-              derived from IP address (used to show relevant nearby events)
+              <strong>Location data:</strong> See{" "}
+              <a
+                href="#location"
+                className="text-primary hover:text-primary-container transition-colors"
+              >
+                Location handling
+              </a>{" "}
+              below for how we use your approximate IP-derived location and
+              (only when you opt in) your precise device location.
             </li>
             <li>
               <strong>Cookies and similar technologies:</strong> See our{" "}
@@ -129,6 +136,70 @@ export default function PrivacyPolicyPage() {
             <li>To comply with legal obligations</li>
             <li>To protect our rights and prevent misuse of the Website</li>
           </ul>
+        </section>
+
+        <section id="location" className="scroll-mt-24">
+          <h2 className="mb-3 font-heading text-2xl font-semibold text-on-surface">
+            3a. Location Handling
+          </h2>
+          <p>
+            We use location information in two ways, both for the sole purpose
+            of showing you events relevant to where you are. We do not use
+            location information for advertising, profiling, or to track you
+            across other websites.
+          </p>
+
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
+            Approximate city from IP address
+          </h3>
+          <p>
+            On your first visit, our edge layer reads your IP address and the
+            approximate city / latitude / longitude it resolves to (provided by
+            our hosting partner, Vercel) to pre-select the nearest supported
+            city (currently Gold Coast, Brisbane, Sydney, or Melbourne). The IP
+            address itself is not stored by Festlio beyond standard short-term
+            server logs; only the resolved city slug is written to a cookie on
+            your device (see our{" "}
+            <a
+              href="/cookies"
+              className="text-primary hover:text-primary-container transition-colors"
+            >
+              Cookie Policy
+            </a>
+            ). You can change the suggested city from the header city picker at
+            any time.
+          </p>
+
+          <h3 className="mb-2 mt-4 font-heading text-lg font-semibold text-on-surface">
+            Precise device location (opt-in)
+          </h3>
+          <p>
+            When &mdash; and only when &mdash; you tap the &ldquo;Near Me&rdquo;
+            button on the home page or the &ldquo;Sort: Near me&rdquo; toggle
+            on the events page, your browser will ask your permission to share
+            your device location. If you allow it:
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-6">
+            <li>
+              your coordinates are appended to the page URL (e.g.{" "}
+              <code>?sort=nearme&amp;lat=&hellip;&amp;lng=&hellip;</code>) so
+              our server can rank events by distance for that request,
+            </li>
+            <li>
+              the coordinates are cached in your browser&rsquo;s local storage
+              for up to 24 hours so the sort persists across page loads,
+            </li>
+            <li>
+              we do <strong>not</strong> persist your coordinates in any
+              Festlio database, log, or analytics tool beyond what is needed to
+              render the current request.
+            </li>
+          </ul>
+          <p className="mt-2">
+            If you deny or revoke the permission in your browser, the rest of
+            Festlio continues to work &mdash; you&rsquo;ll only lose
+            distance-based sorting.
+          </p>
         </section>
 
         <section>
@@ -289,6 +360,8 @@ export default function PrivacyPolicyPage() {
             </a>
           </p>
         </section>
+
+        <p className="text-sm text-secondary">Last updated: 13 May 2026</p>
       </div>
     </div></div>
   );

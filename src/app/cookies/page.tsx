@@ -115,8 +115,8 @@ export default function CookiePolicyPage() {
           </h3>
           <p>
             These cookies enable enhanced functionality and personalisation,
-            such as remembering your location preference for showing nearby
-            events.
+            such as remembering the city you&rsquo;ve chosen for event
+            discovery.
           </p>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
@@ -129,15 +129,80 @@ export default function CookiePolicyPage() {
               </thead>
               <tbody>
                 <tr className="border-b border-surface-container-high">
-                  <td className="py-2 pr-4">location_pref</td>
-                  <td className="py-2 pr-4">
-                    Stores your preferred city/region for event discovery
+                  <td className="py-2 pr-4 align-top">
+                    <code>festlio_city</code>
                   </td>
-                  <td className="py-2">1 year</td>
+                  <td className="py-2 pr-4">
+                    Stores the city slug used to pre-scope event listings
+                    (e.g. <code>brisbane</code>).
+                  </td>
+                  <td className="py-2 align-top">180 days</td>
+                </tr>
+                <tr className="border-b border-surface-container-high">
+                  <td className="py-2 pr-4 align-top">
+                    <code>festlio_city_source</code>
+                  </td>
+                  <td className="py-2 pr-4">
+                    Records whether <code>festlio_city</code> was set
+                    automatically from your IP (<code>ip</code>) or by you
+                    (<code>manual</code>).
+                  </td>
+                  <td className="py-2 align-top">180 days</td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p className="mt-3">
+            The value written to <code>festlio_city</code> is a short city slug
+            only (for example, <code>brisbane</code>). It does not contain your
+            IP address or any precise coordinates. You can change the value any
+            time from the header city picker, and you can delete both cookies
+            in your browser settings; on your next visit the IP-based
+            suggestion will run again and a fresh <code>festlio_city</code>{" "}
+            cookie will be set. See the{" "}
+            <a
+              href="/privacy#location"
+              className="text-primary hover:text-primary-container transition-colors"
+            >
+              Location handling
+            </a>{" "}
+            section of our Privacy Policy for the full flow.
+          </p>
+
+          <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-on-surface">
+            Local Storage
+          </h3>
+          <p>
+            We use one browser local storage key for functional purposes:
+          </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-container-high text-left">
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Key</th>
+                  <th className="pb-2 pr-4 font-semibold text-on-surface">Purpose</th>
+                  <th className="pb-2 font-semibold text-on-surface">Retention</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-surface-container-high">
+                  <td className="py-2 pr-4 align-top">
+                    <code>eventure:userLocation</code>
+                  </td>
+                  <td className="py-2 pr-4">
+                    Caches the city + coordinates resolved from the &ldquo;Near
+                    Me&rdquo; / &ldquo;Sort: Near me&rdquo; controls so
+                    distance sort persists between page loads.
+                  </td>
+                  <td className="py-2 align-top">24 hours</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3">
+            Clearing your browser&rsquo;s site data for festlio.com removes
+            this key.
+          </p>
 
           <h3 className="mb-2 mt-6 font-heading text-lg font-semibold text-on-surface">
             Third-Party Cookies
@@ -233,6 +298,8 @@ export default function CookiePolicyPage() {
             </a>
           </p>
         </section>
+
+        <p className="text-sm text-secondary">Last updated: 13 May 2026</p>
       </div>
     </div></div>
   );
