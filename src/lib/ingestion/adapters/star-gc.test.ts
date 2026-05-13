@@ -9,6 +9,7 @@ import {
   extractDrupalSettings,
   parseStarDate,
 } from "./star-gc";
+import { assertSampleQuality } from "../quality/event-quality";
 
 const __dirnameLocal = dirname(fileURLToPath(import.meta.url));
 const LISTING = readFileSync(
@@ -90,5 +91,19 @@ describe("StarGCAdapter (HTML fixtures)", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 500 }));
     const events = await new StarGCAdapter().fetch();
     expect(events).toEqual([]);
+  });
+
+  // QC rule (EVE-197): sampled events from this adapter must clear the
+  // shared event-quality validator.
+  it("produces sample events that pass the QC quality bar", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.endsWith("/goldcoast/whats-on")) {
+        return new Response(LISTING, { status: 200 });
+      }
+      return new Response(DETAIL_MOVIES, { status: 200 });
+    });
+    const events = await new StarGCAdapter().fetch();
+    assertSampleQuality(events, { source: "star-gc", sampleSize: 3 });
   });
 });

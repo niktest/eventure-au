@@ -4,6 +4,7 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { DestinationGCAdapter, parseExperienceGCDate } from "./destination-gc";
+import { assertSampleQuality } from "../quality/event-quality";
 
 const __dirnameLocal = dirname(fileURLToPath(import.meta.url));
 const FIXTURE = readFileSync(
@@ -79,5 +80,19 @@ describe("DestinationGCAdapter (HTML fixture)", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 404 }));
     const events = await new DestinationGCAdapter().fetch();
     expect(events).toEqual([]);
+  });
+
+  // QC rule (EVE-197): sampled events from this adapter must clear the
+  // shared event-quality validator.
+  it("produces sample events that pass the QC quality bar", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.endsWith("/events/entertainment")) {
+        return new Response(FIXTURE, { status: 200 });
+      }
+      return new Response("", { status: 404 });
+    });
+    const events = await new DestinationGCAdapter().fetch();
+    assertSampleQuality(events, { source: "destination-gc", sampleSize: 3 });
   });
 });

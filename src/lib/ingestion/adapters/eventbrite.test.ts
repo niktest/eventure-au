@@ -4,6 +4,7 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { EventbriteAdapter, parseEventbriteEvents } from "./eventbrite";
+import { assertSampleQuality } from "../quality/event-quality";
 
 const __dirnameLocal = dirname(fileURLToPath(import.meta.url));
 const FIXTURE = readFileSync(
@@ -60,6 +61,14 @@ describe("parseEventbriteEvents", () => {
   it("ignores malformed JSON-LD blocks", () => {
     const html = '<script type="application/ld+json">{not json</script>';
     expect(parseEventbriteEvents(html, "Brisbane", "QLD")).toEqual([]);
+  });
+
+  // QC rule (EVE-197): sampled events from this adapter must clear the
+  // shared event-quality validator. This protects against regressions in
+  // thumbnail-vs-full-res images, fabricated dates, HTML-in-description, etc.
+  it("produces sample events that pass the QC quality bar", () => {
+    const events = parseEventbriteEvents(FIXTURE, "Brisbane", "QLD");
+    assertSampleQuality(events, { source: "eventbrite", sampleSize: 3 });
   });
 });
 

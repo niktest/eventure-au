@@ -13,6 +13,7 @@
     "ingest": "tsx src/lib/ingestion/run.ts",
     "backfill:eve-141": "tsx scripts/backfill-entity-titles.ts",
     "backfill:image-upgrades": "tsx scripts/backfill-image-upgrades.ts",
+    "qc:sample": "tsx scripts/qc-sample-events.ts",
     "cleanup:seed-events": "tsx scripts/cleanup-seed-events.ts",
     "setup": "NODE_ENV=development npm install --include=dev",
     "visual-check": "tsx scripts/screenshot-pages.ts",

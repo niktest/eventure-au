@@ -94,6 +94,57 @@ If a card has no anchor date (e.g. "Saturday (Weekly)"), `return` from the itera
 
 Adapters must read `process.env.<SOURCE>_URL` with a sensible default. This lets us repoint at a proxy, mirror, or `localhost` test fixture without redeploying.
 
+## QC rule: every adapter change must sample 2–3 events
+
+This rule exists because we have repeatedly shipped subtle event-quality
+regressions (thumbnail images, HTML-in-description, fabricated dates,
+missing venues) that only show up on the live site. It is enforced two ways:
+
+### 1. Unit-test pass via `assertSampleQuality` (automatic, runs in CI)
+
+Adapters that ship an HTML fixture under `__fixtures__/` MUST include a test
+that runs the fixture-parsed events through `assertSampleQuality` from
+`src/lib/ingestion/quality/event-quality.ts`. Example (see
+`eventbrite.test.ts`, `destination-gc.test.ts`, `star-gc.test.ts`):
+
+```ts
+import { assertSampleQuality } from "../quality/event-quality";
+
+it("produces sample events that pass the QC quality bar", () => {
+  const events = parseFoo(FIXTURE, "Brisbane", "QLD");
+  assertSampleQuality(events, { source: "foo", sampleSize: 3 });
+});
+```
+
+`npm test` will fail loudly if the first N events from the fixture regress on
+any of the validator's `error`-severity checks: thumbnail-shaped image URL,
+missing/invalid url, HTML tags in description, fabricated startDate
+(within 60s of now and no endDate), generic placeholder name, etc.
+
+### 2. Live QC sample (manual, before merging a provider change)
+
+For adapters without a fixture, or to spot-check live output after a change,
+run:
+
+```bash
+npm run qc:sample -- --provider humanitix   # one adapter
+npm run qc:sample -- --provider humanitix,oztix --sample 5
+npm run qc:sample -- --provider humanitix --probe-images   # also HEAD-checks image bytes
+npm run qc:sample                                          # every adapter
+```
+
+The script hits the real source, samples 3 events per adapter, runs the
+shared validator, and exits non-zero on any `error`-severity finding.
+
+### When you touch an adapter
+
+1. Run `npm run qc:sample -- --provider <name>` and capture the output.
+2. If the fixture exists, the `npm test` QC test must stay green.
+3. Note before/after numbers in the PR/issue comment so reviewers can sanity-check.
+4. Add a fixture under `__fixtures__/` + a `assertSampleQuality` test for any
+   adapter you touch that doesn't yet have one — the rule applies going forward,
+   so don't leave the next contributor without coverage.
+
 ## Other expectations
 
 - Run `npm run lint` and `npx tsc --noEmit` before pushing (the pre-commit hook does this for you).
