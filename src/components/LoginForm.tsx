@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { mergeSavedEventsFromLocalStorage } from "@/lib/saved/merge";
 
 // Same-origin path only: must start with "/" and must not start with "//" or "/\".
 function safeRedirect(value: string | null | undefined): string | null {
@@ -57,6 +58,8 @@ export function LoginForm() {
         setLoading(false);
         return;
       }
+
+      await mergeSavedEventsFromLocalStorage();
 
       window.location.href = callbackUrl;
     } catch {

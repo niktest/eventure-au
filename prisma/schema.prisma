@@ -59,6 +59,7 @@ model Event {
 
   // Discussions (v1: optional event-attached threads)
   discussionThreads Thread[] @relation("EventThreads")
+  savedBy           SavedEvent[]
 
   @@unique([source, sourceId]) // Prevent duplicate imports from same source
   @@index([startDate, status])
@@ -118,6 +119,21 @@ model User {
   replyUpvotes   ReplyUpvote[]
   threadReports  ThreadReport[]
   replyReports   ReplyReport[]
+
+  // Saved events (♥)
+  savedEvents    SavedEvent[]
+}
+
+model SavedEvent {
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([userId, eventId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([eventId])
 }
 
 model Account {

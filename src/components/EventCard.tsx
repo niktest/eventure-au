@@ -4,6 +4,7 @@ import {
   EventCardImage,
   EventCardImagePlaceholder,
 } from "./EventCardImage";
+import { SaveEventButton } from "./SaveEventButton";
 
 function formatMonth(d: Date): string {
   return new Date(d).toLocaleDateString("en-AU", { month: "short" });
@@ -59,6 +60,8 @@ export function EventCard({
             From ${event.priceMin.toFixed(0)}
           </span>
         ) : null}
+
+        <SaveEventButton eventId={event.id} eventName={event.name} variant="card" />
       </div>
 
       {/* Content */}

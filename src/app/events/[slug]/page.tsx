@@ -9,7 +9,9 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { InterestedButton } from "@/components/InterestedButton";
+import { SaveEventButton } from "@/components/SaveEventButton";
 import { AddToCalendarButton } from "@/components/AddToCalendarButton";
+import { TicketCTA } from "@/components/TicketCTA";
 import { EventDiscussPanelLoader } from "@/components/discussions/EventDiscussPanelLoader";
 import { googleCalendarUrl, outlookCalendarUrl } from "@/lib/calendar/ics";
 import { getSiteUrl } from "@/lib/seo/site-url";
@@ -411,24 +413,20 @@ export default async function EventDetailPage({
               </ul>
 
               {/* CTA Buttons */}
-              {event.ticketUrl && (
-                <a
-                  href={event.ticketUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-primary-container text-on-primary rounded-full py-4 font-heading text-lg font-bold shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[20px]">
-                    confirmation_number
-                  </span>
-                  Get Tickets
-                </a>
-              )}
+              <TicketCTA
+                eventId={event.id}
+                source={event.source}
+                ticketUrl={event.ticketUrl}
+                infoUrl={event.url}
+                isFree={event.isFree}
+                variant="detail"
+              />
               <AddToCalendarButton
                 slug={event.slug}
                 googleUrl={googleCalUrl}
                 outlookUrl={outlookCalUrl}
               />
+              <SaveEventButton eventId={event.id} variant="detail" eventName={event.name} />
               <InterestedButton eventId={event.id} />
 
               {event.url && (
@@ -451,17 +449,16 @@ export default async function EventDetailPage({
         {/* Mobile sticky CTA — keeps "Get tickets" visible on small screens so
             users never have to scroll past the venue card to act. Hidden on lg+
             where the sticky right column already does this job. */}
-        {event.ticketUrl && (
+        {(event.ticketUrl || event.url) && (
           <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface-bright/95 backdrop-blur border-t border-surface-container-high px-4 py-3 flex gap-2 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
-            <a
-              href={event.ticketUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 bg-primary-container text-on-primary rounded-full py-3 font-heading text-base font-bold shadow flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[18px]">confirmation_number</span>
-              Get Tickets
-            </a>
+            <TicketCTA
+              eventId={event.id}
+              source={event.source}
+              ticketUrl={event.ticketUrl}
+              infoUrl={event.url}
+              isFree={event.isFree}
+              variant="mobile-sticky"
+            />
             <a
               href={`/events/${event.slug}/calendar.ics`}
               download

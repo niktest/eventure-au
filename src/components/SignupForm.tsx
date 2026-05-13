@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { mergeSavedEventsFromLocalStorage } from "@/lib/saved/merge";
 
 // Same-origin path only: must start with "/" and must not start with "//" or "/\".
 function safeRedirect(value: string | null | undefined): string | null {
@@ -72,6 +73,7 @@ export function SignupForm() {
       });
 
       if (signInRes.ok || signInRes.type === "opaqueredirect") {
+        await mergeSavedEventsFromLocalStorage();
         window.location.href = callbackUrl;
       } else {
         // Account created but auto-login failed — redirect to login, preserving callback
