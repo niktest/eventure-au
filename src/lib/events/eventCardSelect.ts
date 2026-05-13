@@ -17,6 +17,8 @@ export const EVENT_CARD_SELECT = {
   // Needed for distance sort when `?sort=nearme` is active (EVE-209).
   latitude: true,
   longitude: true,
+  // Source provenance — shown as a small "via X" tag on cards (EVE-212).
+  source: true,
 } satisfies Prisma.EventSelect;
 
 export type EventCardData = Prisma.EventGetPayload<{

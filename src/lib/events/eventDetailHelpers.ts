@@ -16,21 +16,8 @@ export function ageSuitabilityFromTags(tags: string[] | null | undefined): strin
   return null;
 }
 
-const SOURCE_LABELS: Record<string, string> = {
-  eventbrite: "Eventbrite",
-  humanitix: "Humanitix",
-  moshtix: "Moshtix",
-  megatix: "Megatix",
-  ticketmaster: "Ticketmaster",
-  meetup: "Meetup",
-  hota: "HOTA",
-  destinationgc: "Destination Gold Coast",
-  "city-of-gc": "City of Gold Coast",
-  "sandstone-point": "Sandstone Point Hotel",
-  star: "The Star Gold Coast",
-};
+import { eventSourceMeta } from "./eventSources";
 
 export function sourceAttribution(source: string | null | undefined): string | null {
-  if (!source) return null;
-  return SOURCE_LABELS[source] ?? source.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return eventSourceMeta(source)?.label ?? null;
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { EventCardData } from "@/lib/events/eventCardSelect";
+import { eventSourceMeta } from "@/lib/events/eventSources";
 import {
   EventCardImage,
   EventCardImagePlaceholder,
@@ -27,6 +28,7 @@ export function EventCard({
     variant === "homepage"
       ? "hover:-translate-y-1 hover:border-neon-coral hover:shadow-glow-coral transition-all duration-300"
       : "card-hover";
+  const sourceMeta = eventSourceMeta(event.source);
   return (
     <Link
       href={`/events/${event.slug}`}
@@ -76,7 +78,7 @@ export function EventCard({
           </p>
         )}
 
-        <div className="mt-auto flex items-center gap-1 text-secondary min-w-0">
+        <div className="mt-auto flex items-center justify-between gap-2 text-secondary min-w-0">
           {event.venueName && (
             <p className="flex items-center gap-1 text-sm min-w-0">
               <span className="material-symbols-outlined text-[16px] shrink-0">
@@ -86,6 +88,15 @@ export function EventCard({
                 {event.venueName}, {event.city}
               </span>
             </p>
+          )}
+          {sourceMeta && (
+            <span
+              data-testid="event-card-source"
+              className="shrink-0 text-[11px] font-body text-on-surface-variant"
+              title={`Listed via ${sourceMeta.label}`}
+            >
+              via {sourceMeta.label}
+            </span>
           )}
         </div>
       </div>
