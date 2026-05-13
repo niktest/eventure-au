@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import type { Metadata } from "next";
@@ -7,6 +6,7 @@ import { EventCard } from "@/components/EventCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { TimeWindowChips } from "@/components/TimeWindowChips";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { ListEmptyState } from "@/components/events/ListEmptyState";
 import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
 import {
   buildEventFilters,
@@ -15,6 +15,8 @@ import {
   sortEventsByDistance,
   type EventFilterParams,
 } from "@/lib/events/eventFilters";
+import { getZeroResultSuggestions } from "@/lib/events/zeroResultSuggestions";
+import { getTopCategoryForCity } from "@/lib/events/topCategory";
 import { getSelectedCity } from "@/lib/location/getSelectedCity";
 
 export const metadata: Metadata = {
@@ -116,7 +118,12 @@ export default async function EventsPage({
         </Suspense>
 
         {events.length === 0 ? (
-          <ZeroResultState filtersActive={filtersActive} />
+          <ZeroResultState
+            params={params}
+            citySlug={selectedCity.slug}
+            cityLabel={selectedCity.label}
+            filtersActive={filtersActive}
+          />
         ) : (
           <>
             <p className="mb-6 mt-6 text-sm font-semibold text-secondary font-body">
@@ -136,52 +143,38 @@ export default async function EventsPage({
   );
 }
 
-function ZeroResultState({ filtersActive }: { filtersActive: boolean }) {
+async function ZeroResultState({
+  params,
+  citySlug,
+  cityLabel,
+  filtersActive,
+}: {
+  params: EventFilterParams;
+  citySlug: string;
+  cityLabel: string;
+  filtersActive: boolean;
+}) {
+  const topCategory = await getTopCategoryForCity(cityLabel);
+  const suggestions = getZeroResultSuggestions(params, {
+    citySlug,
+    cityLabel,
+    topCategory,
+  });
+  const headline = filtersActive
+    ? "Nothing matches those filters."
+    : `Nothing scheduled in ${cityLabel} just yet.`;
+  const body = filtersActive
+    ? "Here are a few ways to broaden your search:"
+    : "Try a different angle — there's still plenty to discover.";
   return (
-    <div className="rounded-xl bg-surface-container-low py-16 px-6 text-center mt-6">
-      <span className="material-symbols-outlined text-4xl text-secondary mb-4 block">
-        search
-      </span>
-      <p className="text-secondary font-body">
-        No events found matching your criteria.
-      </p>
-      {filtersActive ? (
-        <>
-          <p className="mt-1 text-sm text-outline font-body">
-            Try widening your dates or removing a filter.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/events"
-              className="rounded-full bg-primary px-5 py-2 font-body text-sm font-semibold text-on-primary hover:opacity-90 transition-opacity"
-            >
-              Clear all filters
-            </Link>
-            <Link
-              href="/events?category=music"
-              className="rounded-full bg-surface-container px-5 py-2 font-body text-sm font-semibold text-on-surface hover:bg-surface-container-high transition-colors"
-            >
-              Browse music
-            </Link>
-            <Link
-              href="/events?category=family"
-              className="rounded-full bg-surface-container px-5 py-2 font-body text-sm font-semibold text-on-surface hover:bg-surface-container-high transition-colors"
-            >
-              Browse family
-            </Link>
-            <Link
-              href="/events?price=free"
-              className="rounded-full bg-surface-container px-5 py-2 font-body text-sm font-semibold text-on-surface hover:bg-surface-container-high transition-colors"
-            >
-              Free events
-            </Link>
-          </div>
-        </>
-      ) : (
-        <p className="mt-1 text-sm text-outline font-body">
-          Check back soon — we&apos;re adding new events every day!
-        </p>
-      )}
+    <div className="mt-6">
+      <ListEmptyState
+        icon="explore_off"
+        headline={headline}
+        body={body}
+        suggestions={suggestions}
+        testId="events-empty"
+      />
     </div>
   );
 }

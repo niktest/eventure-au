@@ -1,10 +1,13 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { ListEmptyState } from "@/components/events/ListEmptyState";
 import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
+import { getZeroResultSuggestions } from "@/lib/events/zeroResultSuggestions";
+import { getTopCategoryForCity } from "@/lib/events/topCategory";
+import { getSelectedCity } from "@/lib/location/getSelectedCity";
 
 export const metadata: Metadata = {
   title: "Events Today",
@@ -15,7 +18,9 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 600;
+// EVE-213: zero-state recovery is city-aware, which reads the festlio_city
+// cookie via getSelectedCity. Cookies force the route to render dynamically.
+export const dynamic = "force-dynamic";
 
 function formatTodayLong(d: Date): string {
   return d.toLocaleDateString("en-AU", {
@@ -44,6 +49,7 @@ function getBrisbaneDayWindow(): { start: Date; end: Date } {
 
 export default async function TodayPage() {
   const { start, end } = getBrisbaneDayWindow();
+  const { city: selectedCity } = await getSelectedCity();
 
   let events: Array<
     Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
@@ -61,6 +67,22 @@ export default async function TodayPage() {
   } catch {
     // DB unavailable — render empty state, ISR will retry
   }
+
+  const topCategory =
+    events.length === 0
+      ? await getTopCategoryForCity(selectedCity.label)
+      : null;
+  const suggestions =
+    events.length === 0
+      ? getZeroResultSuggestions(
+          { when: "today" },
+          {
+            citySlug: selectedCity.slug,
+            cityLabel: selectedCity.label,
+            topCategory,
+          },
+        )
+      : [];
 
   const todayLabel = formatTodayLong(new Date());
   const eventCount = events.length;
@@ -102,23 +124,13 @@ export default async function TodayPage() {
       {/* Events grid */}
       <section className="mx-auto max-w-[1280px] px-6 py-12">
         {events.length === 0 ? (
-          <div className="rounded-xl bg-surface-container-low py-16 text-center">
-            <span className="material-symbols-outlined text-4xl text-secondary mb-4 block" aria-hidden="true">
-              event_busy
-            </span>
-            <p className="mb-2 text-secondary font-body">
-              No events found for today.
-            </p>
-            <p className="mb-6 text-sm text-outline font-body">
-              Try browsing all upcoming events instead.
-            </p>
-            <Link
-              href="/events"
-              className="inline-block rounded-full bg-primary-container px-6 py-3 font-body font-semibold text-on-primary transition-colors hover:bg-primary"
-            >
-              Browse all events
-            </Link>
-          </div>
+          <ListEmptyState
+            icon="event_busy"
+            headline={`Nothing on today in ${selectedCity.label}.`}
+            body="Plenty's coming up — pick a direction:"
+            suggestions={suggestions}
+            testId="today-empty"
+          />
         ) : (
           <>
             <p className="mb-6 text-sm font-semibold text-secondary font-body">

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
@@ -6,7 +5,17 @@ import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { HomepageCategoryRow } from "@/components/home/HomepageCategoryRow";
+import { TimeWindowChips } from "@/components/TimeWindowChips";
+import { ListEmptyState } from "@/components/events/ListEmptyState";
 import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
+import {
+  isTimeWindowKey,
+  resolveTimeWindow,
+  TIME_WINDOW_LABELS,
+} from "@/lib/events/timeWindows";
+import { getZeroResultSuggestions } from "@/lib/events/zeroResultSuggestions";
+import { getTopCategoryForCity } from "@/lib/events/topCategory";
+import { Suspense } from "react";
 
 const CITIES: Record<string, { name: string; state: string; tagline: string; icon: string }> = {
   "gold-coast": {
@@ -57,12 +66,18 @@ export async function generateMetadata({
 
 export default async function CityPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ when?: string }>;
 }) {
   const { slug } = await params;
   const city = CITIES[slug];
   if (!city) return notFound();
+
+  const sp = (await searchParams) ?? {};
+  const whenKey = isTimeWindowKey(sp.when) ? sp.when : null;
+  const whenRange = whenKey ? resolveTimeWindow(whenKey) : null;
 
   let events: Array<
     Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
@@ -72,8 +87,10 @@ export default async function CityPage({
     events = await prisma.event.findMany({
       where: {
         city: city.name,
-        startDate: { gte: new Date() },
         status: "published",
+        startDate: whenRange
+          ? { gte: whenRange.start, lt: whenRange.end }
+          : { gte: new Date() },
       },
       select: EVENT_CARD_SELECT,
       orderBy: { startDate: "asc" },
@@ -83,6 +100,20 @@ export default async function CityPage({
   } catch {
     // DB unavailable — render empty state, ISR will retry
   }
+
+  const topCategory =
+    events.length === 0 ? await getTopCategoryForCity(city.name) : null;
+  const suggestions =
+    events.length === 0
+      ? getZeroResultSuggestions(
+          whenKey ? { when: whenKey } : {},
+          {
+            citySlug: slug,
+            cityLabel: city.name,
+            topCategory,
+          },
+        )
+      : [];
 
   return (
     <div className="bg-surface-bright min-h-screen">
@@ -102,7 +133,9 @@ export default async function CityPage({
             </span>
             {eventCount > 0 && (
               <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white backdrop-blur-sm font-body">
-                {eventCount} upcoming event{eventCount !== 1 ? "s" : ""}
+                {whenKey
+                  ? `${eventCount} event${eventCount !== 1 ? "s" : ""} ${TIME_WINDOW_LABELS[whenKey].toLowerCase()}`
+                  : `${eventCount} upcoming event${eventCount !== 1 ? "s" : ""}`}
               </span>
             )}
           </div>
@@ -122,7 +155,10 @@ export default async function CityPage({
         className="relative"
         style={{ background: "var(--color-surface-0)" }}
       >
-        <div className="mx-auto max-w-[1280px] px-6 py-6">
+        <div className="mx-auto max-w-[1280px] px-6 py-6 flex flex-col gap-4">
+          <Suspense fallback={<div className="h-[40px]" />}>
+            <TimeWindowChips ariaLabel="When" />
+          </Suspense>
           <HomepageCategoryRow city={city.name} />
         </div>
       </section>
@@ -130,20 +166,17 @@ export default async function CityPage({
       {/* Events grid */}
       <section className="mx-auto max-w-[1280px] px-6 py-12">
         {events.length === 0 ? (
-          <div className="rounded-xl bg-surface-container-low py-16 text-center">
-            <span className="material-symbols-outlined text-4xl text-secondary mb-4 block">
-              calendar_month
-            </span>
-            <p className="mb-4 text-secondary font-body">
-              No upcoming events in {city.name} yet. Check back soon!
-            </p>
-            <Link
-              href="/events"
-              className="inline-block rounded-full bg-primary-container px-6 py-3 font-body font-semibold text-on-primary transition-colors hover:bg-primary"
-            >
-              Browse all events
-            </Link>
-          </div>
+          <ListEmptyState
+            icon="calendar_month"
+            headline={
+              whenKey
+                ? `Nothing in ${city.name} for ${TIME_WINDOW_LABELS[whenKey].toLowerCase()}.`
+                : `Nothing scheduled in ${city.name} just yet.`
+            }
+            body="Try a different angle — there's still plenty to discover."
+            suggestions={suggestions}
+            testId="city-empty"
+          />
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event, i) => (
