@@ -9,7 +9,11 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { InterestedButton } from "@/components/InterestedButton";
+import { AddToCalendarButton } from "@/components/AddToCalendarButton";
 import { EventDiscussPanelLoader } from "@/components/discussions/EventDiscussPanelLoader";
+import { googleCalendarUrl, outlookCalendarUrl } from "@/lib/calendar/ics";
+import { getSiteUrl } from "@/lib/seo/site-url";
+import { ageSuitabilityFromTags, sourceAttribution } from "@/lib/events/eventDetailHelpers";
 import {
   EVENT_CARD_SELECT,
   type EventCardData,
@@ -135,6 +139,22 @@ export default async function EventDetailPage({
       day: "numeric",
     });
 
+  const ageSuitability = ageSuitabilityFromTags(event.tags);
+  const sourceLabel = sourceAttribution(event.source);
+  const siteUrl = getSiteUrl();
+  const googleCalUrl = googleCalendarUrl(event, siteUrl);
+  const outlookCalUrl = outlookCalendarUrl(event, siteUrl);
+  const priceLabel =
+    event.isFree
+      ? "Free"
+      : event.priceMin && event.priceMax
+        ? `$${event.priceMin}–$${event.priceMax}`
+        : event.priceMin
+          ? `From $${event.priceMin}`
+          : event.priceMax
+            ? `Up to $${event.priceMax}`
+            : null;
+
   return (
     <>
       <script
@@ -142,7 +162,7 @@ export default async function EventDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd(event)) }}
       />
 
-      <div className="bg-surface-bright min-h-screen">
+      <div className="bg-surface-bright min-h-screen pb-24 lg:pb-0">
         {/* Hero Section */}
         <section className="relative w-full h-[280px] md:h-[480px] bg-surface-dim overflow-hidden">
           {event.imageUrl ? (
@@ -171,9 +191,18 @@ export default async function EventDetailPage({
                 <span className="bg-surface-container-low text-on-surface font-body text-sm font-semibold px-4 py-1.5 rounded-full">
                   {formatCategory(event.category)}
                 </span>
-                {event.isFree && (
+                {event.isFree ? (
                   <span className="bg-success/10 text-success font-body text-sm font-semibold px-4 py-1.5 rounded-full">
                     FREE
+                  </span>
+                ) : priceLabel && (
+                  <span className="bg-surface-container-low text-on-surface font-body text-sm font-semibold px-4 py-1.5 rounded-full">
+                    {priceLabel}
+                  </span>
+                )}
+                {ageSuitability && (
+                  <span className="bg-surface-container-low text-on-surface font-body text-sm font-semibold px-4 py-1.5 rounded-full">
+                    {ageSuitability}
                   </span>
                 )}
               </div>
@@ -200,20 +229,44 @@ export default async function EventDetailPage({
                   </span>
                 </div>
                 {event.venueName && (
-                  <div className="flex items-center gap-1">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      [event.venueName, event.venueAddress, event.city].filter(Boolean).join(", "),
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
                     <span className="material-symbols-outlined text-primary-container text-[20px]">
                       location_on
                     </span>
                     <span>
                       {event.venueName}, {event.city}
                     </span>
-                  </div>
+                  </a>
                 )}
               </div>
 
-              {/* Share buttons */}
-              <div className="mt-4 pt-4 border-t border-surface-container-high">
+              {/* Share buttons + source attribution */}
+              <div className="mt-4 pt-4 border-t border-surface-container-high flex flex-wrap items-center gap-x-6 gap-y-3 justify-between">
                 <ShareButtons title={event.name} slug={event.slug} />
+                {sourceLabel && (
+                  <p className="text-xs font-body text-on-surface-variant">
+                    Listed via{" "}
+                    {event.sourceUrl ? (
+                      <a
+                        href={event.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-secondary hover:text-primary hover:underline"
+                      >
+                        {sourceLabel}
+                      </a>
+                    ) : (
+                      <span className="font-semibold text-secondary">{sourceLabel}</span>
+                    )}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -371,6 +424,11 @@ export default async function EventDetailPage({
                   Get Tickets
                 </a>
               )}
+              <AddToCalendarButton
+                slug={event.slug}
+                googleUrl={googleCalUrl}
+                outlookUrl={outlookCalUrl}
+              />
               <InterestedButton eventId={event.id} />
 
               {event.url && (
@@ -389,6 +447,31 @@ export default async function EventDetailPage({
             </div>
           </div>
         </div>
+
+        {/* Mobile sticky CTA — keeps "Get tickets" visible on small screens so
+            users never have to scroll past the venue card to act. Hidden on lg+
+            where the sticky right column already does this job. */}
+        {event.ticketUrl && (
+          <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface-bright/95 backdrop-blur border-t border-surface-container-high px-4 py-3 flex gap-2 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
+            <a
+              href={event.ticketUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 bg-primary-container text-on-primary rounded-full py-3 font-heading text-base font-bold shadow flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[18px]">confirmation_number</span>
+              Get Tickets
+            </a>
+            <a
+              href={`/events/${event.slug}/calendar.ics`}
+              download
+              aria-label="Download calendar invite"
+              className="rounded-full border-2 border-secondary text-secondary px-4 py-3 flex items-center justify-center"
+            >
+              <span className="material-symbols-outlined text-[18px]">event</span>
+            </a>
+          </div>
+        )}
 
         {/* Discuss this event — dynamic island so the parent stays SSG/ISR.
             auth() reads cookies and would otherwise force the whole page dynamic. */}

@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 export function ShareButtons({ title, slug }: { title: string; slug: string }) {
+  const [copied, setCopied] = useState(false);
+
   const url = typeof window !== "undefined"
     ? `${window.location.origin}/events/${slug}`
     : `/events/${slug}`;
@@ -11,14 +15,40 @@ export function ShareButtons({ title, slug }: { title: string; slug: string }) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
     } catch {
       // Fallback — noop
     }
   };
 
+  // Primary path on mobile: native share sheet. We only render the button when
+  // the browser supports it so desktop users aren't shown a dead control.
+  const handleNativeShare = async () => {
+    if (typeof navigator === "undefined" || !navigator.share) return;
+    try {
+      await navigator.share({ title, url });
+    } catch {
+      // user cancelled or share failed — silently ignore
+    }
+  };
+
+  const canNativeShare =
+    typeof navigator !== "undefined" && typeof navigator.share === "function";
+
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <span className="text-sm font-semibold text-secondary font-body">Share:</span>
+      {canNativeShare && (
+        <button
+          type="button"
+          onClick={handleNativeShare}
+          aria-label="Share"
+          className="rounded-full bg-surface-container-low p-2 text-secondary transition-colors hover:bg-surface-container-high hover:text-primary"
+        >
+          <span className="material-symbols-outlined text-[18px] align-middle">ios_share</span>
+        </button>
+      )}
       <a
         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
         target="_blank"
@@ -44,13 +74,22 @@ export function ShareButtons({ title, slug }: { title: string; slug: string }) {
       <button
         type="button"
         onClick={handleCopy}
-        aria-label="Copy link"
+        aria-label={copied ? "Link copied" : "Copy link"}
         className="rounded-full bg-surface-container-low p-2 text-secondary transition-colors hover:bg-surface-container-high hover:text-primary"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-        </svg>
+        {copied ? (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        ) : (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+        )}
       </button>
+      {copied && (
+        <span className="text-xs text-success font-body font-semibold" role="status">Link copied</span>
+      )}
     </div>
   );
 }

@@ -8,6 +8,8 @@ const SITE_NAME = "Festlio";
  * https://developers.google.com/search/docs/appearance/structured-data/event
  */
 export function eventJsonLd(event: Event): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const canonicalUrl = `${siteUrl}/events/${event.slug}`;
   const ld: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -18,6 +20,8 @@ export function eventJsonLd(event: Event): Record<string, unknown> {
       ? "https://schema.org/EventCancelled"
       : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    inLanguage: "en-AU",
+    url: canonicalUrl,
   };
 
   if (event.endDate) {
@@ -26,6 +30,14 @@ export function eventJsonLd(event: Event): Record<string, unknown> {
 
   if (event.imageUrl) {
     ld.image = [event.imageUrl];
+  }
+
+  if (event.sourceUrl || event.source) {
+    ld.organizer = {
+      "@type": "Organization",
+      name: event.source,
+      ...(event.sourceUrl ? { url: event.sourceUrl } : {}),
+    };
   }
 
   if (event.venueName) {
@@ -68,10 +80,6 @@ export function eventJsonLd(event: Event): Record<string, unknown> {
       availability: "https://schema.org/InStock",
       url: event.ticketUrl ?? event.url ?? undefined,
     };
-  }
-
-  if (event.url) {
-    ld.url = event.url;
   }
 
   return ld;

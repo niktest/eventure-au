@@ -59,7 +59,18 @@ describe("eventJsonLd", () => {
     expect(ld.startDate).toBe("2026-07-10T09:00:00.000Z");
     expect(ld.endDate).toBe("2026-07-10T17:00:00.000Z");
     expect(ld.description).toBe("A test event description");
-    expect(ld.url).toBe("https://example.com/event");
+    // url is the canonical Festlio detail page, not the upstream source URL —
+    // Google ranks the canonical page that ships the JSON-LD.
+    expect(ld.url).toMatch(/\/events\/test-event-abc$/);
+    expect(ld.inLanguage).toBe("en-AU");
+  });
+
+  it("attributes the organizer to the ingestion source when available", () => {
+    const ld = eventJsonLd(makeEvent());
+    const organizer = ld.organizer as Record<string, unknown>;
+    expect(organizer["@type"]).toBe("Organization");
+    expect(organizer.name).toBe("test");
+    expect(organizer.url).toBe("https://source.example.com");
   });
 
   it("includes image array when imageUrl is present", () => {
