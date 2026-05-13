@@ -15,7 +15,13 @@ const SEGMENTS = ["Music", "Sports", "Arts & Theatre", "Film", "Miscellaneous"] 
 interface TmEvent {
   id: string;
   name: string;
+  // TM populates these inconsistently per event. Prefer `description` (longer
+  // marketing copy), fall back to `info` (short blurb) then `pleaseNote`
+  // (logistics). Without the fallbacks, ~34% of TM events have no description.
+  description?: string;
   info?: string;
+  pleaseNote?: string;
+  additionalInfo?: string;
   url: string;
   images?: Array<{ url: string; width: number; height: number }>;
   dates: {
@@ -200,7 +206,7 @@ function mapEvent(tm: TmEvent): RawEvent {
   return {
     sourceId: tm.id,
     name: tm.name,
-    description: tm.info ?? undefined,
+    description: tm.description ?? tm.info ?? tm.pleaseNote ?? tm.additionalInfo ?? undefined,
     startDate,
     endDate: tm.dates.end?.dateTime ? new Date(tm.dates.end.dateTime) : undefined,
     imageUrl: bestImage?.url ?? undefined,
