@@ -42,11 +42,11 @@ export const HOMEPAGE_CATEGORIES: readonly HomepageCategory[] = [
 
 /**
  * Build the href for a chip. Free is a price predicate, not a category —
- * it routes to the EVE-206 price filter (`?free=1` shim until the canonical
- * `?price=free` shape lands; see follow-up against EVE-206).
+ * it routes to the EVE-206 price filter as the canonical `?price=free` shape
+ * (EVE-219). `?free=1` is still accepted as an alias for cached chip clicks.
  */
 export function categoryHref(slug: string): string {
-  if (slug === "free") return `/events?free=1`;
+  if (slug === "free") return `/events?price=free`;
   return `/events?category=${slug}`;
 }
 

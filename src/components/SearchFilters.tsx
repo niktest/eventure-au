@@ -29,7 +29,9 @@ export function SearchFilters({
   const currentQuery = searchParams?.get("q") ?? "";
   const currentDateFrom = searchParams?.get("dateFrom") ?? "";
   const currentDateTo = searchParams?.get("dateTo") ?? "";
-  const currentFreeOnly = searchParams?.get("free") === "1";
+  // EVE-219: ?price=free is canonical; ?free=1 stays accepted as an alias.
+  const currentFreeOnly =
+    searchParams?.get("price") === "free" || searchParams?.get("free") === "1";
 
   // Keep the active pill visible even if it's not in the top-N popular set,
   // so users can always deselect a category they navigated to (e.g. via deep link).
@@ -111,7 +113,12 @@ export function SearchFilters({
             type="checkbox"
             checked={currentFreeOnly}
             onChange={(e) =>
-              updateParams({ free: e.target.checked ? "1" : null })
+              // Write canonical ?price=free (EVE-219) and clear the legacy
+              // ?free=1 param so toggling doesn't leave both in the URL.
+              updateParams({
+                price: e.target.checked ? "free" : null,
+                free: null,
+              })
             }
             className="rounded accent-primary"
           />

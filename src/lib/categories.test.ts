@@ -40,10 +40,11 @@ describe("HOMEPAGE_CATEGORIES", () => {
 });
 
 describe("categoryHref", () => {
-  it("routes the Free chip to the EVE-206 price filter, never ?category=free", () => {
+  it("routes the Free chip to the canonical EVE-219 price filter, never ?category=free", () => {
     const href = categoryHref("free");
-    expect(href).toBe("/events?free=1");
+    expect(href).toBe("/events?price=free");
     expect(href).not.toContain("category=");
+    expect(href).not.toContain("free=1");
   });
 
   it("preserves the city slug shape for normal category chips", () => {

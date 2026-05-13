@@ -60,7 +60,7 @@ export default async function CityPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ category?: string; free?: string }>;
+  searchParams?: Promise<{ category?: string; free?: string; price?: string }>;
 }) {
   const { slug } = await params;
   const city = CITIES[slug];
@@ -68,7 +68,9 @@ export default async function CityPage({
 
   const sp = (await searchParams) ?? {};
   const activeChip = HOMEPAGE_CATEGORIES.find((c) => c.slug === sp.category);
-  const freeActive = sp.free === "1";
+  // EVE-219: ?price=free is canonical; ?free=1 stays as an alias for backwards
+  // compatibility with cached chip clicks and inbound links.
+  const freeActive = sp.price === "free" || sp.free === "1";
 
   // Active-state title per EVE-215. Free is a price filter, not a category,
   // so it gets its own title and never doubles "Free events events".

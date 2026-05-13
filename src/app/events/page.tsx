@@ -34,6 +34,7 @@ export default async function EventsPage({
     near?: string;
     radius?: string;
     free?: string;
+    price?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -93,7 +94,9 @@ export default async function EventsPage({
     conditions.push({ city: NEAR_TO_CITY[params.near] });
   }
 
-  if (params.free === "1") {
+  // EVE-219: ?price=free is canonical; ?free=1 stays as an alias for cached
+  // chip clicks and shared links from before the migration.
+  if (params.price === "free" || params.free === "1") {
     conditions.push({ isFree: true });
   }
 
