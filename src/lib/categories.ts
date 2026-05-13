@@ -39,8 +39,13 @@ export const HOMEPAGE_CATEGORIES: readonly HomepageCategory[] = [
   { label: "Pop Up", slug: "pop-up", icon: Sparkles, magentaAccent: true },
 ] as const;
 
-export function categoryHref(slug: string): string {
-  return `/events?category=${slug}`;
+export function categoryHref(
+  slug: string,
+  opts?: { city?: string | null },
+): string {
+  const params = new URLSearchParams({ category: slug });
+  if (opts?.city) params.set("city", opts.city);
+  return `/events?${params.toString()}`;
 }
 
 /**

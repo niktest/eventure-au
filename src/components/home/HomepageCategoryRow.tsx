@@ -4,6 +4,8 @@ import { HOMEPAGE_CATEGORIES, categoryHref } from "@/lib/categories";
 type HomepageCategoryRowProps = {
   /** Currently active slug, used by category landing pages. Leave undefined on the homepage. */
   active?: string;
+  /** When rendered on a city page, preserve the city as `&city=` on each chip link (EVE-207). */
+  city?: string | null;
 };
 
 /**
@@ -11,7 +13,7 @@ type HomepageCategoryRowProps = {
  * Server-rendered <a> links so chips are SEO-indexable. The 11 labels and
  * order are authoritative and live in {@link HOMEPAGE_CATEGORIES}.
  */
-export function HomepageCategoryRow({ active }: HomepageCategoryRowProps) {
+export function HomepageCategoryRow({ active, city }: HomepageCategoryRowProps) {
   return (
     <nav
       aria-label="Browse events by category"
@@ -29,7 +31,7 @@ export function HomepageCategoryRow({ active }: HomepageCategoryRowProps) {
         return (
           <Link
             key={cat.slug}
-            href={categoryHref(cat.slug)}
+            href={categoryHref(cat.slug, { city })}
             aria-current={isActive ? "page" : undefined}
             className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 min-h-[44px] font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-coral-glow whitespace-nowrap ${stateClasses}`}
           >

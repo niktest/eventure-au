@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { HomepageCategoryRow } from "@/components/home/HomepageCategoryRow";
 import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
 
 const CITIES: Record<string, { name: string; state: string; tagline: string; icon: string }> = {
@@ -112,6 +113,17 @@ export default async function CityPage({
             {city.tagline}. Discover what&apos;s happening — from live music and
             festivals to markets and family fun.
           </p>
+        </div>
+      </section>
+
+      {/* Category quick-filter chips (EVE-207) — preserve city via &city= */}
+      <section
+        aria-label="Browse by category"
+        className="relative"
+        style={{ background: "var(--color-surface-0)" }}
+      >
+        <div className="mx-auto max-w-[1280px] px-6 py-6">
+          <HomepageCategoryRow city={city.name} />
         </div>
       </section>
 
