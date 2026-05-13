@@ -7,7 +7,7 @@ const PAGE_DELAY_MS = 200;
 // Walk multiple cities in parallel — sequentially the per-city HTTP latency
 // (20 cities × ~5 pages × ~500ms) was burning ~50s of fetch wall-time before
 // upserts even started, pushing the cron past the 300s function cap (EVE-194).
-const CITY_CONCURRENCY = 4;
+const CITY_CONCURRENCY = 8;
 // `/api/carousels` returns events whose location falls inside the
 // `northeast`/`southwest` box. A degree of latitude is ~111 km, so 1.0
 // gives a ~100 km radius around each city centroid — wide enough that
