@@ -12,12 +12,20 @@
       "schedule": "15 2 * * *"
     },
     {
-      "path": "/api/cron/ingest/scrapers-platform",
+      "path": "/api/cron/ingest/scrapers-platform-large",
       "schedule": "30 2 * * *"
     },
     {
-      "path": "/api/cron/ingest/moshtix",
+      "path": "/api/cron/ingest/scrapers-platform-small",
       "schedule": "45 2 * * *"
+    },
+    {
+      "path": "/api/cron/ingest/ticketmaster",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/ingest/moshtix",
+      "schedule": "15 3 * * *"
     }
   ],
   "headers": [

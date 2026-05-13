@@ -25,21 +25,24 @@ import { MoshtixAdapter } from "./adapters/moshtix";
  * Adapter groups, scheduled as separate cron endpoints so each stays under
  * Vercel's 300s function limit. See `vercel.json` for schedules.
  *
- * - `api`: fast JSON APIs.
+ * - `api`: fast JSON APIs (excluding Ticketmaster).
+ * - `ticketmaster`: isolated because a full paginated run plus dedup dominates
+ *   wall-clock (~3500 events).
  * - `scrapers-venue`: light venue/destination scrapers (Gold Coast + Brisbane).
- * - `scrapers-platform`: paginated AU-wide platform scrapers, excluding Moshtix.
+ * - `scrapers-platform-large`: the two heaviest platform scrapers (~2.7k each).
+ * - `scrapers-platform-small`: the remaining smaller platform scrapers.
  * - `moshtix`: isolated because a full paginated run dominates wall-clock
  *   (~1700 events, ~80s of fetches before dedup).
  */
 export const ADAPTER_GROUPS = {
   api: (): SourceAdapter[] => [
     new EventbriteAdapter(),
-    new TicketmasterAdapter(),
     new MeetupAdapter(),
     new BandsintownAdapter(),
     new EventfindaAdapter(),
     new StickyTicketsAdapter(),
   ],
+  ticketmaster: (): SourceAdapter[] => [new TicketmasterAdapter()],
   "scrapers-venue": (): SourceAdapter[] => [
     new DestinationGCAdapter(),
     new CityOfGCAdapter(),
@@ -49,10 +52,12 @@ export const ADAPTER_GROUPS = {
     new SandstonePointAdapter(),
     new VisitBrisbaneAdapter(),
   ],
-  "scrapers-platform": (): SourceAdapter[] => [
+  "scrapers-platform-large": (): SourceAdapter[] => [
     new HumanitixAdapter(),
-    new TryBookingAdapter(),
     new OztixAdapter(),
+  ],
+  "scrapers-platform-small": (): SourceAdapter[] => [
+    new TryBookingAdapter(),
     new MegatixAdapter(),
   ],
   moshtix: (): SourceAdapter[] => [new MoshtixAdapter()],
