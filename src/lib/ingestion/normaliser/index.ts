@@ -28,8 +28,30 @@ export function cleanTitle(raw: string): string {
     .trim();
 }
 
+/**
+ * Strip HTML tags and normalise whitespace for descriptions.
+ *
+ * Several adapters (Oztix, Sticky Tickets, Eventbrite, future others) read
+ * `description` straight out of JSON-LD or platform JSON, where it often
+ * contains raw HTML (`<p>`, `<br>`, `<em>`, `<strong>`, image tags). The
+ * frontend renders descriptions as plain text — by design, to avoid an XSS
+ * surface — so any HTML that slips through is shown verbatim to the user.
+ *
+ * Block-level tags become newlines so list/paragraph formatting survives;
+ * inline tags drop to their text content. HTML entities are decoded after
+ * tag removal so escaped angle brackets in actual prose are preserved.
+ */
 function cleanDescription(raw: string): string {
-  return decodeHtmlEntities(raw).replace(/\s+/g, " ").trim();
+  const blockBreak = raw
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n• ");
+  const stripped = blockBreak.replace(/<[^>]+>/g, "");
+  return decodeHtmlEntities(stripped)
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function cleanShortText(raw: string | null | undefined): string | null {

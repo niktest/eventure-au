@@ -103,6 +103,33 @@ describe("normalise", () => {
     expect(result.description).toBe("Has spaces");
   });
 
+  it("strips HTML tags from description while preserving paragraph breaks", () => {
+    // Matches the real Oztix shape: <em>...<br><br><strong>$5 Pots</strong></em><br>
+    const raw = makeRawEvent({
+      description:
+        "<em>DRINK SPECIALS EVERY WEDNESDAY<br><br><strong>$5 Pots and $10 pints</strong></em><br>",
+    });
+    const result = normalise("oztix", raw);
+
+    expect(result.description).not.toContain("<");
+    expect(result.description).not.toContain(">");
+    expect(result.description).toContain("DRINK SPECIALS EVERY WEDNESDAY");
+    expect(result.description).toContain("$5 Pots and $10 pints");
+  });
+
+  it("converts list items and block tags to newlines / bullets", () => {
+    const raw = makeRawEvent({
+      description:
+        "<p>Welcome to the show.</p><ul><li>Doors at 7pm</li><li>BYO drinks</li></ul>",
+    });
+    const result = normalise("oztix", raw);
+
+    expect(result.description).toContain("Welcome to the show.");
+    expect(result.description).toContain("• Doors at 7pm");
+    expect(result.description).toContain("• BYO drinks");
+    expect(result.description).not.toContain("<");
+  });
+
   it("handles ticket/pricing fields", () => {
     const raw = makeRawEvent({
       priceMin: 25.0,

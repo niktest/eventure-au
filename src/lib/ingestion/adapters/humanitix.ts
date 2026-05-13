@@ -152,8 +152,11 @@ function mapEvent(
   const eventUrl = it.slug
     ? `${it.hostname ?? "https://events.humanitix.com/"}${it.slug}`
     : undefined;
+  // Humanitix CDN only serves @seo-500 and @seo-800 presets; anything larger
+  // (1024, 1200, 1600) returns CloudFront 400 → broken thumbnail on the card.
+  // Use 800 as the largest supported variant.
   const imageUrl = it.bannerImage?.handle
-    ? `https://images.humanitix.com/i/${it.bannerImage.handle}@seo-1200.jpg`
+    ? `https://images.humanitix.com/i/${it.bannerImage.handle}@seo-800.jpg`
     : undefined;
 
   const components = it.eventLocation?.addressComponents ?? [];
