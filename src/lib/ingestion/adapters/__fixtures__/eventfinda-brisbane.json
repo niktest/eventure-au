@@ -1,0 +1,110 @@
+{
+  "events": [
+    {
+      "id": 3001,
+      "name": "South Bank Lantern Festival 2026",
+      "description": "Annual lantern festival on the Brisbane river.",
+      "url": "https://www.eventfinda.com.au/2026/south-bank-lantern-festival/brisbane",
+      "url_slug": "south-bank-lantern-festival",
+      "datetime_start": "2026-06-22T18:00:00+10:00",
+      "datetime_end": "2026-06-22T22:00:00+10:00",
+      "datetime_summary": "Mon 22 Jun 2026 6:00pm",
+      "is_free": true,
+      "is_cancelled": false,
+      "address": "Stanley St Plaza, South Brisbane QLD 4101",
+      "location_summary": "Brisbane, QLD",
+      "point": { "lat": -27.4760, "lng": 153.0205 },
+      "location": { "name": "South Bank Parklands", "summary": "Brisbane, QLD" },
+      "category": { "id": 9, "name": "Festivals" },
+      "images": {
+        "images": [
+          {
+            "id": 1,
+            "transforms": {
+              "transforms": [
+                { "url": "https://www.eventfinda.com.au/files/v3/eventfinda/3001/lantern-1200x800.jpg", "width": 1200, "height": 800 },
+                { "url": "https://www.eventfinda.com.au/files/v3/eventfinda/3001/lantern-600x400.jpg", "width": 600, "height": 400 }
+              ]
+            }
+          }
+        ]
+      },
+      "ticket_types": { "ticket_types": [] },
+      "restrictions": null,
+      "presented_by": "Brisbane City Council"
+    },
+    {
+      "id": 3002,
+      "name": "Brisbane Comedy Showdown",
+      "description": "Top local and touring stand-ups under one roof.",
+      "url": "https://www.eventfinda.com.au/2026/brisbane-comedy-showdown/brisbane",
+      "url_slug": "brisbane-comedy-showdown",
+      "datetime_start": "2026-07-11T20:00:00+10:00",
+      "datetime_end": "2026-07-11T22:30:00+10:00",
+      "datetime_summary": "Sat 11 Jul 2026 8:00pm",
+      "is_free": false,
+      "is_cancelled": false,
+      "address": "Brisbane Powerhouse, 119 Lamington St, New Farm QLD 4005",
+      "location_summary": "Brisbane, QLD",
+      "point": { "lat": -27.4660, "lng": 153.0510 },
+      "location": { "name": "Brisbane Powerhouse", "summary": "Brisbane, QLD" },
+      "category": { "id": 6, "name": "Comedy" },
+      "images": {
+        "images": [
+          {
+            "id": 2,
+            "transforms": {
+              "transforms": [
+                { "url": "https://www.eventfinda.com.au/files/v3/eventfinda/3002/comedy-1200x800.jpg", "width": 1200, "height": 800 }
+              ]
+            }
+          }
+        ]
+      },
+      "ticket_types": {
+        "ticket_types": [
+          { "name": "General Admission", "price": "45.00", "is_free": false }
+        ]
+      },
+      "restrictions": "18+",
+      "presented_by": null
+    },
+    {
+      "id": 3003,
+      "name": "Eat Street Markets — July Special",
+      "description": "Riverside food markets featuring global street food.",
+      "url": "https://www.eventfinda.com.au/2026/eat-street-markets-july/brisbane",
+      "url_slug": "eat-street-markets-july",
+      "datetime_start": "2026-07-19T16:00:00+10:00",
+      "datetime_end": "2026-07-19T22:00:00+10:00",
+      "datetime_summary": "Sat 19 Jul 2026 4:00pm",
+      "is_free": false,
+      "is_cancelled": false,
+      "address": "Hamilton, Brisbane QLD",
+      "location_summary": "Brisbane, QLD",
+      "point": { "lat": -27.4423, "lng": 153.0682 },
+      "location": { "name": "Eat Street Northshore", "summary": "Brisbane, QLD" },
+      "category": { "id": 12, "name": "Markets" },
+      "images": {
+        "images": [
+          {
+            "id": 3,
+            "transforms": {
+              "transforms": [
+                { "url": "https://www.eventfinda.com.au/files/v3/eventfinda/3003/eatstreet-1200x800.jpg", "width": 1200, "height": 800 }
+              ]
+            }
+          }
+        ]
+      },
+      "ticket_types": {
+        "ticket_types": [
+          { "name": "Adult", "price": "6.00", "is_free": false }
+        ]
+      },
+      "restrictions": null,
+      "presented_by": null
+    }
+  ],
+  "@attributes": { "count": 3, "rows": 100, "page": 1, "page_count": 1 }
+}

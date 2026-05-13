@@ -1,0 +1,53 @@
+{
+  "data": [
+    {
+      "id": 90001,
+      "name": "Brisbane DnB Night — Dialled In",
+      "slug": "dialled-in-brisbane",
+      "promoter_name": "Dialled In Crew",
+      "venue_name": "The Triffid",
+      "country_code": "AU",
+      "is_recurring": false,
+      "is_published": true,
+      "is_on_sale": true,
+      "cover": "https://media.megatix.com.au/e/90001/full/dialled-in-cover.jpg",
+      "banner": "https://media.megatix.com.au/e/90001/full/dialled-in-banner.jpg",
+      "start_datetime": "2026-06-28T21:00:00+10:00",
+      "end_datetime": "2026-06-29T03:00:00+10:00",
+      "display_price": "$45 - $80"
+    },
+    {
+      "id": 90002,
+      "name": "Gold Coast Burger Festival 2026",
+      "slug": "gc-burger-festival-2026",
+      "promoter_name": "GC Eats",
+      "venue_name": "Doug Jennings Park",
+      "country_code": "AU",
+      "is_recurring": false,
+      "is_published": true,
+      "is_on_sale": true,
+      "cover": "https://media.megatix.com.au/e/90002/full/burger-fest-cover.jpg",
+      "banner": "https://media.megatix.com.au/e/90002/full/burger-fest-banner.jpg",
+      "start_datetime": "2026-07-12T11:00:00+10:00",
+      "end_datetime": "2026-07-12T22:00:00+10:00",
+      "display_price": "$15 - $35"
+    },
+    {
+      "id": 90003,
+      "name": "Sunshine Coast Yoga Retreat",
+      "slug": "sunny-coast-yoga-retreat-aug",
+      "promoter_name": "Wellbeing Retreats",
+      "venue_name": "Noosa Heads Retreat",
+      "country_code": "AU",
+      "is_recurring": false,
+      "is_published": true,
+      "is_on_sale": true,
+      "cover": "https://media.megatix.com.au/e/90003/full/yoga-retreat-cover.jpg",
+      "banner": "https://media.megatix.com.au/e/90003/full/yoga-retreat-banner.jpg",
+      "start_datetime": "2026-08-22T08:00:00+10:00",
+      "end_datetime": "2026-08-24T16:00:00+10:00",
+      "display_price": "$450"
+    }
+  ],
+  "meta": { "current_page": 1, "last_page": 1, "total": 3 }
+}

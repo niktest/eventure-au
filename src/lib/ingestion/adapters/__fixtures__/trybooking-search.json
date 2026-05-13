@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "id": 1400101,
+      "name": "Sunshine Coast Sourdough Baking Workshop",
+      "eventDisplayName": "Sourdough Baking Workshop — Sunshine Coast",
+      "description": "Hands-on sourdough class with a Noosa baker.",
+      "eventStartDate": "2026-06-13T09:00:00+10:00",
+      "eventEndDate": "2026-06-13T13:00:00+10:00",
+      "venueName": "Noosa Community Kitchen",
+      "heroImage": "https://www.trybooking.com/UserData/Homepage/Q/EHI1400101-hero.jpeg",
+      "thumbnailImage": "https://www.trybooking.com/UserData/Homepage/Q/EHI1400101-thumb.jpeg",
+      "timeZoneId": "Australia/Brisbane",
+      "isCancelled": false
+    },
+    {
+      "id": 1400102,
+      "name": "Brisbane Choir Spring Concert",
+      "eventDisplayName": "Brisbane Choir — Spring Concert",
+      "description": "Annual community choir spring concert.",
+      "eventStartDate": "2026-09-13T14:00:00+10:00",
+      "eventEndDate": "2026-09-13T16:00:00+10:00",
+      "venueName": "St John's Cathedral, Brisbane",
+      "heroImage": "https://www.trybooking.com/UserData/Homepage/Q/EHI1400102-hero.jpeg",
+      "thumbnailImage": "https://www.trybooking.com/UserData/Homepage/Q/EHI1400102-thumb.jpeg",
+      "timeZoneId": "Australia/Brisbane",
+      "isCancelled": false
+    },
+    {
+      "id": 1400103,
+      "name": "Toowoomba Trivia Night Fundraiser",
+      "eventDisplayName": "Trivia Night Fundraiser",
+      "description": "Pub trivia fundraiser for local school.",
+      "eventStartDate": "2026-07-04T19:00:00+10:00",
+      "eventEndDate": "2026-07-04T22:00:00+10:00",
+      "venueName": "Toowoomba RSL",
+      "heroImage": "https://www.trybooking.com/UserData/Homepage/Q/EHI1400103-hero.jpeg",
+      "thumbnailImage": "https://www.trybooking.com/UserData/Homepage/Q/EHI1400103-thumb.jpeg",
+      "timeZoneId": "Australia/Brisbane",
+      "isCancelled": false
+    }
+  ],
+  "skip": 0,
+  "take": 15,
+  "hasMore": false
+}

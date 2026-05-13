@@ -1,0 +1,57 @@
+{
+  "data": {
+    "recommendedEvents": {
+      "edges": [
+        {
+          "node": {
+            "id": "meetup-evt-1001",
+            "title": "Brisbane JavaScript Meetup — May Edition",
+            "description": "Monthly JavaScript meetup in Brisbane CBD. Talks on modern tooling.",
+            "dateTime": "2026-06-12T18:30:00+10:00",
+            "endTime": "2026-06-12T21:00:00+10:00",
+            "eventUrl": "https://www.meetup.com/brisbane-javascript/events/300001/",
+            "eventType": "PHYSICAL",
+            "displayPhoto": { "highResUrl": "https://secure.meetupstatic.com/photos/event/1/2/3/4/highres_500000001.jpeg", "baseUrl": "https://secure.meetupstatic.com/photos/event/1/2/3/4/event_500000001.jpeg" },
+            "featuredEventPhoto": { "highResUrl": "https://secure.meetupstatic.com/photos/event/5/6/7/8/highres_500000002.jpeg", "baseUrl": null },
+            "feeSettings": { "accepts": null, "amount": 0, "currency": "AUD" },
+            "group": { "name": "Brisbane JavaScript", "urlname": "brisbane-javascript", "city": "Brisbane", "state": "QLD", "country": "au" },
+            "venue": { "name": "Fishburners Brisbane", "address": "155 Queen St, Brisbane City QLD 4000", "city": "Brisbane", "state": "QLD", "country": "au", "lat": -27.4710, "lon": 153.0235 }
+          }
+        },
+        {
+          "node": {
+            "id": "meetup-evt-1002",
+            "title": "Brisbane Product Designers — Coffee & Critique",
+            "description": "Casual product design critique morning at South Bank.",
+            "dateTime": "2026-06-21T09:00:00+10:00",
+            "endTime": null,
+            "eventUrl": "https://www.meetup.com/brisbane-product-designers/events/300002/",
+            "eventType": "PHYSICAL",
+            "displayPhoto": { "highResUrl": null, "baseUrl": "https://secure.meetupstatic.com/photos/event/a/b/c/d/event_500000003.jpeg" },
+            "featuredEventPhoto": null,
+            "feeSettings": { "accepts": "credit", "amount": 15.0, "currency": "AUD" },
+            "group": { "name": "Brisbane Product Designers", "urlname": "brisbane-product-designers", "city": "Brisbane", "state": "QLD", "country": "au" },
+            "venue": { "name": "South Bank Parklands", "address": "Stanley St Plaza, South Brisbane QLD 4101", "city": "Brisbane", "state": "QLD", "country": "au", "lat": -27.4760, "lon": 153.0205 }
+          }
+        },
+        {
+          "node": {
+            "id": "meetup-evt-1003",
+            "title": "Brisbane Hiking Group — Mt Coot-tha Sunset",
+            "description": "Family-friendly hike to the Mt Coot-tha summit for sunset.",
+            "dateTime": "2026-07-05T16:00:00+10:00",
+            "endTime": "2026-07-05T19:00:00+10:00",
+            "eventUrl": "https://www.meetup.com/brisbane-hiking/events/300003/",
+            "eventType": "PHYSICAL",
+            "displayPhoto": { "highResUrl": "https://secure.meetupstatic.com/photos/event/e/f/g/h/highres_500000004.jpeg", "baseUrl": null },
+            "featuredEventPhoto": null,
+            "feeSettings": null,
+            "group": { "name": "Brisbane Hiking Group", "urlname": "brisbane-hiking", "city": "Brisbane", "state": "QLD", "country": "au" },
+            "venue": { "name": "Mt Coot-tha Summit", "address": "1012 Sir Samuel Griffith Dr, Mount Coot-Tha QLD 4066", "city": "Brisbane", "state": "QLD", "country": "au", "lat": -27.4775, "lon": 152.9580 }
+          }
+        }
+      ],
+      "pageInfo": { "hasNextPage": false, "endCursor": null }
+    }
+  }
+}

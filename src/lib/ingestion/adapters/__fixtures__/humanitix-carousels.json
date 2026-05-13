@@ -1,0 +1,59 @@
+[
+  {
+    "_id": "hum-evt-7001",
+    "hostname": "https://events.humanitix.com/",
+    "name": "Brisbane Brewery Beer & Food Pairing",
+    "slug": "brisbane-brewery-pairing-jun26",
+    "date": { "startDate": "2026-06-14T18:00:00+10:00", "endDate": "2026-06-14T21:00:00+10:00" },
+    "bannerImage": { "handle": "abc123banner" },
+    "eventLocation": {
+      "address": "1/19 Wandoo St, Fortitude Valley QLD 4006",
+      "venueName": "Newstead Brewing Co",
+      "addressComponents": [
+        { "long_name": "Brisbane", "short_name": "Brisbane", "types": ["locality"] },
+        { "long_name": "Queensland", "short_name": "QLD", "types": ["administrative_area_level_1"] }
+      ]
+    },
+    "pricing": { "minimumPrice": 75, "maximumPrice": 95 },
+    "timezone": "Australia/Brisbane",
+    "isRecurring": false
+  },
+  {
+    "_id": "hum-evt-7002",
+    "hostname": "https://events.humanitix.com/",
+    "name": "Brisbane Photography Workshop — Cityscapes",
+    "slug": "brisbane-photo-workshop-cityscapes",
+    "date": { "startDate": "2026-07-05T08:00:00+10:00", "endDate": "2026-07-05T12:00:00+10:00" },
+    "bannerImage": { "handle": "def456banner" },
+    "eventLocation": {
+      "address": "Kangaroo Point Cliffs, Kangaroo Point QLD 4169",
+      "venueName": "Kangaroo Point Cliffs",
+      "addressComponents": [
+        { "long_name": "Brisbane", "short_name": "Brisbane", "types": ["locality"] },
+        { "long_name": "Queensland", "short_name": "QLD", "types": ["administrative_area_level_1"] }
+      ]
+    },
+    "pricing": { "minimumPrice": 120, "maximumPrice": 120 },
+    "timezone": "Australia/Brisbane",
+    "isRecurring": false
+  },
+  {
+    "_id": "hum-evt-7003",
+    "hostname": "https://events.humanitix.com/",
+    "name": "Brisbane Sourdough Bread Class",
+    "slug": "brisbane-sourdough-class",
+    "date": { "startDate": "2026-07-26T09:30:00+10:00", "endDate": "2026-07-26T13:00:00+10:00" },
+    "bannerImage": { "handle": "ghi789banner" },
+    "eventLocation": {
+      "address": "11 Mollison St, West End QLD 4101",
+      "venueName": "The Bakery Studio",
+      "addressComponents": [
+        { "long_name": "Brisbane", "short_name": "Brisbane", "types": ["locality"] },
+        { "long_name": "Queensland", "short_name": "QLD", "types": ["administrative_area_level_1"] }
+      ]
+    },
+    "pricing": { "minimumPrice": 90, "maximumPrice": 90 },
+    "timezone": "Australia/Brisbane",
+    "isRecurring": false
+  }
+]

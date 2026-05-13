@@ -1,0 +1,92 @@
+[
+  {
+    "id": "bit-2001",
+    "artist_id": "9001",
+    "url": "https://www.bandsintown.com/e/100002001",
+    "on_sale_datetime": "2026-04-01T09:00:00",
+    "datetime": "2026-06-18T20:00:00",
+    "title": "King Gizzard & The Lizard Wizard — Brisbane",
+    "description": "King Gizzard live at The Tivoli with full lineup.",
+    "artist": {
+      "id": "9001",
+      "name": "King Gizzard & The Lizard Wizard",
+      "url": "https://www.bandsintown.com/a/9001",
+      "image_url": "https://photos.bandsintown.com/large/king-gizzard.jpg",
+      "thumb_url": "https://photos.bandsintown.com/thumb/king-gizzard.jpg",
+      "tracker_count": 50000
+    },
+    "venue": {
+      "name": "The Tivoli",
+      "location": "Brisbane, Australia",
+      "city": "Brisbane",
+      "region": "QLD",
+      "country": "Australia",
+      "latitude": "-27.4549",
+      "longitude": "153.0420"
+    },
+    "offers": [
+      { "type": "Tickets", "url": "https://thetivoli.com.au/event/king-gizzard", "status": "available" }
+    ],
+    "lineup": ["King Gizzard & The Lizard Wizard"]
+  },
+  {
+    "id": "bit-2002",
+    "artist_id": "9002",
+    "url": "https://www.bandsintown.com/e/100002002",
+    "on_sale_datetime": "2026-04-05T09:00:00",
+    "datetime": "2026-07-04T19:30:00",
+    "title": "Courtney Barnett — Tivoli Brisbane",
+    "description": "Courtney Barnett with special guests.",
+    "artist": {
+      "id": "9002",
+      "name": "Courtney Barnett",
+      "url": "https://www.bandsintown.com/a/9002",
+      "image_url": "https://photos.bandsintown.com/large/courtney-barnett.jpg",
+      "thumb_url": "https://photos.bandsintown.com/thumb/courtney-barnett.jpg",
+      "tracker_count": 40000
+    },
+    "venue": {
+      "name": "The Tivoli",
+      "location": "Brisbane, Australia",
+      "city": "Brisbane",
+      "region": "QLD",
+      "country": "Australia",
+      "latitude": "-27.4549",
+      "longitude": "153.0420"
+    },
+    "offers": [
+      { "type": "Tickets", "url": "https://thetivoli.com.au/event/courtney-barnett", "status": "available" }
+    ],
+    "lineup": ["Courtney Barnett"]
+  },
+  {
+    "id": "bit-2003",
+    "artist_id": "9003",
+    "url": "https://www.bandsintown.com/e/100002003",
+    "on_sale_datetime": "2026-04-12T09:00:00",
+    "datetime": "2026-08-02T20:00:00",
+    "title": "Tame Impala — Riverstage",
+    "description": "Tame Impala outdoor show at Riverstage.",
+    "artist": {
+      "id": "9003",
+      "name": "Tame Impala",
+      "url": "https://www.bandsintown.com/a/9003",
+      "image_url": "https://photos.bandsintown.com/large/tame-impala.jpg",
+      "thumb_url": "https://photos.bandsintown.com/thumb/tame-impala.jpg",
+      "tracker_count": 80000
+    },
+    "venue": {
+      "name": "Riverstage",
+      "location": "Brisbane, Australia",
+      "city": "Brisbane",
+      "region": "QLD",
+      "country": "Australia",
+      "latitude": "-27.4742",
+      "longitude": "153.0337"
+    },
+    "offers": [
+      { "type": "Tickets", "url": "https://riverstage.com.au/event/tame-impala", "status": "available" }
+    ],
+    "lineup": ["Tame Impala"]
+  }
+]

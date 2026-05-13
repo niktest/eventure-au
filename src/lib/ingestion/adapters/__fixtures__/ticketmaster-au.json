@@ -1,0 +1,87 @@
+{
+  "_embedded": {
+    "events": [
+      {
+        "id": "tm-G5v0Z9YpUe-1001",
+        "name": "Sydney Symphony Orchestra: Beethoven's Ninth",
+        "info": "Sydney Symphony Orchestra performs Beethoven's Ninth Symphony.",
+        "url": "https://www.ticketmaster.com.au/event/G5v0Z9YpUe-1001",
+        "images": [
+          { "url": "https://s1.ticketm.net/dam/a/abc/event-1001-RETINA_PORTRAIT_16_9.jpg", "width": 1136, "height": 639 },
+          { "url": "https://s1.ticketm.net/dam/a/abc/event-1001-RETINA_LANDSCAPE_16_9.jpg", "width": 1024, "height": 576 }
+        ],
+        "dates": {
+          "start": { "dateTime": "2026-06-26T19:30:00Z", "localDate": "2026-06-27" },
+          "end": { "dateTime": "2026-06-26T22:00:00Z" }
+        },
+        "_embedded": {
+          "venues": [
+            {
+              "name": "Sydney Opera House",
+              "address": { "line1": "Bennelong Point" },
+              "city": { "name": "Sydney" },
+              "state": { "stateCode": "NSW" },
+              "country": { "countryCode": "AU" },
+              "location": { "latitude": "-33.8568", "longitude": "151.2153" }
+            }
+          ]
+        },
+        "priceRanges": [{ "min": 89, "max": 240, "currency": "AUD" }],
+        "classifications": [{ "segment": { "name": "Arts & Theatre" } }]
+      },
+      {
+        "id": "tm-G5v0Z9YpUe-1002",
+        "name": "Brisbane Broncos vs Storm — Round 18",
+        "info": "NRL match at Suncorp Stadium.",
+        "url": "https://www.ticketmaster.com.au/event/G5v0Z9YpUe-1002",
+        "images": [
+          { "url": "https://s1.ticketm.net/dam/a/def/event-1002-RETINA_LANDSCAPE_16_9.jpg", "width": 1024, "height": 576 }
+        ],
+        "dates": {
+          "start": { "dateTime": "2026-07-12T09:00:00Z", "localDate": "2026-07-12" }
+        },
+        "_embedded": {
+          "venues": [
+            {
+              "name": "Suncorp Stadium",
+              "address": { "line1": "40 Castlemaine St, Milton" },
+              "city": { "name": "Brisbane" },
+              "state": { "stateCode": "QLD" },
+              "country": { "countryCode": "AU" },
+              "location": { "latitude": "-27.4648", "longitude": "153.0094" }
+            }
+          ]
+        },
+        "priceRanges": [{ "min": 35, "max": 180, "currency": "AUD" }],
+        "classifications": [{ "segment": { "name": "Sports" } }]
+      },
+      {
+        "id": "tm-G5v0Z9YpUe-1003",
+        "name": "Tame Impala — Australian Tour 2026",
+        "info": "Tame Impala live in Melbourne.",
+        "url": "https://www.ticketmaster.com.au/event/G5v0Z9YpUe-1003",
+        "images": [
+          { "url": "https://s1.ticketm.net/dam/a/ghi/event-1003-RETINA_LANDSCAPE_16_9.jpg", "width": 1024, "height": 576 }
+        ],
+        "dates": {
+          "start": { "dateTime": "2026-08-08T10:00:00Z", "localDate": "2026-08-08" }
+        },
+        "_embedded": {
+          "venues": [
+            {
+              "name": "Rod Laver Arena",
+              "address": { "line1": "Olympic Boulevard" },
+              "city": { "name": "Melbourne" },
+              "state": { "stateCode": "VIC" },
+              "country": { "countryCode": "AU" },
+              "location": { "latitude": "-37.8217", "longitude": "144.9784" }
+            }
+          ]
+        },
+        "priceRanges": [{ "min": 99, "max": 220, "currency": "AUD" }],
+        "classifications": [{ "segment": { "name": "Music" } }]
+      }
+    ]
+  },
+  "page": { "number": 0, "totalPages": 1, "totalElements": 3, "size": 200 }
+}

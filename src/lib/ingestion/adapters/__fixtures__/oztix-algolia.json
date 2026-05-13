@@ -1,0 +1,80 @@
+{
+  "hits": [
+    {
+      "EventId": 234001,
+      "EventGuid": "guid-234001",
+      "EventName": "Powderfinger 25th Anniversary — Brisbane",
+      "EventDescription": "Powderfinger reunite for a 25th anniversary set at Riverstage.",
+      "EventImage1": "https://assets.oztix.com.au/image/powderfinger-25-hero.jpg",
+      "HomepageImage": "https://assets.oztix.com.au/image/powderfinger-25-tile.jpg",
+      "EventUrl": "https://oztix.com.au/events/powderfinger-25-brisbane",
+      "DateStart": "2026-08-15T19:30:00+10:00",
+      "DateEnd": "2026-08-15T23:00:00+10:00",
+      "MinPrice": 89.0,
+      "Categories": ["Music"],
+      "Venue": {
+        "Name": "Riverstage",
+        "Address": "59 Gardens Point Rd, City Botanic Gardens",
+        "Locality": "Brisbane",
+        "State": "QLD",
+        "Postcode": "4000",
+        "Country": "Australia",
+        "Timezone": "Australia/Brisbane"
+      },
+      "_geoloc": { "lat": -27.4742, "lng": 153.0337 },
+      "IsCancelled": false
+    },
+    {
+      "EventId": 234002,
+      "EventGuid": "guid-234002",
+      "EventName": "Brisbane Blues & Roots Festival",
+      "EventDescription": "Three-day blues festival at the Bowen Hills Showgrounds.",
+      "EventImage1": "https://assets.oztix.com.au/image/brisbane-blues-hero.jpg",
+      "HomepageImage": "https://assets.oztix.com.au/image/brisbane-blues-tile.jpg",
+      "EventUrl": "https://oztix.com.au/events/brisbane-blues-roots-2026",
+      "DateStart": "2026-09-12T12:00:00+10:00",
+      "DateEnd": "2026-09-14T22:00:00+10:00",
+      "MinPrice": 250.0,
+      "Categories": ["Festival"],
+      "Venue": {
+        "Name": "Brisbane Showgrounds",
+        "Address": "600 Gregory Tce, Bowen Hills",
+        "Locality": "Brisbane",
+        "State": "QLD",
+        "Postcode": "4006",
+        "Country": "Australia",
+        "Timezone": "Australia/Brisbane"
+      },
+      "_geoloc": { "lat": -27.4500, "lng": 153.0330 },
+      "IsCancelled": false
+    },
+    {
+      "EventId": 234003,
+      "EventGuid": "guid-234003",
+      "EventName": "Tash Sultana — The Tivoli Brisbane",
+      "EventDescription": "Tash Sultana plays an intimate Tivoli show.",
+      "EventImage1": "https://assets.oztix.com.au/image/tash-sultana-hero.jpg",
+      "HomepageImage": "https://assets.oztix.com.au/image/tash-sultana-tile.jpg",
+      "EventUrl": "https://oztix.com.au/events/tash-sultana-tivoli",
+      "DateStart": "2026-07-25T20:00:00+10:00",
+      "DateEnd": "2026-07-25T23:30:00+10:00",
+      "MinPrice": 79.0,
+      "Categories": ["Music"],
+      "Venue": {
+        "Name": "The Tivoli",
+        "Address": "52 Costin St, Fortitude Valley",
+        "Locality": "Brisbane",
+        "State": "QLD",
+        "Postcode": "4006",
+        "Country": "Australia",
+        "Timezone": "Australia/Brisbane"
+      },
+      "_geoloc": { "lat": -27.4549, "lng": 153.0420 },
+      "IsCancelled": false
+    }
+  ],
+  "nbHits": 3,
+  "page": 0,
+  "nbPages": 1,
+  "hitsPerPage": 1000
+}
