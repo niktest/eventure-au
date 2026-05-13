@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  decodeHtmlEntities,
   ensureHttps,
   extractBackgroundImage,
   parseHumanDate,
@@ -11,6 +12,28 @@ import {
   upgradeWordpressThumbnail,
   stripHtmlDescription,
 } from "./scrape-helpers";
+
+describe("decodeHtmlEntities", () => {
+  it("decodes numeric entities like &#39; and &#x27;", () => {
+    expect(decodeHtmlEntities("360 &#39;BACK N FORTH&#39; Tour")).toBe(
+      "360 'BACK N FORTH' Tour"
+    );
+    expect(decodeHtmlEntities("foo &#x27;bar&#x27;")).toBe("foo 'bar'");
+  });
+
+  it("decodes named entities (&amp;, &quot;)", () => {
+    expect(decodeHtmlEntities("Salt &amp; Pepper")).toBe("Salt & Pepper");
+    expect(decodeHtmlEntities("&quot;quoted&quot;")).toBe('"quoted"');
+  });
+
+  it("collapses double-encoded entities (&amp;#39;)", () => {
+    expect(decodeHtmlEntities("Queen&amp;#39;s")).toBe("Queen's");
+  });
+
+  it("leaves text without entities unchanged", () => {
+    expect(decodeHtmlEntities("nothing to decode")).toBe("nothing to decode");
+  });
+});
 
 describe("resolveUrl", () => {
   it("resolves relative paths against the base", () => {

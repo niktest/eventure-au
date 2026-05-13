@@ -1,9 +1,10 @@
 import type { SourceAdapter, RawEvent } from "@/types/event";
 import { SCRAPER_USER_AGENT } from "@/lib/contact";
-import { upgradeMoshtixImage } from "../utils/scrape-helpers";
+import { decodeHtmlEntities, upgradeMoshtixImage } from "../utils/scrape-helpers";
 
 const MAX_PAGES = 200;
 const PAGE_DELAY_MS = 250;
+const STALE_GRACE_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Moshtix scraper adapter.
@@ -111,7 +112,45 @@ const TYPE_TO_CATEGORY: Record<string, RawEvent["category"]> = {
   ChildrensEvent: "FAMILY",
 };
 
-function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
+// Many Moshtix listings are "umbrella" recurring entries: a single sourceId
+// whose `startDate` is when the series first ran (sometimes years ago) but
+// whose `endDate` is set far in the future. Each upcoming session also
+// appears in the search feed as its own event. Treat the umbrella as
+// currently running — clamp its startDate to `now` so the validator stops
+// flagging it as stale — and drop anything whose endDate has truly passed
+// (or is missing while the start is in the past).
+function resolveDates(
+  rawStart: unknown,
+  rawEnd: unknown,
+  now: Date
+): { startDate: Date; endDate: Date | undefined } | null {
+  const start = toDate(rawStart);
+  if (!start) return null;
+  const end = toDate(rawEnd);
+  const stale = start.getTime() < now.getTime() - STALE_GRACE_MS;
+  if (!stale) return { startDate: start, endDate: end };
+  if (end && end.getTime() > now.getTime()) {
+    return { startDate: new Date(now.getTime()), endDate: end };
+  }
+  return null;
+}
+
+function toDate(value: unknown): Date | undefined {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value;
+  if (typeof value !== "string" || !value) return undefined;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+function decodeMaybe(value: unknown): string | undefined {
+  return typeof value === "string" ? decodeHtmlEntities(value) : undefined;
+}
+
+function parseMoshtixEvents(
+  html: string,
+  baseUrl: string,
+  now: Date = new Date()
+): RawEvent[] {
   const events: RawEvent[] = [];
   const jsonLdMatches = html.matchAll(
     /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi
@@ -125,21 +164,24 @@ function parseMoshtixEvents(html: string, baseUrl: string): RawEvent[] {
       for (const item of items) {
         const type = item["@type"];
         if (typeof type !== "string" || !EVENT_TYPES.has(type)) continue;
+        const dates = resolveDates(item.startDate, item.endDate, now);
+        if (!dates) continue;
         const eventUrl = item.url?.startsWith("http") ? item.url : `${baseUrl}${item.url}`;
+        const name = decodeMaybe(item.name) ?? "Unknown Event";
         events.push({
-          sourceId: item.url ?? `moshtix-${item.name?.replace(/\s+/g, "-").toLowerCase()}`,
-          name: item.name ?? "Unknown Event",
-          description: item.description ?? undefined,
-          startDate: item.startDate ? new Date(item.startDate) : new Date(),
-          endDate: item.endDate ? new Date(item.endDate) : undefined,
+          sourceId: item.url ?? `moshtix-${name.replace(/\s+/g, "-").toLowerCase()}`,
+          name,
+          description: decodeMaybe(item.description),
+          startDate: dates.startDate,
+          endDate: dates.endDate,
           imageUrl: upgradeMoshtixImage(
             typeof item.image === "string" ? item.image : item.image?.[0] ?? undefined
           ),
           url: eventUrl,
-          venueName: item.location?.name ?? undefined,
-          venueAddress: item.location?.address?.streetAddress ?? undefined,
-          city: item.location?.address?.addressLocality ?? undefined,
-          state: item.location?.address?.addressRegion ?? undefined,
+          venueName: decodeMaybe(item.location?.name),
+          venueAddress: decodeMaybe(item.location?.address?.streetAddress),
+          city: decodeMaybe(item.location?.address?.addressLocality),
+          state: decodeMaybe(item.location?.address?.addressRegion),
           category: TYPE_TO_CATEGORY[type] ?? "MUSIC",
           rawData: item,
         });
