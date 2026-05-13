@@ -1,3 +1,26 @@
+const NAMED_HTML_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+// Decode HTML entities (`&#39;`, `&amp;`, `&#x27;`, …) into their literal
+// characters. Several scraper sources (Moshtix, WordPress feeds) emit JSON-LD
+// strings with entities still encoded; surfacing the raw entity in an event
+// `name` shows up as `360 &#39;BACK N FORTH&#39; Tour` in cards. Run twice so
+// double-encoded inputs (e.g. `&amp;#39;`) collapse fully.
+export function decodeHtmlEntities(text: string): string {
+  const decode = (s: string) =>
+    s
+      .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(parseInt(code, 10)))
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+      .replace(/&([a-zA-Z]+);/g, (match, name) => NAMED_HTML_ENTITIES[name.toLowerCase()] ?? match);
+  return decode(decode(text));
+}
+
 const MONTHS: Record<string, number> = {
   jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
   jul: 6, aug: 7, sep: 8, sept: 8, oct: 9, nov: 10, dec: 11,
@@ -77,6 +100,31 @@ export function upgradeEventbriteImage(url: string | undefined): string | undefi
   } catch {
     return url;
   }
+}
+
+// Strip HTML tags from a description string sourced from JSON-LD or platform
+// JSON (Oztix/Algolia, Sticky Tickets, etc). The frontend renders descriptions
+// as plain text — by design, to avoid an XSS surface — so any tag that slips
+// through is shown verbatim. Mirrors the more thorough `cleanDescription` in
+// the normaliser so adapters can clear the QC validator before upsert.
+//
+// Block-level tags become newlines so paragraph/list structure survives;
+// inline tags drop. Entities decode after tag removal so escaped brackets in
+// real prose are preserved. Returns `undefined` for nullish input so it can be
+// dropped straight into an `imageUrl ?? undefined` style chain.
+export function stripHtmlDescription(raw: string | undefined | null): string | undefined {
+  if (raw == null) return undefined;
+  const blockBreak = raw
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n• ");
+  const stripped = blockBreak.replace(/<[^>]+>/g, "");
+  const out = decodeHtmlEntities(stripped)
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return out.length ? out : undefined;
 }
 
 // Pull a `background-image: url(...)` value out of a style attribute.
