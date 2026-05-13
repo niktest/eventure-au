@@ -4,6 +4,12 @@ import type { NormalisedEvent } from "@/types/event";
 
 const DEDUP_WINDOW_MS = 4 * 60 * 60 * 1000;
 
+// Vercel runs ingestion in syd1 but Neon lives in us-east-1, so each query
+// pays ~200ms RTT. With ~3500 TM events doing two sequential queries each, the
+// 300s function cap is hit before the loop finishes. Bounded concurrency keeps
+// us inside Neon's pgBouncer pool while amortising the latency.
+const UPSERT_CONCURRENCY = 16;
+
 interface DedupCandidate {
   id: string;
   name: string;
@@ -34,71 +40,72 @@ export async function upsertEvents(
   let errors = 0;
   let dupsLinked = 0;
 
-  for (const event of events) {
+  const processOne = async (event: NormalisedEvent): Promise<void> => {
     try {
-      const existing = await prisma.event.findUnique({
+      const result = await prisma.event.upsert({
         where: {
-          source_sourceId: {
-            source: event.source,
-            sourceId: event.sourceId,
-          },
+          source_sourceId: { source: event.source, sourceId: event.sourceId },
         },
+        update: {
+          name: event.name,
+          description: event.description,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          imageUrl: event.imageUrl,
+          url: event.url,
+          venueName: event.venueName,
+          venueAddress: event.venueAddress,
+          city: event.city,
+          state: event.state,
+          latitude: event.latitude,
+          longitude: event.longitude,
+          category: event.category,
+          tags: event.tags,
+          isFree: event.isFree,
+          priceMin: event.priceMin,
+          priceMax: event.priceMax,
+          ticketUrl: event.ticketUrl,
+          ticketProvider: event.ticketProvider,
+          ticketAvailability: event.ticketAvailability,
+          priceTiers: event.priceTiers ?? undefined,
+          affiliateEligible: event.affiliateEligible,
+          sourceUrl: event.sourceUrl,
+          rawData: event.rawData ?? undefined,
+          lastScrapedAt: new Date(),
+        },
+        create: {
+          ...event,
+          rawData: event.rawData ?? Prisma.JsonNull,
+          priceTiers: event.priceTiers ?? Prisma.JsonNull,
+        },
+        select: { id: true, createdAt: true, updatedAt: true },
       });
 
-      if (existing) {
-        await prisma.event.update({
-          where: { id: existing.id },
-          data: {
-            name: event.name,
-            description: event.description,
-            startDate: event.startDate,
-            endDate: event.endDate,
-            imageUrl: event.imageUrl,
-            url: event.url,
-            venueName: event.venueName,
-            venueAddress: event.venueAddress,
-            city: event.city,
-            state: event.state,
-            latitude: event.latitude,
-            longitude: event.longitude,
-            category: event.category,
-            tags: event.tags,
-            isFree: event.isFree,
-            priceMin: event.priceMin,
-            priceMax: event.priceMax,
-            ticketUrl: event.ticketUrl,
-            ticketProvider: event.ticketProvider,
-            ticketAvailability: event.ticketAvailability,
-            priceTiers: event.priceTiers ?? undefined,
-            affiliateEligible: event.affiliateEligible,
-            sourceUrl: event.sourceUrl,
-            rawData: event.rawData ?? undefined,
-            lastScrapedAt: new Date(),
-          },
-        });
-        updated++;
-      } else {
-        await prisma.event.create({
-          data: {
-            ...event,
-            rawData: event.rawData ?? Prisma.JsonNull,
-            priceTiers: event.priceTiers ?? Prisma.JsonNull,
-          },
-        });
-        created++;
+      // Treat the row as new when this call inserted it (createdAt === updatedAt).
+      const wasCreated =
+        result.createdAt.getTime() === result.updatedAt.getTime();
 
+      if (wasCreated) {
+        created++;
         if (matchAgainstCandidates(event, candidatesByCity)) {
-          await prisma.event.updateMany({
-            where: { source: event.source, sourceId: event.sourceId },
+          await prisma.event.update({
+            where: { id: result.id },
             data: { status: "draft" },
           });
           dupsLinked++;
         }
+      } else {
+        updated++;
       }
     } catch (err) {
       console.error(`[dedup] Failed to upsert event "${event.name}":`, err);
       errors++;
     }
+  };
+
+  for (let i = 0; i < events.length; i += UPSERT_CONCURRENCY) {
+    const chunk = events.slice(i, i + UPSERT_CONCURRENCY);
+    await Promise.all(chunk.map(processOne));
   }
 
   return { created, updated, errors, dupsLinked };
