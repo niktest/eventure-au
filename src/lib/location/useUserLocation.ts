@@ -1,28 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import {
+  CITY_COOKIE,
+  CITY_COOKIE_MAX_AGE_SECONDS,
+  CITY_SOURCE_COOKIE,
+} from "./cityCookie";
+import { nearestCity, type SupportedCity } from "./cities";
 
-export type SupportedCity = {
-  slug: string;
-  label: string;
-  /** Approximate centre — used only as a hint for v1 (no real geo radius yet). */
-  lat: number;
-  lng: number;
-};
-
-/**
- * Phase 1 supported cities per EVE-126 §4.3 city-picker fallback.
- * Sydney/Melbourne are intentionally surfaced as "coming soon" elsewhere.
- */
-export const SUPPORTED_CITIES: SupportedCity[] = [
-  { slug: "gold-coast", label: "Gold Coast", lat: -28.0167, lng: 153.4 },
-  { slug: "brisbane", label: "Brisbane", lat: -27.4698, lng: 153.0251 },
-];
+export type { SupportedCity } from "./cities";
+export { SUPPORTED_CITIES } from "./cities";
 
 export type UserLocation = {
   lat: number;
   lng: number;
   label: string;
+  slug: string;
   /** Hint only — radius filter is not implemented in v1 (city-slug match). */
   radiusKm: number;
   source: "geo" | "manual";
@@ -66,19 +59,12 @@ function writeStorage(loc: UserLocation | null): void {
   }
 }
 
-function nearestCity(lat: number, lng: number): SupportedCity {
-  let best = SUPPORTED_CITIES[0]!;
-  let bestDist = Infinity;
-  for (const c of SUPPORTED_CITIES) {
-    const dLat = c.lat - lat;
-    const dLng = c.lng - lng;
-    const dist = dLat * dLat + dLng * dLng;
-    if (dist < bestDist) {
-      best = c;
-      bestDist = dist;
-    }
-  }
-  return best;
+/** Persist the user's city choice in the cookie middleware reads next visit. */
+export function writeCityCookie(slug: string, source: "manual" | "ip"): void {
+  if (typeof document === "undefined") return;
+  const maxAge = CITY_COOKIE_MAX_AGE_SECONDS;
+  document.cookie = `${CITY_COOKIE}=${encodeURIComponent(slug)}; max-age=${maxAge}; path=/; samesite=lax`;
+  document.cookie = `${CITY_SOURCE_COOKIE}=${source}; max-age=${maxAge}; path=/; samesite=lax`;
 }
 
 export function useUserLocation() {
@@ -109,11 +95,16 @@ export function useUserLocation() {
           lat: latitude,
           lng: longitude,
           label: city.label,
+          slug: city.slug,
           radiusKm: 25,
           source: "geo",
           expiresAt: Date.now() + DEFAULT_TTL_MS,
         };
         writeStorage(loc);
+        // Geolocation is an explicit user action, so persist the resolved
+        // city as a "manual" choice in the cookie — middleware won't
+        // overwrite it on subsequent visits.
+        writeCityCookie(city.slug, "manual");
         // Min 350ms display to avoid flash per spec.
         const elapsed = Date.now() - startedAt;
         const delay = Math.max(0, 350 - elapsed);
@@ -135,11 +126,13 @@ export function useUserLocation() {
       lat: city.lat,
       lng: city.lng,
       label: city.label,
+      slug: city.slug,
       radiusKm: 25,
       source: "manual",
       expiresAt: Date.now() + DEFAULT_TTL_MS,
     };
     writeStorage(loc);
+    writeCityCookie(city.slug, "manual");
     setLocation(loc);
     setStatus("located");
   }, []);

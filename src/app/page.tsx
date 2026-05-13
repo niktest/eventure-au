@@ -8,9 +8,20 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { CalendarStrip } from "@/components/home/CalendarStrip";
 import { HomepageCategoryRow } from "@/components/home/HomepageCategoryRow";
 import { NearMeButton } from "@/components/home/NearMeButton";
+import { TimeWindowChips } from "@/components/TimeWindowChips";
 import { buildCalendarDays } from "@/lib/calendar/buildCalendarDays";
 import { parseDateParam, formatDateLabel } from "@/lib/calendar/dateFilter";
 import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
+import {
+  parseNearMeCoords,
+  sortEventsByDistance,
+} from "@/lib/events/eventFilters";
+import { getSelectedCity } from "@/lib/location/getSelectedCity";
+import {
+  isTimeWindowKey,
+  resolveTimeWindow,
+  TIME_WINDOW_LABELS,
+} from "@/lib/events/timeWindows";
 import {
   itemListJsonLd,
   organizationJsonLd,
@@ -18,28 +29,48 @@ import {
 } from "@/lib/seo/schema";
 import { getSiteUrl } from "@/lib/seo/site-url";
 
-// `searchParams` opts this page into dynamic rendering when `?date` is present
-// so the calendar-strip filter actually takes effect (EVE-163).
-export const revalidate = 3600;
+// EVE-209: home is city-aware via the `festlio_city` cookie, so the whole
+// route must render dynamically. Calling cookies() inside an ISR page would
+// trigger DYNAMIC_SERVER_USAGE (EVE-177 guard).
+export const dynamic = "force-dynamic";
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ date?: string }>;
+  searchParams?: Promise<{
+    date?: string;
+    when?: string;
+    sort?: string;
+    lat?: string;
+    lng?: string;
+  }>;
 }) {
   const params = (await searchParams) ?? {};
-  const dateRange = parseDateParam(params.date);
+  // `?when=` (named chip) wins over `?date=` so chip + calendar can't disagree.
+  const whenKey = isTimeWindowKey(params.when) ? params.when : null;
+  const whenRange = whenKey ? resolveTimeWindow(whenKey) : null;
+  const dateRange = whenRange ? null : parseDateParam(params.date);
   const selectedDate = dateRange ? params.date! : null;
 
-  const where: Prisma.EventWhereInput = dateRange
-    ? {
-        status: "published",
-        startDate: { gte: dateRange.dayStart, lt: dateRange.dayEnd },
-      }
-    : {
-        status: "published",
-        startDate: { gte: new Date() },
-      };
+  // EVE-209: scope every home render to the selected city so users don't see
+  // the national firehose. `getSelectedCity` falls back to Gold Coast when
+  // the cookie is missing (e.g. local dev with no Vercel headers).
+  const { city: selectedCity } = await getSelectedCity();
+  const nearMe = parseNearMeCoords({
+    sort: params.sort,
+    lat: params.lat,
+    lng: params.lng,
+  });
+
+  const where: Prisma.EventWhereInput = {
+    status: "published",
+    city: selectedCity.label,
+    ...(whenRange
+      ? { startDate: { gte: whenRange.start, lt: whenRange.end } }
+      : dateRange
+      ? { startDate: { gte: dateRange.dayStart, lt: dateRange.dayEnd } }
+      : { startDate: { gte: new Date() } }),
+  };
 
   let calendarDays: Awaited<ReturnType<typeof buildCalendarDays>> = [];
   let upcomingEvents: Array<
@@ -55,12 +86,15 @@ export default async function HomePage({
         where,
         select: EVENT_CARD_SELECT,
         orderBy: { startDate: "asc" },
-        take: 12,
+        // When sorting by distance we pull a wider window and re-rank in JS.
+        take: nearMe ? 100 : 12,
       }),
       prisma.event.count({ where }),
     ]);
     calendarDays = calDays;
-    upcomingEvents = events;
+    upcomingEvents = nearMe
+      ? sortEventsByDistance(events, nearMe).slice(0, 12)
+      : events;
     totalCount = count;
   } catch {
     // DB unavailable — render empty state, ISR will retry.
@@ -94,6 +128,9 @@ export default async function HomePage({
         style={{ background: "var(--color-surface-0)" }}
       >
         <div className="max-w-[1280px] mx-auto px-6 pb-10 md:pb-12 flex flex-col gap-6">
+          <Suspense fallback={<div className="h-[40px]" />}>
+            <TimeWindowChips ariaLabel="When" />
+          </Suspense>
           <Suspense fallback={<div className="h-[84px] md:h-[92px] lg:h-[104px]" />}>
             <CalendarStrip days={calendarDays} />
           </Suspense>
@@ -106,11 +143,13 @@ export default async function HomePage({
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-baseline gap-3 flex-wrap">
               <h2 className="font-heading text-3xl font-bold text-on-surface tracking-tight">
-                {selectedDate
-                  ? `Events on ${formatDateLabel(selectedDate)}`
-                  : "Upcoming Events"}
+                {whenKey
+                  ? `Events ${TIME_WINDOW_LABELS[whenKey].toLowerCase()} in ${selectedCity.label}`
+                  : selectedDate
+                  ? `Events on ${formatDateLabel(selectedDate)} in ${selectedCity.label}`
+                  : `Upcoming Events in ${selectedCity.label}`}
               </h2>
-              {selectedDate && (
+              {(whenKey || selectedDate) && (
                 <Link
                   href="/"
                   scroll={false}
@@ -121,7 +160,13 @@ export default async function HomePage({
               )}
             </div>
             <Link
-              href={selectedDate ? `/events?date=${selectedDate}` : "/events"}
+              href={
+                whenKey
+                  ? `/events?when=${whenKey}`
+                  : selectedDate
+                  ? `/events?date=${selectedDate}`
+                  : "/events"
+              }
               className="text-primary font-body text-sm font-semibold hover:underline flex items-center gap-1"
             >
               View all
@@ -140,11 +185,13 @@ export default async function HomePage({
                 calendar_month
               </span>
               <p className="text-secondary font-body">
-                {selectedDate
+                {whenKey
+                  ? `No events ${TIME_WINDOW_LABELS[whenKey].toLowerCase()}.`
+                  : selectedDate
                   ? `No events on ${formatDateLabel(selectedDate)}.`
                   : "No upcoming events yet. Check back soon!"}
               </p>
-              {selectedDate && (
+              {(whenKey || selectedDate) && (
                 <Link
                   href="/"
                   scroll={false}
@@ -170,10 +217,18 @@ export default async function HomePage({
           {totalCount > 12 && (
             <div className="mt-8 text-center">
               <Link
-                href={selectedDate ? `/events?date=${selectedDate}` : "/events"}
+                href={
+                  whenKey
+                    ? `/events?when=${whenKey}`
+                    : selectedDate
+                    ? `/events?date=${selectedDate}`
+                    : "/events"
+                }
                 className="inline-flex items-center gap-2 bg-primary text-on-primary rounded-full px-8 py-3 font-body font-semibold hover:scale-[1.02] transition-transform shadow-sm"
               >
-                {selectedDate
+                {whenKey
+                  ? `Browse all ${totalCount} events ${TIME_WINDOW_LABELS[whenKey].toLowerCase()}`
+                  : selectedDate
                   ? `Browse all ${totalCount} events on ${formatDateLabel(selectedDate)}`
                   : `Browse all ${totalCount} events`}
                 <span className="material-symbols-outlined text-[18px]">

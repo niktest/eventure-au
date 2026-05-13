@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { SUPPORTED_CITIES, type SupportedCity } from "@/lib/location/useUserLocation";
+import { SUPPORTED_CITIES, type SupportedCity } from "@/lib/location/cities";
 
 type CityPickerProps = {
   open: boolean;
@@ -13,7 +13,7 @@ type CityPickerProps = {
 /**
  * Phase 1 city-picker fallback per EVE-126 §4.3.
  * Mobile: bottom sheet. Tablet+: anchored popover (visually similar layout).
- * Sydney / Melbourne shown as "coming soon" placeholders to set expectations.
+ * Cities flagged `coming-soon` in the registry render disabled.
  */
 export function CityPicker({ open, onClose, onSelect, onTryGeo }: CityPickerProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -53,33 +53,31 @@ export function CityPicker({ open, onClose, onSelect, onTryGeo }: CityPickerProp
         </h2>
 
         <ul className="flex flex-col gap-2 mb-4">
-          {SUPPORTED_CITIES.map((c) => (
-            <li key={c.slug}>
-              <button
-                type="button"
-                onClick={() => {
-                  onSelect(c);
-                  onClose();
-                }}
-                className="w-full text-left rounded-lg border border-surface-3 bg-surface-2 px-4 py-3 font-body font-semibold hover:border-neon-coral hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-coral-glow transition-colors"
-              >
-                {c.label}
-              </button>
-            </li>
-          ))}
-          {[
-            { slug: "sydney", label: "Sydney · coming soon" },
-            { slug: "melbourne", label: "Melbourne · coming soon" },
-          ].map((p) => (
-            <li key={p.slug}>
-              <span
-                aria-disabled="true"
-                className="block w-full rounded-lg border border-surface-3 bg-surface-1 px-4 py-3 font-body text-on-dark-subtle"
-              >
-                {p.label}
-              </span>
-            </li>
-          ))}
+          {SUPPORTED_CITIES.map((c) =>
+            c.status === "live" ? (
+              <li key={c.slug}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelect(c);
+                    onClose();
+                  }}
+                  className="w-full text-left rounded-lg border border-surface-3 bg-surface-2 px-4 py-3 font-body font-semibold hover:border-neon-coral hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-coral-glow transition-colors"
+                >
+                  {c.label}
+                </button>
+              </li>
+            ) : (
+              <li key={c.slug}>
+                <span
+                  aria-disabled="true"
+                  className="block w-full rounded-lg border border-surface-3 bg-surface-1 px-4 py-3 font-body text-on-dark-subtle"
+                >
+                  {c.label} · coming soon
+                </span>
+              </li>
+            ),
+          )}
         </ul>
 
         <button

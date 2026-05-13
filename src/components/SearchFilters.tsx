@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useTransition } from "react";
 import { EventSearchAutocomplete } from "./EventSearchAutocomplete";
+import { NearMeSortToggle } from "./NearMeSortToggle";
 
 function formatCategory(cat: string): string {
   return cat
@@ -242,6 +243,11 @@ export function SearchFilters({
             Clear all
           </button>
         )}
+      </div>
+
+      {/* "Near me" sort — explicit geolocation opt-in (EVE-209). */}
+      <div className="flex flex-wrap items-center gap-2">
+        <NearMeSortToggle />
       </div>
 
       {/* Structured filters: price / setting / age */}

@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { MobileNav } from "@/components/MobileNav";
 import { DesktopSearch } from "@/components/DesktopSearch";
 import { Footer } from "@/components/Footer";
+import { HeaderCityPickerSlot } from "@/components/HeaderCityPickerSlot";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import "./globals.css";
 
@@ -89,6 +91,11 @@ export default function RootLayout({
 
             {/* Desktop Search */}
             <DesktopSearch />
+
+            {/* City picker — visible on every page (EVE-209) */}
+            <Suspense fallback={<div className="hidden md:block w-[140px]" />}>
+              <HeaderCityPickerSlot />
+            </Suspense>
 
             {/* Desktop Nav + Actions */}
             <MobileNav />

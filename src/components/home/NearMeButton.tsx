@@ -19,14 +19,31 @@ export function NearMeButton() {
   const { status, location, requestGeolocation, setManualCity } = useUserLocation();
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  // Push the resolved city to the URL so the event grid can filter on it.
+  // Push the resolved city + (for real geolocation) the user's coords so
+  // the server can either filter to the city or distance-sort the grid.
+  // EVE-209: explicit geolocation triggers a distance sort; manual picks
+  // just scope by city slug.
   useEffect(() => {
     if (status !== "located" || !location) return;
     const slug = nearestCitySlug(location.label);
     if (!slug) return;
     const next = new URLSearchParams(params?.toString() ?? "");
-    if (next.get("near") === slug) return;
-    next.set("near", slug);
+    let changed = false;
+    if (next.get("near") !== slug) {
+      next.set("near", slug);
+      changed = true;
+    }
+    if (location.source === "geo") {
+      const lat = location.lat.toFixed(4);
+      const lng = location.lng.toFixed(4);
+      if (next.get("sort") !== "nearme" || next.get("lat") !== lat || next.get("lng") !== lng) {
+        next.set("sort", "nearme");
+        next.set("lat", lat);
+        next.set("lng", lng);
+        changed = true;
+      }
+    }
+    if (!changed) return;
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }, [status, location, params, pathname, router]);
 

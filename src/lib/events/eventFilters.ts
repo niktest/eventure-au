@@ -1,10 +1,11 @@
 import { Prisma } from "@prisma/client";
 import { resolveCategoryFilter, HOMEPAGE_CATEGORIES } from "@/lib/categories";
+import { isTimeWindowKey, resolveTimeWindow } from "@/lib/events/timeWindows";
+import { SUPPORTED_CITIES } from "@/lib/location/cities";
 
-const NEAR_TO_CITY: Record<string, string> = {
-  "gold-coast": "Gold Coast",
-  brisbane: "Brisbane",
-};
+const NEAR_TO_CITY: Record<string, string> = Object.fromEntries(
+  SUPPORTED_CITIES.map((c) => [c.slug, c.label]),
+);
 
 export type EventFilterParams = {
   q?: string;
@@ -25,6 +26,14 @@ export type EventFilterParams = {
   setting?: string;
   /** "family" | "adults". */
   age?: string;
+  /** Named time window: today | tomorrow | weekend | next7 | month (EVE-208). */
+  when?: string;
+  /** Sort key: "date" (default) | "nearme" (EVE-209). */
+  sort?: string;
+  /** User latitude — populated when `sort=nearme` (EVE-209). */
+  lat?: string;
+  /** User longitude — populated when `sort=nearme` (EVE-209). */
+  lng?: string;
 };
 
 const OUTDOOR_TAGS = ["outdoor", "outdoors", "open-air", "park", "beach"];
@@ -77,8 +86,12 @@ export function buildEventFilters(
 ): Prisma.EventWhereInput {
   const conditions: Prisma.EventWhereInput[] = [{ status: "published" }];
 
-  // Date window
-  if (params.date && /^\d{4}-\d{2}-\d{2}$/.test(params.date)) {
+  // Date window. `when=` (named chip) takes precedence over `date` /
+  // `dateFrom` / `dateTo` so the visible chip state always matches results.
+  if (params.when && isTimeWindowKey(params.when)) {
+    const { start, end } = resolveTimeWindow(params.when, now);
+    conditions.push({ startDate: { gte: start, lt: end } });
+  } else if (params.date && /^\d{4}-\d{2}-\d{2}$/.test(params.date)) {
     const dayStart = new Date(`${params.date}T00:00:00.000Z`);
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
     conditions.push({ startDate: { gte: dayStart, lt: dayEnd } });
@@ -177,6 +190,61 @@ export function buildEventFilters(
   return { AND: conditions };
 }
 
+export type NearMeCoords = { lat: number; lng: number };
+
+/**
+ * Parse `?sort=nearme&lat=…&lng=…` into a usable coord tuple. Returns null
+ * when either coordinate is missing or non-finite so callers can fall back
+ * to the default date sort.
+ */
+export function parseNearMeCoords(
+  params: EventFilterParams,
+): NearMeCoords | null {
+  if (params.sort !== "nearme") return null;
+  const lat = params.lat ? Number.parseFloat(params.lat) : NaN;
+  const lng = params.lng ? Number.parseFloat(params.lng) : NaN;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat, lng };
+}
+
+/** Squared Euclidean distance — fine for ranking. */
+function squaredDist(
+  aLat: number,
+  aLng: number,
+  bLat: number,
+  bLng: number,
+): number {
+  const dLat = aLat - bLat;
+  const dLng = aLng - bLng;
+  return dLat * dLat + dLng * dLng;
+}
+
+/**
+ * Sort an event list in-place by distance to `coords`. Events missing
+ * lat/lng are pushed to the end so a partial geocoding gap doesn't hide
+ * them; among themselves they keep startDate order.
+ */
+export function sortEventsByDistance<
+  T extends { latitude: number | null; longitude: number | null; startDate: Date | string | null },
+>(events: T[], coords: NearMeCoords): T[] {
+  const withCoords: T[] = [];
+  const withoutCoords: T[] = [];
+  for (const e of events) {
+    if (typeof e.latitude === "number" && typeof e.longitude === "number") {
+      withCoords.push(e);
+    } else {
+      withoutCoords.push(e);
+    }
+  }
+  withCoords.sort((a, b) => {
+    const da = squaredDist(coords.lat, coords.lng, a.latitude!, a.longitude!);
+    const db = squaredDist(coords.lat, coords.lng, b.latitude!, b.longitude!);
+    return da - db;
+  });
+  return [...withCoords, ...withoutCoords];
+}
+
 /**
  * Did the user apply any narrowing filters beyond the default
  * "published, future" view? Used by the zero-result state.
@@ -190,6 +258,7 @@ export function hasActiveFilters(params: EventFilterParams): boolean {
       params.date ||
       params.dateFrom ||
       params.dateTo ||
+      (params.when && isTimeWindowKey(params.when)) ||
       params.near ||
       params.price ||
       params.free === "1" ||

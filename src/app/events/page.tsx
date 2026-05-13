@@ -5,13 +5,17 @@ import type { Prisma } from "@prisma/client";
 import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { SearchFilters } from "@/components/SearchFilters";
+import { TimeWindowChips } from "@/components/TimeWindowChips";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
 import {
   buildEventFilters,
   hasActiveFilters,
+  parseNearMeCoords,
+  sortEventsByDistance,
   type EventFilterParams,
 } from "@/lib/events/eventFilters";
+import { getSelectedCity } from "@/lib/location/getSelectedCity";
 
 export const metadata: Metadata = {
   title: "Browse Events",
@@ -19,7 +23,9 @@ export const metadata: Metadata = {
     "Browse upcoming events across Australia — live music, festivals, markets, sports, family activities, and more.",
 };
 
-export const revalidate = 3600;
+// EVE-209: /events scopes by the `festlio_city` cookie, so the route must
+// render dynamically (cookie + searchParams both vary the result).
+export const dynamic = "force-dynamic";
 
 export default async function EventsPage({
   searchParams,
@@ -27,7 +33,19 @@ export default async function EventsPage({
   searchParams: Promise<EventFilterParams>;
 }) {
   const params = await searchParams;
-  const where = buildEventFilters(params);
+
+  // EVE-209: when the user hasn't picked an explicit city/near filter, fall
+  // back to the cookie city so /events stays scoped to where they are.
+  // Pickers in the SearchFilters UI can still override either by setting a
+  // `location` free-text or by clicking a different city in the header.
+  const { city: selectedCity } = await getSelectedCity();
+  const effectiveParams: EventFilterParams = { ...params };
+  if (!effectiveParams.city && !effectiveParams.near && !effectiveParams.location) {
+    effectiveParams.near = selectedCity.slug;
+  }
+
+  const where = buildEventFilters(effectiveParams);
+  const nearMe = parseNearMeCoords(effectiveParams);
 
   let events: Array<
     Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
@@ -38,8 +56,10 @@ export default async function EventsPage({
       prisma.event.findMany({
         where,
         select: EVENT_CARD_SELECT,
+        // Date order is the default; `sort=nearme` re-orders below in JS so
+        // we don't need a Postgres distance function for v1.
         orderBy: { startDate: "asc" },
-        take: 60,
+        take: nearMe ? 200 : 60,
       }),
       // EVE-183: drive category pills from the DB — only categories with at
       // least one upcoming published event, ordered by popularity desc and
@@ -53,12 +73,17 @@ export default async function EventsPage({
         take: 12,
       }),
     ]);
-    events = eventRows;
+    events = nearMe
+      ? sortEventsByDistance(eventRows, nearMe).slice(0, 60)
+      : eventRows;
     availableCategories = categoryRows.map((r) => r.category);
   } catch {
     // DB unavailable — render empty state, ISR will retry
   }
 
+  // Don't treat the implicit cookie city as an "active filter" — the zero
+  // state should still encourage broadening rather than nagging users to
+  // clear a filter they didn't set.
   const filtersActive = hasActiveFilters(params);
 
   return (
@@ -69,12 +94,22 @@ export default async function EventsPage({
             className="font-display text-4xl font-extrabold text-on-surface tracking-tight"
             style={{ letterSpacing: "-0.02em" }}
           >
-            Browse Events
+            {params.near || params.city || params.location
+              ? "Browse Events"
+              : `Events in ${selectedCity.label}`}
           </h1>
           <p className="mt-2 font-body text-lg text-secondary">
-            Discover what&apos;s happening near you
+            {nearMe
+              ? "Sorted by distance from you"
+              : "Discover what's happening near you"}
           </p>
         </div>
+
+        <Suspense fallback={<div className="h-[40px] mb-6" />}>
+          <div className="mb-6">
+            <TimeWindowChips />
+          </div>
+        </Suspense>
 
         <Suspense fallback={null}>
           <SearchFilters availableCategories={availableCategories} />

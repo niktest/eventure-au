@@ -14,6 +14,9 @@ export const EVENT_CARD_SELECT = {
   priceMin: true,
   venueName: true,
   city: true,
+  // Needed for distance sort when `?sort=nearme` is active (EVE-209).
+  latitude: true,
+  longitude: true,
 } satisfies Prisma.EventSelect;
 
 export type EventCardData = Prisma.EventGetPayload<{
