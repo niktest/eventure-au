@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { EVENT_CARD_SELECT } from "@/lib/events/eventCardSelect";
+import { HOMEPAGE_CATEGORIES, resolveCategoryFilter } from "@/lib/categories";
 
 const CITIES: Record<string, { name: string; state: string; tagline: string; icon: string }> = {
   "gold-coast": {
@@ -56,12 +57,51 @@ export async function generateMetadata({
 
 export default async function CityPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ category?: string; free?: string }>;
 }) {
   const { slug } = await params;
   const city = CITIES[slug];
   if (!city) return notFound();
+
+  const sp = (await searchParams) ?? {};
+  const activeChip = HOMEPAGE_CATEGORIES.find((c) => c.slug === sp.category);
+  const freeActive = sp.free === "1";
+
+  // Active-state title per EVE-215. Free is a price filter, not a category,
+  // so it gets its own title and never doubles "Free events events".
+  const title = freeActive
+    ? `Free events in ${city.name}`
+    : activeChip
+    ? `${activeChip.label} events in ${city.name}`
+    : `Events in ${city.name}`;
+
+  const conditions: Prisma.EventWhereInput[] = [
+    { city: city.name },
+    { startDate: { gte: new Date() } },
+    { status: "published" },
+  ];
+
+  if (activeChip) {
+    const filter = resolveCategoryFilter(activeChip.slug);
+    if (filter) {
+      const orParts: Prisma.EventWhereInput[] = [];
+      if (filter.enums?.length) {
+        orParts.push({
+          category: { in: filter.enums as unknown as Prisma.EnumEventCategoryFilter["in"] },
+        });
+      }
+      if (filter.tags?.length) {
+        orParts.push({ tags: { hasSome: filter.tags } });
+      }
+      if (orParts.length === 1) conditions.push(orParts[0]!);
+      else if (orParts.length > 1) conditions.push({ OR: orParts });
+    }
+  }
+
+  if (freeActive) conditions.push({ isFree: true });
 
   let events: Array<
     Prisma.EventGetPayload<{ select: typeof EVENT_CARD_SELECT }>
@@ -69,11 +109,7 @@ export default async function CityPage({
   let eventCount = 0;
   try {
     events = await prisma.event.findMany({
-      where: {
-        city: city.name,
-        startDate: { gte: new Date() },
-        status: "published",
-      },
+      where: { AND: conditions },
       select: EVENT_CARD_SELECT,
       orderBy: { startDate: "asc" },
       take: 50,
@@ -106,7 +142,7 @@ export default async function CityPage({
             )}
           </div>
           <h1 className="mb-3 font-display text-4xl font-extrabold text-white md:text-5xl tracking-tight" style={{ letterSpacing: "-0.02em" }}>
-            Events in {city.name}
+            {title}
           </h1>
           <p className="max-w-xl font-body text-lg text-surface-variant">
             {city.tagline}. Discover what&apos;s happening — from live music and

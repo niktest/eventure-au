@@ -1,15 +1,16 @@
 import {
-  Baby,
   Music,
-  MicVocal,
+  Mic2,
+  ShoppingBag,
+  UtensilsCrossed,
+  Baby,
+  Tag,
+  Trees,
+  Palette,
   Trophy,
-  Puzzle,
-  Users,
-  Briefcase,
-  Image as LucideImage,
+  Moon,
   Wrench,
-  PartyPopper,
-  Sparkles,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -17,39 +18,46 @@ export type HomepageCategory = {
   label: string;
   slug: string;
   icon: LucideIcon;
-  /** Whether the active state uses the magenta accent (Pop Up only). */
-  magentaAccent?: boolean;
 };
 
 /**
- * Authoritative homepage category list — order and labels per EVE-126 §4.2.
- * Do not reorder or rename without product approval.
+ * Authoritative homepage category list — 12-chip taxonomy per EVE-215.
+ * Order, labels, and slugs are product-approved; do not change without
+ * coordinating with Copywriter (EVE-215 owns the spec).
  */
 export const HOMEPAGE_CATEGORIES: readonly HomepageCategory[] = [
+  { label: "Live Music", slug: "live-music", icon: Music },
+  { label: "Comedy", slug: "comedy", icon: Mic2 },
+  { label: "Markets", slug: "markets", icon: ShoppingBag },
+  { label: "Food & Drink", slug: "food-drink", icon: UtensilsCrossed },
   { label: "Family", slug: "family", icon: Baby },
-  { label: "Music", slug: "music", icon: Music },
-  { label: "Concerts", slug: "concerts", icon: MicVocal },
+  { label: "Free", slug: "free", icon: Tag },
+  { label: "Outdoors", slug: "outdoors", icon: Trees },
+  { label: "Arts", slug: "arts", icon: Palette },
   { label: "Sport", slug: "sport", icon: Trophy },
-  { label: "Hobby", slug: "hobby", icon: Puzzle },
-  { label: "Cultural Community", slug: "cultural-community", icon: Users },
-  { label: "Business", slug: "business", icon: Briefcase },
-  { label: "Exhibitions", slug: "exhibitions", icon: LucideImage },
+  { label: "Nightlife", slug: "nightlife", icon: Moon },
   { label: "Workshops", slug: "workshops", icon: Wrench },
-  { label: "Festivals", slug: "festivals", icon: PartyPopper },
-  { label: "Pop Up", slug: "pop-up", icon: Sparkles, magentaAccent: true },
+  { label: "Community", slug: "community", icon: Users },
 ] as const;
 
+/**
+ * Build the href for a chip. Free is a price predicate, not a category —
+ * it routes to the EVE-206 price filter (`?free=1` shim until the canonical
+ * `?price=free` shape lands; see follow-up against EVE-206).
+ */
 export function categoryHref(slug: string): string {
+  if (slug === "free") return `/events?free=1`;
   return `/events?category=${slug}`;
 }
 
 /**
  * Resolve a spec category slug into a Prisma `EventCategory` enum filter
- * and/or a tag-search filter. The Prisma schema only models 13 enum values
+ * and/or a tag-search filter. The Prisma schema models 13 enum values
  * (MUSIC, FESTIVAL, MARKETS, SPORTS, FAMILY, NIGHTLIFE, FOOD_DRINK, ARTS,
- * COMMUNITY, COMEDY, THEATRE, OUTDOOR, OTHER), so spec-only slugs route via
- * tag matching as a v1 fallback. Follow-up tracked separately when the
- * Prisma enum is expanded.
+ * COMMUNITY, COMEDY, THEATRE, OUTDOOR, OTHER); Workshops is the only chip
+ * without an enum yet and falls back to tag matching.
+ *
+ * Free is intentionally absent — it's a price filter, handled separately.
  */
 export type CategoryFilter = {
   /** Uppercase Prisma enum values to OR into the category filter. */
@@ -59,17 +67,17 @@ export type CategoryFilter = {
 };
 
 const SLUG_TO_FILTER: Record<string, CategoryFilter> = {
+  "live-music": { enums: ["MUSIC"] },
+  "comedy": { enums: ["COMEDY"] },
+  "markets": { enums: ["MARKETS"] },
+  "food-drink": { enums: ["FOOD_DRINK"] },
   "family": { enums: ["FAMILY"] },
-  "music": { enums: ["MUSIC"] },
-  "concerts": { enums: ["MUSIC"], tags: ["concert"] },
+  "outdoors": { enums: ["OUTDOOR"] },
+  "arts": { enums: ["ARTS"] },
   "sport": { enums: ["SPORTS"] },
-  "hobby": { tags: ["hobby"] },
-  "cultural-community": { enums: ["COMMUNITY"], tags: ["culture", "cultural"] },
-  "business": { tags: ["business", "networking"] },
-  "exhibitions": { enums: ["ARTS"], tags: ["exhibition"] },
+  "nightlife": { enums: ["NIGHTLIFE"] },
   "workshops": { tags: ["workshop"] },
-  "festivals": { enums: ["FESTIVAL"] },
-  "pop-up": { tags: ["popup", "pop-up"] },
+  "community": { enums: ["COMMUNITY"] },
 };
 
 export function resolveCategoryFilter(slug: string): CategoryFilter | null {

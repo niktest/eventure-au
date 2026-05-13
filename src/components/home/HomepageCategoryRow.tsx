@@ -7,9 +7,9 @@ type HomepageCategoryRowProps = {
 };
 
 /**
- * Homepage category chip row per EVE-126 §4.2.
- * Server-rendered <a> links so chips are SEO-indexable. The 11 labels and
- * order are authoritative and live in {@link HOMEPAGE_CATEGORIES}.
+ * Homepage category chip row — 12 chips per EVE-215.
+ * Server-rendered <a> links so chips are SEO-indexable. Labels, order, and
+ * slugs are authoritative and live in {@link HOMEPAGE_CATEGORIES}.
  */
 export function HomepageCategoryRow({ active }: HomepageCategoryRowProps) {
   return (
@@ -20,11 +20,8 @@ export function HomepageCategoryRow({ active }: HomepageCategoryRowProps) {
       {HOMEPAGE_CATEGORIES.map((cat) => {
         const Icon = cat.icon;
         const isActive = active === cat.slug;
-        const ringColor = cat.magentaAccent
-          ? "border-neon-magenta shadow-glow-magenta"
-          : "border-neon-coral shadow-glow-coral";
         const stateClasses = isActive
-          ? `bg-surface-2 ${ringColor} text-on-dark-strong`
+          ? "bg-surface-2 border-neon-coral shadow-glow-coral text-on-dark-strong"
           : "bg-surface-1 border-surface-3 text-on-dark-muted hover:bg-surface-2 hover:text-on-dark-strong hover:border-neon-coral/40";
         return (
           <Link
