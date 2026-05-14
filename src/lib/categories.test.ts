@@ -3,6 +3,7 @@ import {
   HOMEPAGE_CATEGORIES,
   allCategoriesHref,
   categoryHref,
+  categoryToggleHref,
   resolveCategoryFilter,
 } from "./categories";
 
@@ -121,6 +122,59 @@ describe("allCategoriesHref", () => {
         free: "1",
       }),
     ).toBe("/events?date=2026-05-16&q=markets");
+  });
+});
+
+describe("categoryToggleHref (EVE-230 — multi-select chips on /events)", () => {
+  it("adds a slug to an empty active list", () => {
+    expect(categoryToggleHref("arts", [])).toBe("/events?category=arts");
+  });
+
+  it("appends a slug to an existing active list, preserving order", () => {
+    expect(categoryToggleHref("markets", ["arts"])).toBe(
+      "/events?category=arts%2Cmarkets",
+    );
+  });
+
+  it("removes a slug that is already active", () => {
+    expect(categoryToggleHref("arts", ["arts", "markets"])).toBe(
+      "/events?category=markets",
+    );
+  });
+
+  it("drops the category param entirely when the last slug is removed", () => {
+    expect(categoryToggleHref("arts", ["arts"])).toBe("/events");
+  });
+
+  it("carries non-chip-axis preserve params through the toggle", () => {
+    expect(
+      categoryToggleHref("arts", ["markets"], { date: "2026-05-16" }),
+    ).toBe("/events?date=2026-05-16&category=markets%2Carts");
+  });
+
+  it("ignores any preserved chip-axis params so the toggle is the source of truth", () => {
+    // The category in `preserve` would otherwise clobber the toggle target.
+    expect(
+      categoryToggleHref("arts", ["arts", "markets"], {
+        category: "stale,values",
+        price: "free",
+      }),
+    ).toBe("/events?category=markets");
+  });
+
+  it("toggles the Free chip via ?price=free independently of categories", () => {
+    expect(
+      categoryToggleHref("free", ["arts"], undefined, { freeActive: false }),
+    ).toBe("/events?price=free&category=arts");
+    expect(
+      categoryToggleHref("free", ["arts"], undefined, { freeActive: true }),
+    ).toBe("/events?category=arts");
+  });
+
+  it("keeps the Free predicate active when toggling a category chip", () => {
+    expect(
+      categoryToggleHref("arts", ["markets"], undefined, { freeActive: true }),
+    ).toBe("/events?category=markets%2Carts&price=free");
   });
 });
 
