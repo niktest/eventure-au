@@ -1,45 +1,39 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { EventSearchAutocomplete } from "./EventSearchAutocomplete";
 
-function formatCategory(cat: string): string {
-  return cat
-    .toLowerCase()
-    .replace("_", " & ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .replace(/\bAnd\b/, "&");
-}
+// Ring-buffer calendar (EVE-232) is heavy-ish and only mounts when opened.
+const EventCalendar = dynamic(
+  () => import("./calendar/EventCalendar").then((m) => m.EventCalendar),
+  { ssr: false, loading: () => null }
+);
 
-export function SearchFilters({
-  availableCategories,
-}: {
-  /** Uppercase EventCategory enums, pre-ordered by popularity desc (EVE-183). */
-  availableCategories: readonly string[];
-}) {
+/**
+ * Free-text + date-range + free-only controls for /events.
+ *
+ * Category chips are NOT rendered here — they live in {@link HomepageCategoryRow},
+ * the single canonical chip row shared with Home (EVE-229). Keeping chips in
+ * one place is what stops Browse↔Home category state from drifting.
+ */
+export function SearchFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // `loading.tsx` doesn't fire on same-segment search-param changes, so we
   // surface the SSR roundtrip after a filter click via `isPending` —
   // dimmed controls + thin top progress bar (board feedback EVE-164).
   const [isPending, startTransition] = useTransition();
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
-  const currentCategory = searchParams?.get("category") ?? "";
   const currentQuery = searchParams?.get("q") ?? "";
+  const currentDate = searchParams?.get("date") ?? "";
   const currentDateFrom = searchParams?.get("dateFrom") ?? "";
   const currentDateTo = searchParams?.get("dateTo") ?? "";
   // EVE-219: ?price=free is canonical; ?free=1 stays accepted as an alias.
   const currentFreeOnly =
     searchParams?.get("price") === "free" || searchParams?.get("free") === "1";
-
-  // Keep the active pill visible even if it's not in the top-N popular set,
-  // so users can always deselect a category they navigated to (e.g. via deep link).
-  const currentCategoryUpper = currentCategory.toUpperCase();
-  const categoryPills =
-    currentCategoryUpper && !availableCategories.includes(currentCategoryUpper)
-      ? [...availableCategories, currentCategoryUpper]
-      : availableCategories;
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -124,43 +118,27 @@ export function SearchFilters({
           />
           <span className="font-body font-semibold text-on-surface">Free only</span>
         </label>
+
+        {/* EVE-232 "Browse by date" toggle. Opens the ring-buffer calendar. */}
+        <button
+          type="button"
+          aria-expanded={calendarOpen}
+          aria-controls="event-calendar-surface"
+          onClick={() => setCalendarOpen((v) => !v)}
+          className="rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 font-body text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          {calendarOpen ? "Hide calendar" : currentDate ? `Calendar — ${currentDate}` : "Browse by date"}
+        </button>
       </div>
 
-      {/* Category pills */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => updateParams({ category: null })}
-          aria-pressed={!currentCategory}
-          className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-            !currentCategory
-              ? "bg-primary text-on-primary"
-              : "bg-surface-container-low text-on-surface hover:bg-surface-container"
-          }`}
-        >
-          All
-        </button>
-        {categoryPills.map((cat) => {
-          const isSelected = currentCategoryUpper === cat;
-          return (
-            <button
-              key={cat}
-              onClick={() =>
-                updateParams({
-                  category: isSelected ? null : cat.toLowerCase(),
-                })
-              }
-              aria-pressed={isSelected}
-              className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-                isSelected
-                  ? "bg-primary text-on-primary"
-                  : "bg-surface-container-low text-on-surface hover:bg-surface-container"
-              }`}
-            >
-              {formatCategory(cat)}
-            </button>
-          );
-        })}
-      </div>
+      {calendarOpen && (
+        <div id="event-calendar-surface">
+          <EventCalendar
+            initialSelectedDate={currentDate || null}
+            onClose={() => setCalendarOpen(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HOMEPAGE_CATEGORIES,
+  allCategoriesHref,
   categoryHref,
   resolveCategoryFilter,
 } from "./categories";
@@ -50,6 +51,76 @@ describe("categoryHref", () => {
   it("preserves the city slug shape for normal category chips", () => {
     expect(categoryHref("live-music")).toBe("/events?category=live-music");
     expect(categoryHref("community")).toBe("/events?category=community");
+  });
+
+  describe("with preserve (EVE-229 — Browse↔Home state sync)", () => {
+    it("carries non-chip-axis params through so date survives a chip click", () => {
+      const href = categoryHref("live-music", { date: "2026-05-16" });
+      expect(href).toBe("/events?date=2026-05-16&category=live-music");
+    });
+
+    it("preserves multiple orthogonal params (q, dateFrom, dateTo, near)", () => {
+      const href = categoryHref("markets", {
+        q: "vintage",
+        dateFrom: "2026-05-01",
+        dateTo: "2026-05-31",
+        near: "gold-coast",
+      });
+      expect(href).toContain("q=vintage");
+      expect(href).toContain("dateFrom=2026-05-01");
+      expect(href).toContain("dateTo=2026-05-31");
+      expect(href).toContain("near=gold-coast");
+      expect(href).toContain("category=markets");
+    });
+
+    it("replaces chip-axis params (category, price, free) since chips are mutually exclusive", () => {
+      const href = categoryHref("comedy", {
+        category: "live-music",
+        price: "free",
+        free: "1",
+        date: "2026-05-16",
+      });
+      expect(href).toBe("/events?date=2026-05-16&category=comedy");
+    });
+
+    it("routes the Free chip to ?price=free even with preserved params", () => {
+      const href = categoryHref("free", {
+        date: "2026-05-16",
+        category: "live-music",
+      });
+      expect(href).toBe("/events?date=2026-05-16&price=free");
+    });
+
+    it("accepts a URLSearchParams instance for preserve", () => {
+      const sp = new URLSearchParams("date=2026-05-16&category=stale");
+      expect(categoryHref("arts", sp)).toBe(
+        "/events?date=2026-05-16&category=arts",
+      );
+    });
+
+    it("ignores undefined values in the preserve object", () => {
+      expect(categoryHref("arts", { date: undefined, q: "jazz" })).toBe(
+        "/events?q=jazz&category=arts",
+      );
+    });
+  });
+});
+
+describe("allCategoriesHref", () => {
+  it("returns the bare /events route with no preserve", () => {
+    expect(allCategoriesHref()).toBe("/events");
+  });
+
+  it("keeps non-chip-axis params and drops category/price/free", () => {
+    expect(
+      allCategoriesHref({
+        date: "2026-05-16",
+        q: "markets",
+        category: "live-music",
+        price: "free",
+        free: "1",
+      }),
+    ).toBe("/events?date=2026-05-16&q=markets");
   });
 });
 

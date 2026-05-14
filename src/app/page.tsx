@@ -97,7 +97,7 @@ export default async function HomePage({
           <Suspense fallback={<div className="h-[84px] md:h-[92px] lg:h-[104px]" />}>
             <CalendarStrip days={calendarDays} />
           </Suspense>
-          <HomepageCategoryRow />
+          <HomepageCategoryRow preserve={selectedDate ? { date: selectedDate } : undefined} />
         </div>
       </section>
 
