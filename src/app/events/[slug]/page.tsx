@@ -9,6 +9,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { EventCard } from "@/components/EventCard";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { InterestedButton } from "@/components/InterestedButton";
+import { TicketCTA } from "@/components/TicketCTA";
 import { EventDiscussPanelLoader } from "@/components/discussions/EventDiscussPanelLoader";
 import {
   EVENT_CARD_SELECT,
@@ -359,17 +360,18 @@ export default async function EventDetailPage({
 
               {/* CTA Buttons */}
               {event.ticketUrl && (
-                <a
-                  href={event.ticketUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <TicketCTA
+                  eventId={event.id}
+                  eventSlug={event.slug}
+                  ticketUrl={event.ticketUrl}
+                  source="event_detail"
                   className="w-full bg-primary-container text-on-primary rounded-full py-4 font-heading text-lg font-bold shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined text-[20px]">
                     confirmation_number
                   </span>
                   Get Tickets
-                </a>
+                </TicketCTA>
               )}
               <InterestedButton eventId={event.id} />
 

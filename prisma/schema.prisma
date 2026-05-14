@@ -96,6 +96,25 @@ enum TicketAvailability {
   sold_out
 }
 
+// Owned record of outbound ticket clicks (EVE-217 redo). DB-sink only —
+// PostHog was scrapped under EVE-224. eventId is nullable because clicks can
+// in principle arrive after an Event row is purged; eventSlug + ticketUrl are
+// always captured so the row stays useful for joins/dashboards either way.
+model TicketClick {
+  id         String   @id @default(cuid())
+  eventId    String?
+  eventSlug  String
+  ticketUrl  String   @db.Text
+  source     String
+  userAgent  String?  @db.Text
+  referrer   String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([eventId, createdAt])
+  @@index([eventSlug, createdAt])
+  @@index([createdAt])
+}
+
 // ── Auth ─────────────────────────────────────────────
 
 model User {
