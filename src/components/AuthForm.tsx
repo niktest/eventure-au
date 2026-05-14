@@ -200,13 +200,29 @@ export function AuthForm({ initialMode = "sign_in" }: AuthFormProps) {
       body: new URLSearchParams({ csrfToken, email: emailValue, password: passwordValue }),
       redirect: "manual",
     });
-    if (!res.ok && res.type !== "opaqueredirect") {
-      // Generic form-level error — never disclose whether the email exists.
-      setErrors({ _form: "That email or password didn't match. Try again or reset your password." });
-      setLoading(false);
-      return;
+    // NextAuth 302s on both success (→ callbackUrl) and failure (→ /login?error=
+    // CredentialsSignin). With redirect:"manual" both responses are
+    // opaqueredirect — Location/headers are unreadable — so we can't tell them
+    // apart from this response alone. A non-opaque non-ok response means a
+    // network/server error, which we surface as the same generic message.
+    const credentialsTransportFailed =
+      !res.ok && res.type !== "opaqueredirect";
+    if (!credentialsTransportFailed) {
+      // Set-Cookie from a successful POST is applied at the network layer
+      // before the opaqueredirect mask, so a follow-up session probe will see
+      // the JWT if and only if authorize() returned a user.
+      const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
+      const session = (await sessionRes.json().catch(() => null)) as
+        | { user?: { id?: string } | null }
+        | null;
+      if (session?.user) {
+        window.location.href = callbackUrl;
+        return;
+      }
     }
-    window.location.href = callbackUrl;
+    // Generic form-level error — never disclose whether the email exists.
+    setErrors({ _form: "That email or password didn't match. Try again or reset your password." });
+    setLoading(false);
   }
 
   async function doSignUp(payload: { name: string; email: string; password: string }) {

@@ -161,6 +161,99 @@ describe("AuthForm — show/hide password toggle", () => {
   });
 });
 
+describe("AuthForm — sign-in submit network path", () => {
+  // EVE-238: NextAuth credentials returns opaqueredirect for BOTH success and
+  // failure. The form must verify via /api/auth/session before redirecting.
+  function mockSignInFlow({ sessionUser }: { sessionUser: object | null }) {
+    return vi
+      .fn()
+      .mockImplementation(async (input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("/api/auth/csrf")) {
+          return {
+            ok: true,
+            type: "basic",
+            json: async () => ({ csrfToken: "fake-token" }),
+          };
+        }
+        if (url.includes("/api/auth/callback/credentials")) {
+          return { ok: false, status: 0, type: "opaqueredirect" };
+        }
+        if (url.includes("/api/auth/session")) {
+          return {
+            ok: true,
+            type: "basic",
+            json: async () => (sessionUser ? { user: sessionUser } : {}),
+          };
+        }
+        return { ok: true, type: "basic", json: async () => ({}) };
+      });
+  }
+
+  it("stays on the page and renders the generic error when the session probe shows no user", async () => {
+    global.fetch = mockSignInFlow({ sessionUser: null }) as unknown as typeof fetch;
+    const hrefSetter = vi.fn();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: new Proxy(
+        { href: "" },
+        {
+          set(_t, prop, v) {
+            if (prop === "href") hrefSetter(v);
+            return true;
+          },
+          get(t, prop) {
+            return (t as Record<string | symbol, unknown>)[prop];
+          },
+        },
+      ),
+    });
+
+    const user = userEvent.setup();
+    render(<AuthForm initialMode="sign_in" />);
+    await user.type(screen.getByLabelText(/email address/i), "nobody@festlio.example");
+    await user.type(screen.getByLabelText("Password"), "wrong-password-99");
+    await user.click(screen.getByRole("button", { name: /^sign in$/i }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toMatch(/didn't match/i);
+    expect(hrefSetter).not.toHaveBeenCalled();
+  });
+
+  it("redirects to the callback URL when the session probe shows a user", async () => {
+    global.fetch = mockSignInFlow({
+      sessionUser: { id: "user_1", email: "ok@example.com" },
+    }) as unknown as typeof fetch;
+    const hrefSetter = vi.fn();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: new Proxy(
+        { href: "" },
+        {
+          set(_t, prop, v) {
+            if (prop === "href") hrefSetter(v);
+            return true;
+          },
+          get(t, prop) {
+            return (t as Record<string | symbol, unknown>)[prop];
+          },
+        },
+      ),
+    });
+
+    const user = userEvent.setup();
+    render(<AuthForm initialMode="sign_in" />);
+    await user.type(screen.getByLabelText(/email address/i), "ok@example.com");
+    await user.type(screen.getByLabelText("Password"), "rightpassword");
+    await user.click(screen.getByRole("button", { name: /^sign in$/i }));
+
+    await vi.waitFor(() => {
+      expect(hrefSetter).toHaveBeenCalledWith("/");
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});
+
 describe("AuthForm — OAuth row", () => {
   it("renders Google, Apple, and Facebook providers in order", () => {
     render(<AuthForm initialMode="sign_in" />);
