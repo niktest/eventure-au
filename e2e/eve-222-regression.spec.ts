@@ -81,6 +81,41 @@ async function waitPastVercelChallenge(page: Page, timeout = 15_000) {
     .catch(() => {});
 }
 
+/**
+ * Wait for AuthForm hydration. The SSR'd form has `onSubmit={handleSubmit}` and
+ * `noValidate`, but those only take effect after React hydrates the bundle. If
+ * Playwright clicks the submit button before hydration finishes, the browser
+ * performs the default form action (a GET to the current URL with the email +
+ * password in the query string), the doSignIn fetch path never runs, and the
+ * form re-renders blank with no alert region.
+ *
+ * Probe by toggling the password visibility button — its `aria-pressed` is
+ * driven by React state, so a successful toggle proves the React tree owns
+ * the form's event listeners.
+ */
+async function waitForAuthFormHydrated(page: Page) {
+  const toggle = page.getByRole("button", { name: /show password|hide password/i }).first();
+  await toggle.waitFor({ state: "visible", timeout: 10_000 }).catch(() => {});
+  await page
+    .waitForFunction(
+      () => {
+        const b = document.querySelector(
+          'button[aria-label="Show password"], button[aria-label="Hide password"]',
+        ) as HTMLButtonElement | null;
+        if (!b) return false;
+        const before = b.getAttribute("aria-pressed");
+        b.click();
+        const after = b.getAttribute("aria-pressed");
+        // Restore state for downstream tests.
+        if (before !== after) b.click();
+        return before !== after;
+      },
+      undefined,
+      { timeout: 8_000 },
+    )
+    .catch(() => {});
+}
+
 async function waitForApp(page: Page) {
   // Next.js pages with images / analytics rarely reach networkidle. Wait for
   // a stable app shell signal instead — the skip-to-content link is in the
@@ -254,6 +289,11 @@ test.describe("§2 Sign in / Sign up edge cases (EVE-231)", () => {
       .getByRole("heading", { name: /welcome to festlio/i })
       .waitFor({ timeout: 10_000 })
       .catch(() => {});
+    // Wait for hydration before clicking the submit button. Without hydration,
+    // the form falls back to its default GET action and the click lands a
+    // browser-native submit (visible as `GET /login?email=…&password=…` in the
+    // dev server log) — the JS-controlled doSignIn flow never runs.
+    await waitForAuthFormHydrated(page);
   });
 
   test("2.1 invalid email format — inline error, no network", async ({
@@ -699,6 +739,49 @@ test.describe("§6 A11y attribute snapshot", () => {
     // AuthForm is client-rendered; wait for its heading before counting.
     await expect(page.getByRole("heading", { name: /welcome to festlio/i })).toBeVisible({ timeout: 8000 });
     await expect(page.locator('[aria-live="polite"]').first()).toBeVisible();
+  });
+
+  test("6.2 post-failure alert region exposes role=alert and stays on /login", async ({
+    page,
+  }) => {
+    // Drive the same path as §2.2 so the form-level error region renders, then
+    // snapshot the a11y contract on it: assertive live region (role=alert
+    // implicitly aria-live=assertive), the generic non-enumerating accessible
+    // name, and no client-side redirect off /login.
+    await page.goto(withBypassQuery(`${BASE_URL}/login`), { waitUntil: "domcontentloaded" });
+    await waitPastVercelChallenge(page);
+    await waitForApp(page);
+    await page
+      .getByRole("heading", { name: /welcome to festlio/i })
+      .waitFor({ timeout: 10_000 });
+    await waitForAuthFormHydrated(page);
+
+    await page.getByLabel(/email address/i).fill("definitely-not-a-real-user@festlio.example");
+    await page.getByLabel(/^password$/i).fill("wrong-password-99");
+    await page.getByRole("button", { name: /^sign in$/i }).click();
+
+    const alert = page.getByRole("alert").filter({
+      hasText: /didn't match|did not match|something went wrong/i,
+    });
+    await expect(alert.first()).toBeVisible({ timeout: 10_000 });
+
+    // role=alert is implicitly an assertive live region. Engines that surface
+    // the implicit value report aria-live="assertive"; engines that don't
+    // surface the implicit value omit the attribute entirely. Either is
+    // spec-compliant — but explicit aria-live, if present, MUST be assertive.
+    const explicitLive = await alert.first().getAttribute("aria-live");
+    expect(explicitLive === null || explicitLive === "assertive").toBe(true);
+
+    // No field-level enumeration: accessible name does not say which input was wrong.
+    const accessibleName = (await alert.first().textContent())?.trim() ?? "";
+    expect(accessibleName.length).toBeGreaterThan(0);
+    expect(accessibleName).not.toMatch(
+      /email .* (does not|doesn't) exist|user .* not found|password (is|was) (wrong|incorrect)/i,
+    );
+
+    // §2.2 contract — URL stays on /login (no silent bounce to / or callbackUrl).
+    await page.waitForTimeout(500);
+    expect(new URL(page.url()).pathname).toBe("/login");
   });
 
   test("6.6 active chip exposes aria-pressed / aria-current", async ({
